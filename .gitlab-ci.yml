@@ -1,0 +1,17 @@
+stages:
+  - test
+  - compile
+
+test:
+  stage: test
+  script:
+    - mvn test
+  tags:
+    - docker
+
+compile:
+  stage: compile
+  script:
+    - mvn compile
+  tags:
+    - shell
