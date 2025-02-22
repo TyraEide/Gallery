@@ -1,0 +1,9 @@
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - mvn test
+  tags:
+    - docker
