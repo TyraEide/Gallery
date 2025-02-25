@@ -8,6 +8,7 @@ setup_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: setup
   script:
+    - cd backend
     - mvn --version
     - mvn validate
     - echo "Backend setup complete"
@@ -16,7 +17,7 @@ setup_frontend:
   image: node:20
   stage: setup
   script:
-    - cd DAT251-frontend  # Navigate to the frontend folder
+    - cd frontend  # Navigate to the frontend folder
     - node -v
     - npm install 
     - npm run check  
@@ -27,6 +28,7 @@ test_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: test
   script:
+    - cd backend
     - mvn test
     - echo "Backend tests complete"
   tags:
@@ -36,7 +38,7 @@ test_frontend:
   image: node:20
   stage: test
   script:
-    - cd DAT251-frontend  # Navigate to the frontend folder
+    - cd frontend  # Navigate to the frontend folder
     - npm run test   # Run frontend tests
     - echo "Frontend tests complete"
   tags:
@@ -47,6 +49,7 @@ build_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: build
   script:
+    - cd backend
     - mvn compile
     - echo "Backend build complete"
   tags:
