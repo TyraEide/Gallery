@@ -1,6 +1,22 @@
 stages:
+  - setup
   - test
   - compile
+
+test_backend:
+image: maven:3.9.6-eclipse-temurin-21
+stage: setup
+script:
+  - mvn --version
+  - mvn validate
+
+test_frontend:
+image: node:20
+stage: setup
+script:
+  - node -v
+  - npm ci
+  - npm run check
 
 test:
   stage: test
