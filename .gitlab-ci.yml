@@ -1,35 +1,60 @@
 stages:
   - setup
   - test
-  - compile
+  - build
 
-test_backend:
+# Setup Stage - Install dependencies and check environment
+setup_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: setup
   script:
     - mvn --version
     - mvn validate
+    - echo "Backend setup complete"
 
-test_frontend:
+setup_frontend:
   image: node:20
   stage: setup
   script:
+    - echo "Frontend setup complete"
     - node -v
-    - npm ci
+    - npm install  # Eller npm ci, hvis package.json er til stede
     - npm run check
 
-test:
+# Test Stage - Run tests to ensure everything works
+test_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: test
   script:
     - mvn test
+    - echo "Backend tests complete"
   tags:
     - docker
 
-compile:
+test_frontend:
+  image: node:20
+  stage: test
+  script:
+    - echo "Frontend tests complete"
+    - npm run test   # Kan kjøres hvis frontend-testing er implementert
+  tags:
+    - docker
+
+# Build Stage - Compile and prepare project for deployment
+build_backend:
   image: maven:3.9.6-eclipse-temurin-21
-  stage: compile
+  stage: build
   script:
     - mvn compile
+    - echo "Backend build complete"
+  tags:
+    - shell
+
+build_frontend:
+  image: node:20
+  stage: build
+  script:
+    - echo "Frontend build complete"
+    - npm run build  # Forberedelse for distribusjon eller bygging
   tags:
     - shell
