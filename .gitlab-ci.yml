@@ -18,8 +18,8 @@ setup_frontend:
   script:
     - cd DAT251-frontend  # Navigate to the frontend folder
     - node -v
-    - npm install  # Or npm install if package.json is present
-    - npm run check  # This can be a linting or pre-check script if defined
+    - npm install 
+    - npm run check  
     - echo "Frontend setup complete"
 
 # Test Stage - Run tests to ensure everything works
@@ -36,7 +36,7 @@ test_frontend:
   image: node:20
   stage: test
   script:
-    - cd frontend  # Navigate to the frontend folder
+    - cd DAT251-frontend  # Navigate to the frontend folder
     - npm run test   # Run frontend tests
     - echo "Frontend tests complete"
   tags:
