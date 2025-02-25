@@ -16,10 +16,11 @@ setup_frontend:
   image: node:20
   stage: setup
   script:
-    - echo "Frontend setup complete"
+    - cd frontend
     - node -v
-    - npm install  # Eller npm ci, hvis package.json er til stede
+    - npm ci  # Eller npm ci, hvis package.json er til stede
     - npm run check
+    - echo "Frontend setup complete"
 
 # Test Stage - Run tests to ensure everything works
 test_backend:
