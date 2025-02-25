@@ -16,7 +16,7 @@ setup_frontend:
   image: node:20
   stage: setup
   script:
-    - cd frontend  # Navigate to the frontend folder
+    - cd DAT251-frontend  # Navigate to the frontend folder
     - node -v
     - npm install  # Or npm install if package.json is present
     - npm run check  # This can be a linting or pre-check script if defined
