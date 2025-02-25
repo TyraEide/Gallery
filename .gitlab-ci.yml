@@ -16,10 +16,10 @@ setup_frontend:
   image: node:20
   stage: setup
   script:
-    - cd frontend
+    - cd frontend  # Navigate to the frontend folder
     - node -v
-    - npm ci  # Eller npm ci, hvis package.json er til stede
-    - npm run check
+    - npm install  # Or npm install if package.json is present
+    - npm run check  # This can be a linting or pre-check script if defined
     - echo "Frontend setup complete"
 
 # Test Stage - Run tests to ensure everything works
@@ -36,8 +36,9 @@ test_frontend:
   image: node:20
   stage: test
   script:
+    - cd frontend  # Navigate to the frontend folder
+    - npm run test   # Run frontend tests
     - echo "Frontend tests complete"
-    - npm run test   # Kan kjøres hvis frontend-testing er implementert
   tags:
     - docker
 
@@ -55,7 +56,8 @@ build_frontend:
   image: node:20
   stage: build
   script:
+    - cd frontend  # Navigate to the frontend folder
+    - npm run build  # Build for production or prepare for deployment
     - echo "Frontend build complete"
-    - npm run build  # Forberedelse for distribusjon eller bygging
   tags:
     - shell
