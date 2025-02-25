@@ -1,0 +1,7 @@
+{
+    "name": "dummy-project",
+    "version": "1.0.0",
+    "scripts": {
+      "check": "echo 'No frontend check to run'"
+    }
+  }
