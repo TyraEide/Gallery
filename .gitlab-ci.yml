@@ -4,21 +4,22 @@ stages:
   - compile
 
 test_backend:
-image: maven:3.9.6-eclipse-temurin-21
-stage: setup
-script:
-  - mvn --version
-  - mvn validate
+  image: maven:3.9.6-eclipse-temurin-21
+  stage: setup
+  script:
+    - mvn --version
+    - mvn validate
 
 test_frontend:
-image: node:20
-stage: setup
-script:
-  - node -v
-  - npm ci
-  - npm run check
+  image: node:20
+  stage: setup
+  script:
+    - node -v
+    - npm ci
+    - npm run check
 
 test:
+  image: maven:3.9.6-eclipse-temurin-21
   stage: test
   script:
     - mvn test
@@ -26,6 +27,7 @@ test:
     - docker
 
 compile:
+  image: maven:3.9.6-eclipse-temurin-21
   stage: compile
   script:
     - mvn compile
