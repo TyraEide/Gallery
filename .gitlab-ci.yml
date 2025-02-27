@@ -28,7 +28,7 @@ setup_frontend:
   image: node:20
   stage: setup
   script:
-    - cd frontend  # Navigate to the frontend folder
+    - cd frontend  
     - node -v
     - npm install 
     - npm run check  
@@ -49,8 +49,8 @@ test_frontend:
   image: node:20
   stage: test
   script:
-    - cd frontend  # Navigate to the frontend folder
-    - npm run test   # Run frontend tests
+    - cd frontend  
+    - npm run test   
     - echo "Frontend tests complete"
   tags:
     - docker
