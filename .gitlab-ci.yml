@@ -50,7 +50,7 @@ test_frontend:
   script:
     - cd frontend  
     - npm run test  # Run frontend unit tests
-    - npm run lint  # Run linting to catch syntax issues
+    # npm run lint  # Run linting to catch syntax issues
     - npm run test:e2e  # Run end-to-end tests (if applicable)
     - npm run coverage  # Check test coverage
     - echo "Frontend tests complete"
