@@ -8,7 +8,7 @@ setup_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: setup
   script:
-    - cd backend\Gallery
+    - cd backend/Gallery
     - mvn --version
     - mvn validate
     - echo "Backend setup complete"
@@ -28,7 +28,7 @@ test_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: test
   script:
-    - cd backend\Gallery
+    - cd backend/Gallery
     - mvn test
     - echo "Backend tests complete"
   tags:
@@ -49,7 +49,7 @@ build_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: build
   script:
-    - cd backend\Gallery
+    - cd backend/Gallery
     - mvn compile
     - echo "Backend build complete"
   tags:
