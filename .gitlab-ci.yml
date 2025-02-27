@@ -11,17 +11,17 @@ setup_backend:
     - cd backend/Gallery
     - echo "Checking if backend is running..."
     - |
-      # Try to check if the backend is running (example: using health endpoint)
       if ! curl -s --head --request GET http://localhost:8080/actuator/health | grep "200 OK" > /dev/null; then
         echo "Backend is not running. Starting backend..."
         nohup mvn spring-boot:run -f ../backend/pom.xml &  
-        # Wait for the backend to fully start (you can increase this time based on your app's startup time)
         sleep 20
       else
         echo "Backend is already running."
       fi
     - mvn --version
     - mvn validate
+    - mvn flyway:validate  # Check for DB migration status
+    - curl -s http://localhost:8080/api/test-endpoint  # Basic API endpoint check
     - echo "Backend setup complete"
 
 setup_frontend:
@@ -30,8 +30,9 @@ setup_frontend:
   script:
     - cd frontend  
     - node -v
-    - npm install 
-    - npm run check  
+    - npm install
+    - npm run check  # Linting or other checks
+    - npm run build  # Verify frontend build
     - echo "Frontend setup complete"
 
 # Test Stage - Run tests to ensure everything works
@@ -40,7 +41,11 @@ test_backend:
   stage: test
   script:
     - cd backend/Gallery
-    - mvn test
+    - mvn test  # Unit tests for backend
+    - mvn verify  # Ensure all tests pass
+    - mvn flyway:validate  # Ensure migrations are correct
+    - mvn spring-boot:run -DskipTests  # Ensure backend runs without errors
+    - curl -s http://localhost:8080/api/important-endpoint  # Test critical API response
     - echo "Backend tests complete"
   tags:
     - docker
@@ -50,7 +55,10 @@ test_frontend:
   stage: test
   script:
     - cd frontend  
-    - npm run test   
+    - npm run test  # Run frontend unit tests
+    - npm run lint  # Run linting to catch syntax issues
+    - npm run test:e2e  # Run end-to-end tests (if applicable)
+    - npm run coverage  # Check test coverage
     - echo "Frontend tests complete"
   tags:
     - docker
@@ -61,7 +69,8 @@ build_backend:
   stage: build
   script:
     - cd backend/Gallery
-    - mvn compile 
+    - mvn compile
+    - mvn package  # Create a deployable package (e.g., JAR)
     - echo "Backend build complete"
   tags:
     - docker
@@ -73,8 +82,7 @@ build_frontend:
     - cd frontend
     - npm install 
     - npm install -g vite
-    - npm run build 
+    - npm run build  # Build the frontend
     - echo "Frontend build complete"
   tags:
     - docker
-
