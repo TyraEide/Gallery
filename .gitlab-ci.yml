@@ -9,6 +9,18 @@ setup_backend:
   stage: setup
   script:
     - cd backend/Gallery
+    - echo "Checking if backend is running..."
+    - |
+      # Try to check if the backend is running (example: using health endpoint)
+      if ! curl -s --head --request GET http://localhost:8080/actuator/health | grep "200 OK" > /dev/null; then
+        echo "Backend is not running. Starting backend..."
+        # Start the backend using a command (adjust this to match how your backend starts)
+        nohup mvn spring-boot:run -f ../backend/pom.xml &  # Adjust the path to the backend if needed
+        # Wait for the backend to fully start (you can increase this time based on your app's startup time)
+        sleep 20
+      else
+        echo "Backend is already running."
+      fi
     - mvn --version
     - mvn validate
     - echo "Backend setup complete"
