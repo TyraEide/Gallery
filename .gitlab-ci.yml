@@ -16,7 +16,7 @@ setup_backend:
         echo "Backend is not running. Starting backend..."
         nohup mvn spring-boot:run -f ../backend/pom.xml &  
         # Wait for the backend to fully start (you can increase this time based on your app's startup time)
-        sleep 300
+        sleep 20
       else
         echo "Backend is already running."
       fi
@@ -71,6 +71,8 @@ build_frontend:
   stage: build
   script:
     - cd frontend
+    - npm install 
+    - npm install -g vite
     - npm run build 
     - echo "Frontend build complete"
   tags:
