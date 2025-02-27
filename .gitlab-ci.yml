@@ -61,9 +61,7 @@ build_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: build
   script:
-    - cd backend/Gallery
-    - mvn compile
-    - echo "Backend build complete"
+    - bash --noprofile --norc -c 'cd backend/Gallery && mvn compile && echo "Backend build complete"'
   tags:
     - shell
 
@@ -71,8 +69,7 @@ build_frontend:
   image: node:20
   stage: build
   script:
-    - cd frontend  # Navigate to the frontend folder
-    - npm run build  # Build for production or prepare for deployment
-    - echo "Frontend build complete"
+    - bash --noprofile --norc -c 'cd frontend && npm run build && echo "Frontend build complete"'
   tags:
     - shell
+
