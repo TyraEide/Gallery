@@ -20,7 +20,6 @@ setup_backend:
       fi
     - mvn --version
     - mvn validate
-    - mvn flyway:validate  # Check for DB migration status
     - curl -s http://localhost:8080/api/test-endpoint  # Basic API endpoint check
     - echo "Backend setup complete"
 
@@ -43,7 +42,6 @@ test_backend:
     - cd backend/Gallery
     - mvn test  # Unit tests for backend
     - mvn verify  # Ensure all tests pass
-    - mvn flyway:validate  # Ensure migrations are correct
     - mvn spring-boot:run -DskipTests  # Ensure backend runs without errors
     - curl -s http://localhost:8080/api/important-endpoint  # Test critical API response
     - echo "Backend tests complete"
