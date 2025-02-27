@@ -26,11 +26,10 @@ setup_frontend:
   image: node:20
   stage: setup
   script:
-    - cd frontend  
+    - cd frontend
     - node -v
-    - npm install
+    - npm install  # Install dependencies
     - npm run check  # Linting or other checks
-    - npm run build  # Verify frontend build
     - echo "Frontend setup complete"
 
 # Test Stage - Run tests to ensure everything works
@@ -75,8 +74,6 @@ build_frontend:
   stage: build
   script:
     - cd frontend
-    - npm install 
-    - npm install -g vite
     - npm run build  # Build the frontend
     - echo "Frontend build complete"
   tags:
