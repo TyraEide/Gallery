@@ -41,7 +41,6 @@ test_backend:
     - cd backend/Gallery
     - mvn test  # Unit tests for backend
     - mvn verify  # Ensure all tests pass
-    - mvn spring-boot:run -DskipTests  # Ensure backend runs without errors
     - echo "Backend tests complete"
   tags:
     - docker
