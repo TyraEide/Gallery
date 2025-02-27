@@ -1,53 +1,30 @@
 stages:
-  - test
-  - build
+  - test_and_build
 
-# Backend Test
-test_backend:
+# Backend Test and Build
+test_and_build_backend:
   image: maven:3.9.6-eclipse-temurin-21
-  stage: test
+  stage: test_and_build
   script:
     - cd backend/Gallery
     - mvn validate  # Validate the backend before testing
     - mvn test  # Run backend unit tests
     - mvn verify  # Ensure all tests pass
-    - echo "Backend tests complete"
+    - mvn package  # Build the backend (create JAR file)
+    - echo "Backend test and build complete"
   tags:
     - docker
 
-# Frontend Test
-test_frontend:
+# Frontend Test and Build
+test_and_build_frontend:
   image: node:20
-  stage: test
+  stage: test_and_build
   script:
     - cd frontend
-    - npm install  # Install frontend dependencies
+    - npm install  # Install frontend dependencies (only once)
     - npm run test  # Run frontend unit tests
     - npm run coverage  # Check test coverage
-    - echo "Frontend tests complete"
-  tags:
-    - docker
-
-# Backend Build
-build_backend:
-  image: maven:3.9.6-eclipse-temurin-21
-  stage: build
-  script:
-    - cd backend/Gallery
-    - mvn compile
-    - mvn package  # Create a deployable package (e.g., JAR)
-    - echo "Backend build complete"
-  tags:
-    - docker
-
-# Frontend Build
-build_frontend:
-  image: node:20
-  stage: build
-  script:
-    - cd frontend
-    - npm install  # Ensure frontend dependencies are installed
     - npm run build  # Build the frontend
-    - echo "Frontend build complete"
+    - echo "Frontend test and build complete"
   tags:
     - docker
