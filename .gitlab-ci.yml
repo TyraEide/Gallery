@@ -28,7 +28,7 @@ test_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: test
   script:
-    - cd backend
+    - cd backend\Gallery
     - mvn test
     - echo "Backend tests complete"
   tags:
