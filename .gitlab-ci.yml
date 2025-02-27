@@ -1,62 +1,34 @@
 stages:
-  - setup
   - test
   - build
 
-# Setup Stage - Install dependencies and check environment
-setup_backend:
-  image: maven:3.9.6-eclipse-temurin-21
-  stage: setup
-  script:
-    - cd backend/Gallery
-    - echo "Checking if backend is running..."
-    - |
-      if ! curl -s --head --request GET http://localhost:8080/actuator/health | grep "200 OK" > /dev/null; then
-        echo "Backend is not running. Starting backend..."
-        nohup mvn spring-boot:run -f ../backend/pom.xml &  
-        sleep 20
-      else
-        echo "Backend is already running."
-      fi
-    - mvn --version
-    - mvn validate
-    - echo "Backend setup complete"
-
-setup_frontend:
-  image: node:20
-  stage: setup
-  script:
-    - cd frontend
-    - node -v
-    - npm install  # Install dependencies
-    - npm run check  # Linting or other checks
-    - echo "Frontend setup complete"
-
-# Test Stage - Run tests to ensure everything works
+# Backend Test
 test_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: test
   script:
     - cd backend/Gallery
-    - mvn test  # Unit tests for backend
+    - mvn validate  # Validate the backend before testing
+    - mvn test  # Run backend unit tests
     - mvn verify  # Ensure all tests pass
     - echo "Backend tests complete"
   tags:
     - docker
 
+# Frontend Test
 test_frontend:
   image: node:20
   stage: test
   script:
-    - cd frontend  
+    - cd frontend
+    - npm install  # Install frontend dependencies
     - npm run test  # Run frontend unit tests
-    # npm run lint  # Run linting to catch syntax issues
     - npm run coverage  # Check test coverage
     - echo "Frontend tests complete"
   tags:
     - docker
 
-# Build Stage - Compile and prepare project for deployment
+# Backend Build
 build_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: build
@@ -68,11 +40,13 @@ build_backend:
   tags:
     - docker
 
+# Frontend Build
 build_frontend:
   image: node:20
   stage: build
   script:
     - cd frontend
+    - npm install  # Ensure frontend dependencies are installed
     - npm run build  # Build the frontend
     - echo "Frontend build complete"
   tags:

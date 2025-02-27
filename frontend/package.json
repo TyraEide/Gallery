@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
     "test": "echo \"No tests configured\" && exit 0",
-    "coverage": "echo \"Testing coverage\""
+    "coverage": "echo \"No test coverage configured\" && exit 0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
