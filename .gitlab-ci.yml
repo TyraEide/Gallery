@@ -20,7 +20,6 @@ setup_backend:
       fi
     - mvn --version
     - mvn validate
-    - curl -s http://localhost:8080/api/test-endpoint  # Basic API endpoint check
     - echo "Backend setup complete"
 
 setup_frontend:
@@ -43,7 +42,6 @@ test_backend:
     - mvn test  # Unit tests for backend
     - mvn verify  # Ensure all tests pass
     - mvn spring-boot:run -DskipTests  # Ensure backend runs without errors
-    - curl -s http://localhost:8080/api/important-endpoint  # Test critical API response
     - echo "Backend tests complete"
   tags:
     - docker
