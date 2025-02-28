@@ -74,6 +74,7 @@ public class User implements UserDetails {
     }
 
     public void setCanvasAuthToken(String canvasAuthToken) {
+
         this.canvasAuthToken = canvasAuthToken;
     }
 
