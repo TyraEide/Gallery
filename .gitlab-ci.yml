@@ -3,7 +3,7 @@ stages:
 
 # Backend Test and Build
 test_and_build_backend:
-  image: maven:3.9.6-eclipse-temurin-21
+  image: openjdk:21-jdk
   stage: test_and_build
   cache:
     key: maven
