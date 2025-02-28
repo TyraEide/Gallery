@@ -5,10 +5,6 @@ stages:
 test_and_build_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: test_and_build
-  cache:
-    key: maven
-    paths:
-      - .m2/repository  # Cache dependencies to speed up builds
   before_script:
     - cd backend/Gallery
   script:
