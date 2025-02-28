@@ -39,6 +39,7 @@ public class UserServiceUnitTest {
     @Test
     public void shouldCreateUserThroughRepository() {
         User e = new User();
+        e.setPassword("password");
         when(userRepository.save(e)).thenReturn(e);
         final User result = userService.createUser(e);
 

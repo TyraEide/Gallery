@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.configurers.LogoutConf
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -17,14 +19,16 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .authorizeHttpRequests( auth -> {
-                    auth.anyRequest().authenticated();
+                .authorizeHttpRequests((request) -> {
+                    request.requestMatchers("/api/users").permitAll()
+                            .anyRequest().authenticated();
                 })
                 .formLogin(Customizer.withDefaults())
                 .logout((logout) -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                         .logoutSuccessUrl("/login")
                         .permitAll())
+                .httpBasic(Customizer.withDefaults())
                 .build();
     }
 
