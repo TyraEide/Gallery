@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +26,10 @@ public class User implements UserDetails {
     private String email;
 
     @Convert(converter = StringCryptoConverter.class)
-    private String canvasAuthToken;
+    private String uibToken;
+
+    @Convert(converter = StringCryptoConverter.class)
+    private String hvlToken;
 
     public User(String username, String email, String password) {
         this.username = username;
@@ -73,13 +75,21 @@ public class User implements UserDetails {
         return email;
     }
 
-    public void setCanvasAuthToken(String canvasAuthToken) {
+    public void setUibToken(String canvasAuthToken) {
 
-        this.canvasAuthToken = canvasAuthToken;
+        this.uibToken = canvasAuthToken;
     }
 
-    public String getCanvasAuthToken() {
-        return canvasAuthToken;
+    public String getUibToken() {
+        return uibToken;
+    }
+
+    public void setHvlToken(String hvlToken) {
+        this.hvlToken = hvlToken;
+    }
+
+    public String getHvlToken() {
+        return hvlToken;
     }
 
     @Override

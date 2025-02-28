@@ -9,6 +9,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -27,24 +30,32 @@ public class UserRepositoryIntegrationTest {
 
     @Test
     public void shouldSetIdToUserWhenSaving() {
-        e.setCanvasAuthToken("verySecretToken");
+        e.setUibToken("verySecretToken");
         User inserted = userRepository.save(e);
         assertEquals(testEntityManager.find(User.class, inserted.getId()), e);
     }
 
     @Test
-    public void shouldEncryptCanvasAuthTokenWhenSaving() {
-        String token = "verySecretToken";
+    public void shouldEncryptTokensWhenSaving() {
+        String uibToken = "uibToken";
+        String hvlToken = "hvlToken";
 
         User e = new User("test", "test@example.com", "superSecretPassword");
-        e.setCanvasAuthToken(token);
+        e.setUibToken(uibToken);
+        e.setHvlToken(hvlToken);
 
-        User inserted = userRepository.saveAndFlush(e);
+        userRepository.saveAndFlush(e);
 
-        String sql = "SELECT canvas_auth_token FROM users WHERE id='%s'".formatted(inserted.getId());
-        String secretTokenInDB = jdbcTemplate.queryForObject(sql, String.class);
-        assertNotEquals(token, secretTokenInDB);
-        String loadedToken = userRepository.findById(inserted.getId()).get().getCanvasAuthToken();
-        assertEquals(token, loadedToken);
+        String sqlUib = "SELECT uib_token FROM users WHERE id='%s'".formatted(e.getId());
+        String secretUibTokenInDB = jdbcTemplate.queryForObject(sqlUib, String.class);
+        assertNotEquals(uibToken, secretUibTokenInDB);
+
+        String sqlHvl = "SELECT hvl_token FROM users WHERE id='%s'".formatted(e.getId());
+        String secretHvlTokenInDB = jdbcTemplate.queryForObject(sqlHvl, String.class);
+        assertNotEquals(hvlToken, secretHvlTokenInDB);
+
+        User inserted = userRepository.findById(e.getId()).get();
+        assertEquals(uibToken, inserted.getUibToken());
+        assertEquals(hvlToken, inserted.getHvlToken());
     }
 }
