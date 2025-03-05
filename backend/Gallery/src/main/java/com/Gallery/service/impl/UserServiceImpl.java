@@ -1,8 +1,11 @@
 package com.Gallery.service.impl;
 
+import com.Gallery.dto.UserRegistrationDTO;
+import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,17 +19,20 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private final UserRegistrationMapper urMapper = new UserRegistrationMapper();
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-
-    public User createUser(User user) {
+    @Override
+    public User createUser(UserRegistrationDTO userDTO) {
+        User user = urMapper.toEntity(userDTO);
         user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
+    @Override
     public User updateUser(UUID userId, User user) {
         User existingUser = getUser(userId);
         existingUser.setUsername(user.getUsername());
@@ -36,9 +42,12 @@ public class UserServiceImpl implements UserService {
         existingUser.setHvlToken(user.getHvlToken());
         return userRepository.save(user);
     }
+
+    @Override
     public User getUser(UUID id) {
         return userRepository.findById(id).orElse(null);
     }
+
 
     private User setTokenValidation(UUID userId, User auth) {
         User user = this.getUser(userId);
@@ -63,7 +72,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User setHvlToken(String token, UUID userId, User auth) {
         User user = setTokenValidation(userId, auth);
-        user.setUibToken(token);
+        user.setHvlToken(token);
         return updateUser(userId, user);
     }
 

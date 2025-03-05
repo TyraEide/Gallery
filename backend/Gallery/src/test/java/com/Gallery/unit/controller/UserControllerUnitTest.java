@@ -1,6 +1,8 @@
 package com.Gallery.unit.controller;
 
 import com.Gallery.controller.UserController;
+import com.Gallery.dto.UserRegistrationDTO;
+import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
 import com.Gallery.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ public class UserControllerUnitTest {
     @Mock private UserServiceImpl userService;
 
     @InjectMocks private UserController userController;
+    private UserRegistrationMapper urMapper = new UserRegistrationMapper();
 
     @Test
     public void shouldReturnUserByIdWhenPresentFromService() {
@@ -32,10 +35,11 @@ public class UserControllerUnitTest {
     @Test
     public void shouldCreateUserThroughService() {
         User e = new User();
-        when(userService.createUser(e)).thenReturn(e);
-        final User result = userController.createUser(e);
+        UserRegistrationDTO dtoE = urMapper.toDTO(e);
+        when(userService.createUser(dtoE)).thenReturn(e);
+        final User result = userController.createUser(dtoE);
 
-        verify(userService).createUser(e);
+        verify(userService).createUser(dtoE);
         assertEquals(e, result);
     }
 

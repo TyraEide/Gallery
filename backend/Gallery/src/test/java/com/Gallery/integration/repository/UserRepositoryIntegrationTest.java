@@ -12,8 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 public class UserRepositoryIntegrationTest {
@@ -30,8 +29,8 @@ public class UserRepositoryIntegrationTest {
 
     @Test
     public void shouldSetIdToUserWhenSaving() {
-        e.setUibToken("verySecretToken");
         User inserted = userRepository.save(e);
+        assertNotNull(inserted);
         assertEquals(testEntityManager.find(User.class, inserted.getId()), e);
     }
 
@@ -40,10 +39,8 @@ public class UserRepositoryIntegrationTest {
         String uibToken = "uibToken";
         String hvlToken = "hvlToken";
 
-        User e = new User("test", "test@example.com", "superSecretPassword");
         e.setUibToken(uibToken);
         e.setHvlToken(hvlToken);
-
         userRepository.saveAndFlush(e);
 
         String sqlUib = "SELECT uib_token FROM users WHERE id='%s'".formatted(e.getId());

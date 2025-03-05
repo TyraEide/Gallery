@@ -1,5 +1,6 @@
 package com.Gallery.unit.service;
 
+import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.impl.UserServiceImpl;
@@ -25,6 +26,7 @@ public class UserServiceUnitTest {
     @Mock private UserRepository userRepository;
 
     @InjectMocks private UserServiceImpl userService;
+    private UserRegistrationMapper urMapper = new UserRegistrationMapper();
 
     @Test
     public void shouldReturnUserByIdWhenPresentFromRepository() {
@@ -39,9 +41,11 @@ public class UserServiceUnitTest {
     @Test
     public void shouldCreateUserThroughRepository() {
         User e = new User();
+        e.setUsername("test");
+        e.setEmail("test@example.com");
         e.setPassword("password");
         when(userRepository.save(e)).thenReturn(e);
-        final User result = userService.createUser(e);
+        final User result = userService.createUser(urMapper.toDTO(e));
 
         verify(userRepository).save(e);
         assertEquals(e, result);

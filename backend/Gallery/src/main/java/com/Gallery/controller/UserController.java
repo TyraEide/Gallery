@@ -1,5 +1,6 @@
 package com.Gallery.controller;
 
+import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.model.User;
 import com.Gallery.service.UserService;
 import com.Gallery.service.impl.UserServiceImpl;
@@ -23,8 +24,8 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public @ResponseBody User createUser(@RequestBody UserRegistrationDTO userDTO) {
+        return userService.createUser(userDTO);
     }
 
     @GetMapping("/{id}")
