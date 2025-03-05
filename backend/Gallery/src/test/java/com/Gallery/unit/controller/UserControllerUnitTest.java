@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class UserControllerUnitTest {
     @Mock private UserServiceImpl userService;
-
     @InjectMocks private UserController userController;
     private UserRegistrationMapper urMapper = new UserRegistrationMapper();
 

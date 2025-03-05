@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class UserServiceIntegrationTest {
-    @MockitoBean UserRepository userRepository;
+    @Autowired UserRepository userRepository;
 
     @Autowired UserService userService;
     private UserRegistrationMapper urMapper = new UserRegistrationMapper();
@@ -29,10 +29,7 @@ public class UserServiceIntegrationTest {
         String password = "password";
         User e = new User("test", "test@example.com", password);
 
-        when(userRepository.save(e)).thenReturn(e);
-        when(userRepository.findById(e.getId())).thenReturn(Optional.of(e));
         User inserted = userService.createUser(urMapper.toDTO(e));
-
         String loadedPassword = userRepository.findById(inserted.getId()).get().getPassword();
         assertNotEquals(password, loadedPassword);
     }
