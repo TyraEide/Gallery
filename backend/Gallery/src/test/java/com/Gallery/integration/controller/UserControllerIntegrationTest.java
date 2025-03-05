@@ -4,6 +4,7 @@ import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.impl.UserServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,18 +43,19 @@ public class UserControllerIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private UserServiceImpl userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final User e = new User();
+    private User e = new User();
 
     @BeforeEach
-    public void init() {
-        userRepository.deleteAll();
-        setupUser();
-    }
-
-    private void setupUser() {
+    public void setupTestUser() {
+        e = new User();
         e.setUsername("Test");
         e.setEmail("test@example.com");
         e.setPassword("securePassword");
+    }
+
+    @AfterEach
+    public void emptyDatabase() {
+        userRepository.deleteAll();
     }
 
     @Test

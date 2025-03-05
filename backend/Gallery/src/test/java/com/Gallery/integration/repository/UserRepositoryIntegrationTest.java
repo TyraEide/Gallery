@@ -2,6 +2,7 @@ package com.Gallery.integration.repository;
 
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,16 @@ public class UserRepositoryIntegrationTest {
     User e;
 
     @BeforeEach
-    public void initializerUser() {
-        e = new User("test", "test@example.com", "superSecretPassword");
+    public void setupTestUser() {
+        e = new User();
+        e.setUsername("Test");
+        e.setEmail("test@example.com");
+        e.setPassword("securePassword");
+    }
+
+    @AfterEach
+    public void emptyDatabase() {
+        userRepository.deleteAll();
     }
 
     @Test

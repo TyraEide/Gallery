@@ -5,6 +5,7 @@ import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.UserService;
 import com.Gallery.service.impl.UserServiceImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +23,12 @@ public class UserServiceIntegrationTest {
     @Autowired UserRepository userRepository;
 
     @Autowired UserService userService;
-    private UserRegistrationMapper urMapper = new UserRegistrationMapper();
+    private final UserRegistrationMapper urMapper = new UserRegistrationMapper();
+
+    @AfterEach
+    public void emptyDatabase() {
+        userRepository.deleteAll();
+    }
 
     @Test
     public void shouldNotStorePasswordInPlainText() {
