@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
@@ -64,4 +65,40 @@ public class UserRepositoryIntegrationTest {
         assertEquals(uibToken, inserted.getUibToken());
         assertEquals(hvlToken, inserted.getHvlToken());
     }
+
+    @Test
+    public void shouldDeleteUser() {
+        userRepository.save(e);
+        userRepository.delete(e);
+        
+        assertEquals(0, userRepository.count());
+    }
+    
+    @Test
+    public void shouldUpdateUserDetails() {
+        User saved = userRepository.save(e);
+        saved.setUsername("updatedTest");
+        
+        userRepository.save(saved);
+        
+        User updated = userRepository.findById(saved.getId()).orElseThrow();
+        assertEquals("updatedTest", updated.getUsername());
+    }
+
+    @Test
+    public void shouldReturnCorrectUserCount() {
+        assertEquals(0, userRepository.count());
+
+        userRepository.save(e);
+        assertEquals(1, userRepository.count());
+
+        User anotherUser = new User();
+        anotherUser.setUsername("AnotherUser");
+        anotherUser.setEmail("another@example.com");
+        anotherUser.setPassword("password123");
+        userRepository.save(anotherUser);
+
+        assertEquals(2, userRepository.count());
+    }
+
 }
