@@ -70,9 +70,20 @@ public class UserControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username", is(e.getUsername())))
                 .andExpect(jsonPath("$.email", is(e.getEmail())))
-                .andExpect(jsonPath("$.password").value(""))
                 .andDo(print())
         ;
+    }
+
+    @Test
+    public void shouldNotReturnPasswordWhenCreatingUser() throws Exception{
+        String userJson = objectMapper.writeValueAsString(e);
+
+        mockMvc.perform(post("/api/users")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userJson))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.password").value(""));
     }
 
     @Test
