@@ -70,6 +70,7 @@ public class UserControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username", is(e.getUsername())))
                 .andExpect(jsonPath("$.email", is(e.getEmail())))
+                .andExpect(jsonPath("$.password").value(""))
                 .andDo(print())
         ;
     }

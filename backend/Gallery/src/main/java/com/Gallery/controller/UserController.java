@@ -25,7 +25,9 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public @ResponseBody User createUser(@RequestBody UserRegistrationDTO userDTO) {
-        return userService.createUser(userDTO);
+        var userToSend  = userService.createUser(userDTO);
+        userToSend.setPassword("");
+        return userToSend;
     }
 
     @GetMapping("/{id}")
