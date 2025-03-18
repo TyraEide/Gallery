@@ -1,60 +1,108 @@
 <script lang="ts">
-    import { redirect } from "../ts_modules/routing";
+    import { onMount } from "svelte";
+    import {redirect } from "../ts_modules/routing" 
+    
+    let username: string = "";
+    let password: string = "";
+    let confirmPassword: string = "";
+    let message: string = "";
+    let csrfToken: string = "";
   
-    let registerUsername: string = "";
-    let registerPassword: string = "";
-    let response_msg: string = "";
-    
-    
-    // Registration request
-    async function register_request(url: string) {
-      if (registerPassword.length < 8) {
-        response_msg = "Password must be at least 8 characters long.";
+    // Fetch CSRF token on mount (ensure your backend sends this)
+    onMount(async () => {
+      const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+      csrfToken = tokenMeta ? tokenMeta.getAttribute("content") || "" : "";
+    });
+  
+    // Handle registration
+    async function register(event: Event) {
+      event.preventDefault(); // Prevent page reload
+  
+      if (password.length < 8) {
+        message = "Password must be at least 8 characters.";
         return;
       }
   
-      const response = await fetch(url, {
-        method: "POST",
-        credentials: "same-origin", // Ensures CSRF protection
-        headers: { 
-          "Content-Type": "application/json", 
-          "X-CSRF-Token": getCsrfToken() // Fetch CSRF token (backend must provide)
-        },
-        body: JSON.stringify({ 
-          username: registerUsername, 
-          password: registerPassword 
-        }),
-      });
+      if (password !== confirmPassword) {
+        message = "Passwords do not match.";
+        return;
+      }
   
-      const response_json = await response.json();
-      response_msg = response_json.message;
+      try {
+        // Send the registration request to your backend
+        const response = await fetch("http://localhost:8080/api/auth/register", {
+          method: "POST",
+          credentials: "include", // Send cookies with the request
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrfToken, // Include CSRF token in header if needed
+          },
+          body: JSON.stringify({ username, password }),
+        });
   
-      if (response.ok) {
-        redirect();
-      } else {
-        console.log("Registration failed:", response_json);
+        const data = await response.json();
+        message = data.message || "Registration successful!";
+  
+        if (response.ok) {
+          // Redirect to login page after successful registration
+          setTimeout(() => redirect("/login"), 1500);
+        }
+      } catch (error) {
+        message = "Error registering. Please try again.";
+        console.error(error);
       }
     }
-  
-    function getCsrfToken(): string {
-      // Fetch CSRF token from meta tag (backend should insert this)
-      const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-      return tokenMeta ? tokenMeta.getAttribute("content") || "" : "";
-    }
-    
   </script>
   
   <main>
-    <div>
-      <h2>Register Section</h2>
-      <div>
-        Username: <input type="text" bind:value={registerUsername} required minlength="3" maxlength="30" autocomplete="off"><br>
-        Password: <input type="password" bind:value={registerPassword} required minlength="8" autocomplete="new-password"><br>
-        <input type="submit" value="Register">
-      </div>
-      <div><strong>Output:</strong> {response_msg}</div>
-    </div>
+    <h2>Register</h2>
+    <form on:submit={register}>
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        bind:value={username}
+        required
+        minlength="3"
+        maxlength="30"
+        autocomplete="off"
+      />
+  
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        bind:value={password}
+        required
+        minlength="8"
+        autocomplete="new-password"
+      />
+  
+      <label for="confirmPassword">Confirm Password</label>
+      <input
+        id="confirmPassword"
+        type="password"
+        bind:value={confirmPassword}
+        required
+        minlength="8"
+        autocomplete="new-password"
+      />
+  
+      <button type="submit">Register</button>
+    </form>
+    <p>{message}</p>
   </main>
   
-
+  <style>
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 300px;
+      margin: auto;
+    }
+    button {
+      margin-top: 10px;
+    }
+  </style>
   
