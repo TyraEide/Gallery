@@ -62,10 +62,14 @@
       <div>
         Username: <input type="text" bind:value={username}><br>
         Password: <input type="text" bind:value={password}><br>
-        <input type="submit" onclick={() => {login_request("http://127.0.0.1:5000/login")}}>
+        <button onclick={() => {login_request("http://127.0.0.1:5000/login")}}>Login</button>
       </div>
+
       <div>
-        Output: {response_msg}
+        <p>Output: {response_msg}<p>
+
+        <p>Do you not have an account?<p>
+        <button onclick={() => {redirect("register")}}>Register user</button>
       </div>
     </div>
 
@@ -79,5 +83,3 @@
     <a href="https://svelte.dev">Svelte docs</a>
   </main>
    
-  <style>
-  </style>
