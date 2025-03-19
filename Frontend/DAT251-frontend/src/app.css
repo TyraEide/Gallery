@@ -112,5 +112,5 @@ form {
 
 button:disabled {
   background-color: #ccc;
-  cursor: not-allowed;
+  cursor: normal;
 }

@@ -34,7 +34,6 @@
             return;
         }
 
-        loading = true;
 
         try {
             const response = await fetch("http://localhost:8080/api/users", {
@@ -53,9 +52,13 @@
                 message = data.message || "Username or email was already taken. Please try again.";
             } else {
                 message = data.message || "Registration successful!";
+                loading = true;
                 setTimeout(() => {
                     redirect("registrationSuccessful");
+                    loading = false;
                 }, 1500);
+
+                
             }
         } catch (error) {
             message = "A field is missing. Please try again.";
