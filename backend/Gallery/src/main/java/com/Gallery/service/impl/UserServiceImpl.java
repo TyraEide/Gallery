@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -27,8 +28,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(UserRegistrationDTO userDTO) {
+        // Check if username or email already exists
+        if (userRepository.existsByUsername(userDTO.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is already taken!");
+        }
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already registered!");
+        }
+
         User user = urMapper.toEntity(userDTO);
-        user.setPassword(encoder.encode(user.getPassword()));
+        user.setPassword(encoder.encode(user.getPassword())); // Encrypt password
         return userRepository.save(user);
     }
 

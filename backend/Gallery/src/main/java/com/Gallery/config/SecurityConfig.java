@@ -19,10 +19,17 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
+                
                 .authorizeHttpRequests((request) -> {
                     request.requestMatchers("/api/users").permitAll()
-                            .anyRequest().authenticated();
+                           .requestMatchers("/login").permitAll() 
+                           .anyRequest().authenticated();
+                            
                 })
+                
+                .headers(headers -> headers
+                .frameOptions(frame -> frame.sameOrigin())  // Allow frames from the same origin
+                )
                 .formLogin(Customizer.withDefaults())
                 .logout((logout) -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))

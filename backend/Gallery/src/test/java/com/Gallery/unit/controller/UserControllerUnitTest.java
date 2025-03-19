@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -36,10 +38,16 @@ public class UserControllerUnitTest {
         User e = new User();
         UserRegistrationDTO dtoE = urMapper.toDTO(e);
         when(userService.createUser(dtoE)).thenReturn(e);
-        final User result = userController.createUser(dtoE);
 
+        // Change the assertion to work with ResponseEntity
+        final ResponseEntity<?> responseEntity = userController.registerUser(dtoE);
+
+        // Verify the service was called
         verify(userService).createUser(dtoE);
-        assertEquals(e, result);
+
+        // Check if the status is 201 Created and the response body contains the correct user
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        assertEquals(e, responseEntity.getBody());
     }
 
 }
