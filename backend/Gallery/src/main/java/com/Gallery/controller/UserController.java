@@ -20,15 +20,19 @@ public class UserController {
         this.userService = userService;
     }
 
+
+
     @PostMapping
     public ResponseEntity<?> registerUser(@RequestBody UserRegistrationDTO userDTO) {
         try {
+            userDTO.validateEmail();
+            userDTO.validatePassword();
             User createdUser = userService.createUser(userDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser); // 201 Created on success
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\": \"" + e.getMessage() + "\"}"); // 400 Bad Request for validation issues
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\": \"" + "Invalid input. Please check your details." + "\"}"); // 400 Bad Request for validation issues
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"An unexpected error occurred.\"}"); // 500 Internal Server Error for unknown issues
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Username or email already in use. Please try again.\"}"); // 500 Internal Server Error for unknown issues
         }
     }
 

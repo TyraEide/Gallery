@@ -4,7 +4,7 @@
   import PageMissing from "./pages/Err404.svelte";
   import Home from "./pages/Home.svelte";
   import Register from "./pages/Register.svelte";
-  import RegistrationSuccessful from "./pages/RegistrationSuccessful.svelte"
+  import RegistrationSuccessful from "./pages/RegistrationSuccessful.svelte";
 
   // Routing paths
   let routes = {

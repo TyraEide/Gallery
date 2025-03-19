@@ -1,23 +1,23 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { redirect } from "../ts_modules/routing"; 
-    
+
     let username: string = "";
     let email: string = "";
     let password: string = "";
     let confirmPassword: string = "";
     let message: string = "";
     let csrfToken: string = "";
+    let loading: boolean = false; 
+    
 
-    // Fetch CSRF token on mount (ensure your backend sends this)
     onMount(async () => {
         const tokenMeta = document.querySelector('meta[name="csrf-token"]');
         csrfToken = tokenMeta ? tokenMeta.getAttribute("content") || "" : "";
     });
 
-    // Handle registration
     async function register(event: Event) {
-        event.preventDefault(); // Prevent page reload
+        event.preventDefault();
 
         if (password.length < 8) {
             message = "Password must be at least 8 characters.";
@@ -34,29 +34,33 @@
             return;
         }
 
+        loading = true;
+
         try {
-            // Send the registration request to your backend
             const response = await fetch("http://localhost:8080/api/users", {
                 method: "POST",
-                credentials: "include", // Send cookies with the request
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRF-Token": csrfToken, // Include CSRF token in header if needed
+                    "X-CSRF-Token": csrfToken,
                 },
-                body: JSON.stringify({ username, email, password }), // Include email
+                body: JSON.stringify({ username, email, password }),
             });
 
             const data = await response.json();
-            message = data.message || "Registration successful!";
 
-            if (response.ok) {
-                // Redirect to login page after successful registration
-                setTimeout(() => redirect("registrationSuccessful"), 1500);
+            if (!response.ok) {
+                message = data.message || "Username or email was already taken. Please try again.";
+            } else {
+                message = data.message || "Registration successful!";
+                setTimeout(() => {
+                    redirect("registrationSuccessful");
+                }, 1500);
             }
         } catch (error) {
-            message = "Error registering. Please try again.";
+            message = "A field is missing. Please try again.";
             console.error(error);
-        }
+        } 
     }
 </script>
 
@@ -103,11 +107,13 @@
             autocomplete="new-password"
         />
 
-        <button type="submit">Register</button>
+        <button type="submit" disabled={loading}> 
+            {#if loading}
+                <span class="spinner"></span> Loading...
+            {:else}
+                Register
+            {/if}
+        </button>
     </form>
     <p>{message}</p>
 </main>
-
-<style>
-    
-</style>
