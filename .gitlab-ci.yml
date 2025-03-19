@@ -22,7 +22,7 @@ test_and_build_frontend:
   image: node:20
   stage: test_and_build
   before_script:
-    - cd frontend/DAT251-frontend
+    - cd Frontend/DAT251-frontend
   script:
     - npm install  # Install frontend dependencies (only once)
     - npm run test  # Run frontend unit tests
