@@ -29,10 +29,12 @@
             return;
         }
 
-        if (!email.includes('@') || !email.includes('.')) {
+        if (!email.includes('.') || !email.includes('@')) {
             message = "Please provide a valid email address.";
             return;
         }
+
+
 
 
         try {
@@ -84,7 +86,7 @@
         <label for="email">Email</label>
         <input
             id="email"
-            type="email"
+            type="text"
             bind:value={email}
             required
             autocomplete="email"
@@ -93,7 +95,7 @@
         <label for="password">Password</label>
         <input
             id="password"
-            type="password"
+            type="text"
             bind:value={password}
             required
             minlength="8"
@@ -103,7 +105,7 @@
         <label for="confirmPassword">Confirm Password</label>
         <input
             id="confirmPassword"
-            type="password"
+            type="text"
             bind:value={confirmPassword}
             required
             minlength="8"
