@@ -47,7 +47,7 @@ public class SecurityConfig {
         // Adjust frontend URL if needed
         config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowCredentials(true);
         source.registerCorsConfiguration("/**", config);
         return source;
