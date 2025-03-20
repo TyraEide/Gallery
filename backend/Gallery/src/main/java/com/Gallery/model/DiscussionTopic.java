@@ -1,26 +1,28 @@
 package com.Gallery.model;
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.time.Instant;
 import java.util.Map;
 
 /**
  * Representing DiscussionTopic objects from Canvas.
  * This includes announcements and discussions.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DiscussionTopic {
 
     private String title;
-    private LocalDateTime posted_at;
-    private LocalDateTime delayed_post_at;
+    private Instant posted_at;
+    private Instant delayed_post_at;
     private String message;
     private Map<String, Boolean> permissions;
     private CanvasUser author;
     private String url;
-    private boolean isAnnouncement;
+    private boolean is_announcement;
 
-    public DiscussionTopic(String title, LocalDateTime posted_at, LocalDateTime delayed_post_at, String message,
-                           Map<String, Boolean> permissions, CanvasUser author, String url, boolean isAnnouncement) {
+    public DiscussionTopic(String title, Instant posted_at, Instant delayed_post_at, String message,
+                           Map<String, Boolean> permissions, CanvasUser author, String url, boolean is_announcement) {
         this.title = title;
         this.posted_at = posted_at;
         this.delayed_post_at = delayed_post_at;
@@ -28,7 +30,7 @@ public class DiscussionTopic {
         this.permissions = permissions;
         this.author = author;
         this.url = url;
-        this.isAnnouncement = isAnnouncement;
+        this.is_announcement = is_announcement;
     }
 
     public DiscussionTopic() {
@@ -51,11 +53,11 @@ public class DiscussionTopic {
      * is the date the post was made available for read-authorized users.
      * @return the datetime the {@link DiscussionTopic} was posted
      */
-    public LocalDateTime getPosted_at() {
+    public Instant getPosted_at() {
         return posted_at;
     }
 
-    public void setPosted_at(LocalDateTime posted_at) {
+    public void setPosted_at(Instant posted_at) {
         this.posted_at = posted_at;
     }
 
@@ -99,11 +101,11 @@ public class DiscussionTopic {
     }
 
     public boolean isAnnouncement() {
-        return isAnnouncement;
+        return is_announcement;
     }
 
-    public void setAnnouncement(boolean announcement) {
-        isAnnouncement = announcement;
+    public void setIs_announcement(boolean is_announcement) {
+        this.is_announcement = is_announcement;
     }
 
     /**
@@ -119,7 +121,7 @@ public class DiscussionTopic {
      * @return the datetime a post is made available for read-authorized users, or null
      * if the post already is available.
      */
-    public LocalDateTime getDelayed_post_at() {
+    public Instant getDelayed_post_at() {
         return delayed_post_at;
     }
 
@@ -129,7 +131,7 @@ public class DiscussionTopic {
      * and should otherwise be set to null.
      * @param delayed_post_at the datetime to delay posting of the DiscussionTopic to
      */
-    public void setDelayed_post_at(LocalDateTime delayed_post_at) {
+    public void setDelayed_post_at(Instant delayed_post_at) {
         this.delayed_post_at = delayed_post_at;
     }
 
