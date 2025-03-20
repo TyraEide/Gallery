@@ -1,7 +1,10 @@
 
 <script lang="ts">
 
+    import {api_url} from "../ts_modules/api"
     import {redirect } from "../ts_modules/routing"
+
+    console.log("page loaded")
 
     // General notice ⚠️
     // Session ID is not set up correctly
@@ -50,7 +53,7 @@
 
     // Debug function for "localhost:5000"
     async function check_message_cookie_req(){
-      const response_json = await fetch("http://127.0.0.1:5000/cookie", {credentials: "include"}).then((r) => r.json())
+      const response_json = await fetch(api_url("/cookie"), {credentials: "include"}).then((r) => r.json())
       response_msg = response_json.message
     }
   
@@ -62,7 +65,7 @@
       <div>
         Username: <input type="text" bind:value={username}><br>
         Password: <input type="text" bind:value={password}><br>
-        <input type="submit" onclick={() => {login_request("http://127.0.0.1:5000/login")}}>
+        <input type="submit" onclick={() => {login_request(api_url("/login"))}}>
       </div>
       <div>
         Output: {response_msg}
