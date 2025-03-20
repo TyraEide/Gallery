@@ -23,7 +23,7 @@ public class UserController {
 
 
     @PostMapping
-    public ResponseEntity<?> registerUser(@RequestBody UserRegistrationDTO userDTO) {
+    public ResponseEntity<?> createUser(@RequestBody UserRegistrationDTO userDTO) {
         try {
             userDTO.validateEmail();
             userDTO.validatePassword();
