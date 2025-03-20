@@ -1,5 +1,6 @@
 package com.Gallery.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
 
@@ -10,15 +11,15 @@ import java.util.Map;
 public class DiscussionTopic {
 
     private String title;
-    private Date posted_at;
-    private Date delayed_post_at;
+    private LocalDateTime posted_at;
+    private LocalDateTime delayed_post_at;
     private String message;
     private Map<String, Boolean> permissions;
     private CanvasUser author;
     private String url;
     private boolean isAnnouncement;
 
-    public DiscussionTopic(String title, Date posted_at, Date delayed_post_at, String message,
+    public DiscussionTopic(String title, LocalDateTime posted_at, LocalDateTime delayed_post_at, String message,
                            Map<String, Boolean> permissions, CanvasUser author, String url, boolean isAnnouncement) {
         this.title = title;
         this.posted_at = posted_at;
@@ -48,13 +49,13 @@ public class DiscussionTopic {
      * for the delayed posting date.
      * If {@link DiscussionTopic#getDelayed_post_at()} is null, this
      * is the date the post was made available for read-authorized users.
-     * @return the date the {@link DiscussionTopic} was posted
+     * @return the datetime the {@link DiscussionTopic} was posted
      */
-    public Date getPosted_at() {
+    public LocalDateTime getPosted_at() {
         return posted_at;
     }
 
-    public void setPosted_at(Date posted_at) {
+    public void setPosted_at(LocalDateTime posted_at) {
         this.posted_at = posted_at;
     }
 
@@ -115,10 +116,10 @@ public class DiscussionTopic {
      * was made available for users authorized to edit the specific announcement,
      * and the returned date is when regular users will be able to see the post.
      *
-     * @return the date a post is made available for read-authorized users, or null
+     * @return the datetime a post is made available for read-authorized users, or null
      * if the post already is available.
      */
-    public Date getDelayed_post_at() {
+    public LocalDateTime getDelayed_post_at() {
         return delayed_post_at;
     }
 
@@ -126,9 +127,11 @@ public class DiscussionTopic {
      * The date at which the post should be made available for read-authorized
      * users. Used only when the post should be posted at a later time than creation,
      * and should otherwise be set to null.
-     * @param delayed_post_at the date to delay posting of the DiscussionTopic to
+     * @param delayed_post_at the datetime to delay posting of the DiscussionTopic to
      */
-    public void setDelayed_post_at(Date delayed_post_at) {
+    public void setDelayed_post_at(LocalDateTime delayed_post_at) {
         this.delayed_post_at = delayed_post_at;
     }
+
+
 }
