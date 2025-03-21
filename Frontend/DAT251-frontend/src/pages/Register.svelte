@@ -35,9 +35,12 @@
         }
 
 
-
+        
 
         try {
+
+            loading = true;
+
             const response = await fetch("http://localhost:8080/api/users", {
                 method: "POST",
                 credentials: "include",
@@ -54,10 +57,9 @@
                 message = data.message || "Username or email was already taken. Please try again.";
             } else {
                 message = data.message || "Registration successful!";
-                loading = true;
+
                 setTimeout(() => {
                     redirect("registrationSuccessful");
-                    loading = false;
                 }, 1500);
 
                 
@@ -95,7 +97,7 @@
         <label for="password">Password</label>
         <input
             id="password"
-            type="text"
+            type="password"
             bind:value={password}
             required
             minlength="8"
@@ -105,7 +107,7 @@
         <label for="confirmPassword">Confirm Password</label>
         <input
             id="confirmPassword"
-            type="text"
+            type="password"
             bind:value={confirmPassword}
             required
             minlength="8"
