@@ -28,4 +28,13 @@ public class UserRegistrationDTO {
     public String getPassword() {
         return password;
     }
+
+    public UserRegistrationDTO() {
+    }
+
+    public UserRegistrationDTO(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
 }

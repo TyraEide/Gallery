@@ -1,18 +1,22 @@
 package com.Gallery.unit.service;
 
+import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.impl.UserServiceImpl;
+import com.Gallery.utilities.Emailvalidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -46,5 +50,41 @@ public class UserServiceUnitTest {
 
         verify(userRepository).save(e);
         assertEquals(e, result);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUsernameIsEmpty() {
+
+        UserRegistrationDTO userDTO = new UserRegistrationDTO("", "example@example.com", "ldldl");
+
+        Exception exception = assertThrows(NullPointerException.class, () -> userService.createUser(userDTO));
+        assertEquals("Username is required", exception.getMessage());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenPasswordIsEmpty() {
+
+        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "example@example.com", "");
+
+        Exception exception = assertThrows(NullPointerException.class, () -> userService.createUser(userDTO));
+        assertEquals("Password is required", exception.getMessage());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenEmailIsEmpty() {
+
+        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "", "ldldld");
+
+        Exception exception = assertThrows(NullPointerException.class, () -> userService.createUser(userDTO));
+        assertEquals("Email is required", exception.getMessage());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenEmailIsInvalid() {
+        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "ss@example.com", "ldldld");
+
+        String emailAddress = userDTO.getEmail();
+        String regexPattern = "^(.+)@(\\S+)$";
+        assertTrue(Emailvalidator.validateEmail(emailAddress, regexPattern));
     }
 }
