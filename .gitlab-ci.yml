@@ -17,16 +17,15 @@ test_and_build_backend:
     - docker
   
 
-# Frontend Test and Build
 test_and_build_frontend:
-  image: node:20
+  image: cypress/included:14.2.0
   stage: test_and_build
   before_script:
     - cd Frontend/DAT251-frontend
   script:
-    - npm install  # Install frontend dependencies (only once)
-    - npm run build  # Build the frontend
-    - npx cypress run 
+    - npm install
+    - npm run build
+    - npx cypress run --headless  
     - echo "Frontend test and build complete"
   tags:
     - docker
