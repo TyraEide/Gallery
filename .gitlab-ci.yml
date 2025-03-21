@@ -26,6 +26,7 @@ test_and_build_frontend:
   script:
     - npm install  # Install frontend dependencies (only once)
     - npm run build  # Build the frontend
+    - npx cypress run 
     - echo "Frontend test and build complete"
   tags:
     - docker
