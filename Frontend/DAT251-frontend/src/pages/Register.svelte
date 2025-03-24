@@ -9,12 +9,6 @@
     let message: string = "";
     let csrfToken: string = "";
     let loading: boolean = false; 
-    
-
-    onMount(async () => {
-        const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-        csrfToken = tokenMeta ? tokenMeta.getAttribute("content") || "" : "";
-    });
 
     async function register(event: Event) {
         event.preventDefault();
