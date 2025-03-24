@@ -2,7 +2,7 @@ stages:
   - test_and_build
   - e2e_test
 
-# Backend Test and Build
+
 test_and_build_backend:
   image: maven:3.9.6-eclipse-temurin-21
   stage: test_and_build
@@ -35,7 +35,7 @@ test_and_build_frontend:
 
   e2e_test:
     stage: e2e_test
-    image: cypress/included:14.2.0
+    image: node:20
     stage: test
     before_script:
       - cd Frontend/DAT251-frontend
