@@ -30,12 +30,17 @@ test_and_build_frontend:
     - echo "Frontend test and build complete"
   tags:
     - docker
+  cache:
+    key: frontend
+    paths:
+      - Frontend/DAT251-frontend/node_modules/
 
 
 e2e_test:
   image: node:20
   stage: e2e_test
   before_script:
+    - apt-get update && apt-get install -y xvfb
     - cd Frontend/DAT251-frontend
   script:
     - npx cypress run --headless # Run Cypress tests
