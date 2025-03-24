@@ -4,13 +4,24 @@ import Register from "../pages/Register.svelte";
 import { beforeEach, expect, test, vi } from "vitest";
 import '@testing-library/jest-dom';
 
-// Mock the redirect function
+// Mocking browser-specific methods
 vi.mock("../ts_modules/routing", () => ({
     redirect: vi.fn(),
 }));
 
-// Mock fetch globally
+// Mock global fetch
 global.fetch = vi.fn();
+
+// Mock Svelte lifecycle methods for SSR or server-side rendering
+vi.mock("svelte", async () => {
+    const actualSvelte = await vi.importActual("svelte");
+    return {
+        ...actualSvelte,
+        onMount: vi.fn(),
+        beforeUpdate: vi.fn(),
+        afterUpdate: vi.fn(),
+    };
+});
 
 describe("Register Component", () => {
     beforeEach(() => {
