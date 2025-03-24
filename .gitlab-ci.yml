@@ -1,3 +1,6 @@
+stages:
+  - e2e_test
+
 
 e2e_test:
   image: cypress/included:14.2.0
