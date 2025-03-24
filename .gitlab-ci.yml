@@ -36,7 +36,6 @@ test_and_build_frontend:
   e2e_test:
     stage: e2e_test
     image: node:20
-    stage: test
     before_script:
       - cd Frontend/DAT251-frontend
     script:
