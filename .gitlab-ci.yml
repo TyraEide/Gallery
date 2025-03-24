@@ -16,7 +16,11 @@ test_and_build_backend:
     - echo "Backend test and build complete"
   tags:
     - docker
-  
+  cache:
+    key: maven
+    paths:
+      - /root/.m2/repository
+
 
 test_and_build_frontend:
   image: node:20
@@ -25,7 +29,6 @@ test_and_build_frontend:
     - cd Frontend/DAT251-frontend
   script:
     - npm install  # Install frontend dependencies (only once)
-    - npm run test  # Run frontend unit tests
     - npm run coverage  # Check test coverage
     - npm run build  # Build the frontend
     - echo "Frontend test and build complete"
