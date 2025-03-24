@@ -37,10 +37,9 @@ test_and_build_frontend:
 
 
 e2e_test:
-  image: node:20
+  image: cypress/included:14.2.0
   stage: e2e_test
   before_script:
-    - apt-get update && apt-get install -y xvfb
     - cd Frontend/DAT251-frontend
   script:
     - npx cypress run --headless # Run Cypress tests
