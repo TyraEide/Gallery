@@ -42,8 +42,7 @@ e2e_test:
   before_script:
     - cd Frontend/DAT251-frontend
   script:
-    - script:
-      - npx cypress run --config baseUrl=http://localhost:5173 --headless
+    - npx cypress run --config baseUrl=http://localhost:5173 --headless
 
   tags:
     - docker
