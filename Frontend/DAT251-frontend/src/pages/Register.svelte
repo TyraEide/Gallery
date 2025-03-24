@@ -1,6 +1,4 @@
-<script lang="ts">
-    import { onMount } from "svelte";
-    import { redirect } from "../ts_modules/routing"; 
+<script lang="ts">    import { redirect } from "../ts_modules/routing"; 
 
     let username: string = "";
     let email: string = "";
