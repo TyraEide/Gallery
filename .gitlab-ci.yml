@@ -1,5 +1,6 @@
 stages:
   - test_and_build
+  - e2e_test
 
 # Backend Test and Build
 test_and_build_backend:
@@ -31,7 +32,9 @@ test_and_build_frontend:
   tags:
     - docker
 
-  e2e_tests:
+
+  e2e_test:
+    stage: e2e_test
     image: cypress/included:14.2.0
     stage: test
     before_script:
