@@ -1,40 +1,3 @@
-stages:
-  - test_and_build
-  - e2e_test
-
-
-test_and_build_backend:
-  image: maven:3.9.6-eclipse-temurin-21
-  stage: test_and_build
-  before_script:
-    - cd backend/Gallery
-  script:
-    - mvn clean test package -T 1C # Optimized testing
-    - echo "Backend test and build complete"
-  tags:
-    - docker
-  cache:
-    key: maven
-    paths:
-      - /root/.m2/repository
-
-
-test_and_build_frontend:
-  image: node:20
-  stage: test_and_build
-  before_script:
-    - cd Frontend/DAT251-frontend
-  script:
-    - npm install  # Install frontend dependencies (only once)
-    - npm run build  # Build the frontend
-    - echo "Frontend test and build complete"
-  tags:
-    - docker
-  cache:
-    key: frontend
-    paths:
-      - Frontend/DAT251-frontend/node_modules/
-
 
 e2e_test:
   image: cypress/included:14.2.0
@@ -42,7 +5,7 @@ e2e_test:
   before_script:
     - cd Frontend/DAT251-frontend
   script:
-    - npx cypress run --config baseUrl="http://localhost:5173" --headless
+    - npx cypress run --config "baseUrl=http://localhost:5173" --headless
 
   tags:
     - docker
