@@ -4,7 +4,7 @@ stages:
 
 
 test_and_build_backend:
-  image: maven:3.9.6-eclipse-temurin-21
+  image: maven:3.9.6-eclipse-temurin-21-alpine
   stage: test_and_build
   before_script:
     - cd backend/Gallery
