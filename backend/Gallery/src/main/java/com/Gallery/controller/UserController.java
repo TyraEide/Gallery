@@ -20,8 +20,14 @@ public class UserController {
         this.userService = userService;
     }
 
-
-
+    /* 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public @ResponseBody User createUser(@RequestBody UserRegistrationDTO userDTO) {
+        return userService.createUser(userDTO);
+    }
+    */
+    
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody UserRegistrationDTO userDTO) {
         try {
