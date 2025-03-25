@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { redirect } from "../ts_modules/routing"; 
+    import { api_url } from "../ts_modules/api";
 
     let username: string = "";
     let email: string = "";
@@ -35,7 +36,7 @@
 
             loading = true;
 
-            const response = await fetch("http://localhost:8080/api/users", {
+            const response = await fetch(api_url("/users"), {
                 method: "POST",
                 credentials: "include",
                 headers: {

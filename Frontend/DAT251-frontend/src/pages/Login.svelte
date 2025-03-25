@@ -42,7 +42,7 @@
     // set sessionID cookie from JSON
     if(response_json.sessionID != undefined){
       setCookie("SessionID",response_json.sessionID)
-      redirect()
+      redirect("dashboard")
     }
     else{
       console.log("Missing Cookie")
@@ -68,6 +68,10 @@
     </div>
     <div>
       Output: {response_msg}
+    </div>
+
+    <div>
+      <button type="button" onclick={() => {redirect("register")}}>Register account</button>
     </div>
   </div>
 
