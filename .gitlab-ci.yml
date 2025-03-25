@@ -9,6 +9,7 @@ test_and_build_backend:
   before_script:
     - cd backend/Gallery
   script:
+    - export MAVEN_OPTS="-Xmx1024m -Xms512m"
     - mvn clean test package
     - echo "Backend test and build complete"
   tags:
