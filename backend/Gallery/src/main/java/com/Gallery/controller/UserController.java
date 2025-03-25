@@ -3,8 +3,6 @@ package com.Gallery.controller;
 import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.model.User;
 import com.Gallery.service.UserService;
-import com.Gallery.service.impl.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,10 +20,20 @@ public class UserController {
         this.userService = userService;
     }
 
+
+
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody User createUser(@RequestBody UserRegistrationDTO userDTO) {
-        return userService.createUser(userDTO);
+    public ResponseEntity<?> createUser(@RequestBody UserRegistrationDTO userDTO) {
+        try {
+            userDTO.validateEmail();
+            userDTO.validatePassword();
+            User createdUser = userService.createUser(userDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser); // 201 Created on success
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\": \"" + "Invalid input. Please check your details." + "\"}"); // 400 Bad Request for validation issues
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Username or email already in use. Please try again.\"}"); // 500 Internal Server Error for unknown issues
+        }
     }
 
     @GetMapping("/{id}")
