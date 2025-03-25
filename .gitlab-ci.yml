@@ -35,13 +35,23 @@ test_and_build_frontend:
     paths:
       - Frontend/DAT251-frontend/node_modules/
 
-
 e2e_test:
   image: cypress/included:14.2.0
   stage: e2e_test
-  before_script:
-    - cd Frontend/DAT251-frontend
-  script:
+  script: 
+    #Start the backend application in the background
+    - cd backend/Gallery
+    - nohup ./mvnw spring-boot:run & 
+
+    # Start the frontend application in the background
+    - cd ../../Frontend/DAT251-frontend
+    - npm run start & 
+
+    # Wait for both servers to be ready
+    - npx wait-on http://localhost:8080 # Wait for backend (Spring Boot) to be ready
+    - npx wait-on http://localhost:5173 # Wait for frontend to be ready
+
+    # Run Cypress tests
     - npx cypress run --config "baseUrl=http://localhost:5173" --headless
 
   tags:
