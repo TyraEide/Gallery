@@ -57,6 +57,7 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
   margin: 10px;
+  border-color: darkgray;
 
 }
 
@@ -93,6 +94,9 @@ form {
   gap: 10px;
   width: 200px;
   margin: auto;
+  padding: 20px;
+  border: 1px solid grey;
+  
 }
 
 
