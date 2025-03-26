@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+
   type Announcement = {
     title: string;
     message: string;
@@ -7,22 +9,29 @@
     is_announcement: boolean;
   };
 
-  let announcements: Announcement[] = [
-    {
-      title: "Title1",
-      message: "Message1",
-      author: { name: "Author1" },
-      posted_at: new Date().toISOString(),
-      is_announcement: true
-    },
-    {
-      title: "Title2",
-      message: "Message2",
-      author: { name: "Author2" },
-      posted_at: new Date().toISOString(),
-      is_announcement: true
+  let announcements: Announcement[] = [];
+
+  async function fetchAnnouncements() {
+    try {
+      const response = await fetch("http://backend-API-url/announcements"); // Need to add the actual API where the announcements are located
+      if (!response.ok) throw new Error("Failed to fetch announcements");
+
+      const data = await response.json();
+      announcements = data
+        .filter((item: any) => item.is_announcement)
+        .map((item: any) => ({
+          title: item.title,
+          message: item.message,
+          author: { name: item.author.name },
+          posted_at: item.posted_at,
+          is_announcement: item.is_announcement
+        }));
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
     }
-  ];
+  }
+
+  onMount(fetchAnnouncements);
 </script>
 
 <style>
@@ -52,7 +61,7 @@
     <li class="announcement">
       <h3>{a.title}</h3>
       <p>{a.message}</p>
-      <small>Posted by {a.author?.name} on {new Date(a.posted_at).toLocaleString()}</small>
+      <small>Posted by {a.author.name} on {new Date(a.posted_at).toLocaleString()}</small>
     </li>
   {/each}
 </ul>
