@@ -12,10 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class CanvasUserUnitTest {
 
     @Test
-    public void shouldThrowExceptionOnNullId() {
-        assertThrows(IllegalArgumentException.class, () -> new CanvasUser(null));
-    }
-    @Test
     public void shouldReturnSetUponGet() {
         String id = "1";
         String name = "Test Testy";
@@ -25,8 +21,9 @@ public class CanvasUserUnitTest {
         String avatar_url = "test.png";
         String effective_locale = "nn";
 
-        CanvasUser e = new CanvasUser(id);
+        CanvasUser e = new CanvasUser();
 
+        e.setId(id);
         e.setName(name);
         e.setSortableName(sortable_name);
         e.setFirstName(first_name);

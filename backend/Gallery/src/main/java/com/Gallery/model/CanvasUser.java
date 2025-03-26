@@ -1,9 +1,12 @@
 package com.Gallery.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CanvasUser {
-    private final String id;
+    private String id;
     private String name;
     private String sortable_name;
     private String avatar_url;
@@ -11,10 +14,9 @@ public class CanvasUser {
     private String last_name;
     private String effective_locale;
 
-    public CanvasUser(String id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Id cannot be null");
-        }
+    public CanvasUser() {}
+
+    public void setId(String id) {
         this.id = id;
     }
 
