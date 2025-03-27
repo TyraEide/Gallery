@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 describe('Announcements', () => {
   beforeEach(() => {
     cy.intercept('GET', '/announcements', {
