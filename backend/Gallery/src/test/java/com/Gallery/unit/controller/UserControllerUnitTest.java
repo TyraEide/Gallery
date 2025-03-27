@@ -4,7 +4,7 @@ import com.Gallery.controller.UserController;
 import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
-import com.Gallery.service.impl.UserServiceImpl;
+import com.Gallery.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerUnitTest {
-    @Mock private UserServiceImpl userService;
+    @Mock private UserService userService;
     @InjectMocks private UserController userController;
     private UserRegistrationMapper urMapper = new UserRegistrationMapper();
 
