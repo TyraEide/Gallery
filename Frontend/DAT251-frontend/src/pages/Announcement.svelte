@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  type Announcement = {
+  type DiscussionTopic = {
     title: string;
     message: string;
     author: { name: string };
@@ -9,7 +9,7 @@
     is_announcement: boolean;
   };
 
-  let announcements: Announcement[] = [];
+  let DiscussionTopics: DiscussionTopic[] = [];
 
   async function fetchAnnouncements() {
     try {
@@ -17,7 +17,7 @@
       if (!response.ok) throw new Error("Failed to fetch announcements");
 
       const data = await response.json();
-      announcements = data
+      DiscussionTopics = data
         .filter((item: any) => item.is_announcement)
         .map((item: any) => ({
           title: item.title,
@@ -57,7 +57,7 @@
 </style>
 
 <ul>
-  {#each announcements as a}
+  {#each DiscussionTopics as a}
     <li class="announcement">
       <h3>{a.title}</h3>
       <p>{a.message}</p>
