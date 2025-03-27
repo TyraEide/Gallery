@@ -2,7 +2,6 @@ stages:
   - test_and_build
   - e2e_test
 
-
 test_and_build_backend:
   image: maven:3.9.6-eclipse-temurin-21-alpine
   stage: test_and_build
@@ -19,14 +18,13 @@ test_and_build_backend:
     paths:
       - /root/.m2/repository
 
-
 test_and_build_frontend:
   image: node:20
   stage: test_and_build
   before_script:
     - cd Frontend/DAT251-frontend
   script:
-    - npm install  # Install frontend dependencies (only once)
+    - npm ci  # Ensure a clean dependency installation
     - npm run build  # Build the frontend
     - echo "Frontend test and build complete"
   tags:
@@ -39,21 +37,21 @@ test_and_build_frontend:
 e2e_test:
   image: cypress/included:14.2.0
   stage: e2e_test
-  script: 
-    #Start the backend application in the background
+  before_script:
     - cd backend/Gallery
-    - nohup ./mvnw spring-boot:run & 
+  script:
+    # Start the backend server
+    - nohup ./mvnw spring-boot:run > backend.log 2>&1 &
 
-    # Start the frontend application in the background
+    # Start frontend
     - cd ../../Frontend/DAT251-frontend
-    - npm run start & 
+    - nohup npm run dev > frontend.log 2>&1 &
 
-    # Wait for both servers to be ready
-    - npx wait-on http://localhost:8080
-    - npx wait-on http://localhost:5173
+    # Wait for frontend and backend to be ready
+    - npx wait-on http://localhost:5173 http://localhost:8080
 
     # Run Cypress tests
-    - npx cypress run --config "baseUrl=http://localhost:5173" --headless
+    - npx cypress run --config baseUrl=http://localhost:5173 --headless
 
   tags:
     - docker
