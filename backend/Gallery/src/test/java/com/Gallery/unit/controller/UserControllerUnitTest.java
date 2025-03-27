@@ -4,8 +4,12 @@ import com.Gallery.controller.UserController;
 import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
+<<<<<<< HEAD
 import com.Gallery.service.impl.UserServiceImpl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+=======
+import com.Gallery.service.UserService;
+>>>>>>> 00da9db (Cleaned up: Made UserService a class instead of interface and class and removed unneccesary dependency.)
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +21,7 @@ import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerUnitTest {
-    @Mock private UserServiceImpl userService;
+    @Mock private UserService userService;
     @InjectMocks private UserController userController;
     private UserRegistrationMapper urMapper = new UserRegistrationMapper();
 
