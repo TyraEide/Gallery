@@ -121,4 +121,17 @@ public class UserControllerIntegrationTest {
         User updatedUser = userRepository.findById(e.getId()).get();
         assertEquals(e.getHvlToken(), updatedUser.getHvlToken());
     }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenSettingTokenForOtherUser() throws Exception {
+        userRepository.save(e);
+        e.setUibToken("secureToken");
+
+        mockMvc.perform(put("/api/users/{id}/setUibToken", e.getId())
+                        .with(csrf())
+                        .content(e.getUibToken()))
+                .andExpect(status().isUnauthorized())
+                .andDo(print())
+        ;
+    }
 }
