@@ -1,113 +1,157 @@
 stages:
-  - test_and_build
-  - build
-  - e2e_test
+  - validate
+  - compile
+  - test
+  - deploy
 
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
   NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
+  BACKEND_DIR: "backend/Gallery"
+  FRONTEND_DIR: "Frontend/DAT251-frontend"
 
-# Backend jobs
-backend:test:
+# Backend Jobs
+java:compile:
   image: maven:3.9.6-eclipse-temurin-21
-  stage: test_and_build
+  stage: compile
   before_script:
-    - echo "Running backend tests with Java 21"
-    - cd backend/Gallery
+    - echo "Compiling Java backend with Maven and JDK 21"
+    - cd ${BACKEND_DIR}
     - java -version
   script:
-    - mvn clean test -T 1C
-    - echo "Backend tests completed"
+    - mvn compile -T 1C
+    - echo "Java compilation completed successfully"
+  tags:
+    - docker
+  cache:
+    key: maven-deps-$CI_COMMIT_REF_SLUG
+    paths:
+      - .m2/repository/
+
+java:test:unit:
+  image: maven:3.9.6-eclipse-temurin-21
+  stage: test
+  needs: ["java:compile"]
+  before_script:
+    - echo "Running Java unit tests"
+    - cd ${BACKEND_DIR}
+  script:
+    - mvn test -T 1C
+    - echo "Java unit tests completed"
   after_script:
-    - cd backend/Gallery
+    - cd ${BACKEND_DIR}
     - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
   artifacts:
     when: always
     reports:
       junit: $CI_PROJECT_DIR/TEST-*.xml
     paths:
-      - backend/Gallery/target/surefire-reports/
-      - backend/Gallery/target/pit-reports/
+      - ${BACKEND_DIR}/target/surefire-reports/
+      - ${BACKEND_DIR}/target/pit-reports/
     expire_in: 1 week
   tags:
     - docker
   cache:
-    key: maven-$CI_COMMIT_REF_SLUG
+    key: maven-deps-$CI_COMMIT_REF_SLUG
     paths:
       - .m2/repository/
 
-backend:build:
+java:package:jar:
   image: maven:3.9.6-eclipse-temurin-21
-  stage: test_and_build
-  needs: ["backend:test"]
+  stage: deploy
+  needs: ["java:test:unit"]
   before_script:
-    - echo "Building backend with Java 21"
-    - cd backend/Gallery
+    - echo "Building deployable JAR file"
+    - cd ${BACKEND_DIR}
   script:
     - mvn package -DskipTests
-    - echo "Backend build complete"
+    - echo "JAR packaging complete"
   artifacts:
+    name: "backend-jar-$CI_COMMIT_SHORT_SHA"
     paths:
-      - backend/Gallery/target/*.jar
-    expire_in: 1 week
+      - ${BACKEND_DIR}/target/*.jar
+    expire_in: 2 weeks
   tags:
     - docker
   cache:
-    key: maven-$CI_COMMIT_REF_SLUG
+    key: maven-deps-$CI_COMMIT_REF_SLUG
     paths:
       - .m2/repository/
 
-# Frontend jobs
-frontend:build:
+# Frontend Jobs
+js:dependency:check:
   image: node:20
-  stage: build
+  stage: validate
   before_script:
-    - echo "Building frontend with Node 20"
-    - cd Frontend/DAT251-frontend
+    - echo "Validating frontend dependencies"
+    - cd ${FRONTEND_DIR}
     - node --version
     - npm --version
+    # Clean up any pnpm lock file and generate a clean package-lock.json
+    - rm -f pnpm-lock.yaml
+    - npm install
   script:
-    - npm ci  # More reliable than npm install for CI environments
-    - npm run build
-    - echo "Frontend build complete"
-  artifacts:
-    paths:
-      - Frontend/DAT251-frontend/dist/
-    expire_in: 1 week
+    - npm audit || echo "Audit warnings found, but continuing"
+    - echo "Frontend dependency validation complete"
   tags:
     - docker
   cache:
-    key: npm-$CI_COMMIT_REF_SLUG
+    key: npm-deps-$CI_COMMIT_REF_SLUG
     paths:
       - .npm/
-      - Frontend/DAT251-frontend/node_modules/
+      - ${FRONTEND_DIR}/node_modules/
 
-frontend:e2e:
-  image: cypress/included:14.2.0
-  stage: e2e_test
-  needs: ["frontend:build"]
+js:build:assets:
+  image: node:20
+  stage: compile
+  needs: ["js:dependency:check"]
   before_script:
-    - echo "Running E2E tests with Cypress"
-    - cd Frontend/DAT251-frontend
+    - echo "Building frontend assets"
+    - cd ${FRONTEND_DIR}
+  script:
+    - npm ci
+    - npm run build
+    - echo "Frontend assets built successfully"
+  artifacts:
+    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - ${FRONTEND_DIR}/dist/
+    expire_in: 2 weeks
+  tags:
+    - docker
+  cache:
+    key: npm-deps-$CI_COMMIT_REF_SLUG
+    paths:
+      - .npm/
+      - ${FRONTEND_DIR}/node_modules/
+
+js:test:e2e:
+  image: cypress/included:14.2.0
+  stage: test
+  needs: ["js:build:assets"]
+  before_script:
+    - echo "Running end-to-end tests with Cypress"
+    - cd ${FRONTEND_DIR}
     - cypress --version
   script:
     - npm ci
     - npx cypress run --headless
-    - echo "E2E tests completed"
+    - echo "End-to-end tests completed"
   after_script:
-    - cd Frontend/DAT251-frontend
-    - mkdir -p $CI_PROJECT_DIR/cypress-artifacts
-    - cp -r cypress/screenshots $CI_PROJECT_DIR/cypress-artifacts/ || true
-    - cp -r cypress/videos $CI_PROJECT_DIR/cypress-artifacts/ || true
+    - echo "Collecting test artifacts"
+    - mkdir -p $CI_PROJECT_DIR/cypress-results
+    - cp -r ${FRONTEND_DIR}/cypress/screenshots $CI_PROJECT_DIR/cypress-results/ || true
+    - cp -r ${FRONTEND_DIR}/cypress/videos $CI_PROJECT_DIR/cypress-results/ || true
   artifacts:
+    name: "e2e-test-results-$CI_COMMIT_SHORT_SHA"
     when: always
     paths:
-      - cypress-artifacts/
-    expire_in: 1 week
+      - cypress-results/
+    expire_in: 2 weeks
   tags:
     - docker
   cache:
-    key: npm-$CI_COMMIT_REF_SLUG
+    key: npm-deps-$CI_COMMIT_REF_SLUG
     paths:
       - .npm/
-      - Frontend/DAT251-frontend/node_modules/
+      - ${FRONTEND_DIR}/node_modules/
