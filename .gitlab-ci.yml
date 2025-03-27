@@ -1,48 +1,113 @@
 stages:
   - test_and_build
+  - build
   - e2e_test
 
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
+  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
 
-test_and_build_backend:
+# Backend jobs
+backend:test:
   image: maven:3.9.6-eclipse-temurin-21
   stage: test_and_build
   before_script:
+    - echo "Running backend tests with Java 21"
+    - cd backend/Gallery
+    - java -version
+  script:
+    - mvn clean test -T 1C
+    - echo "Backend tests completed"
+  after_script:
+    - cd backend/Gallery
+    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
+  artifacts:
+    when: always
+    reports:
+      junit: $CI_PROJECT_DIR/TEST-*.xml
+    paths:
+      - backend/Gallery/target/surefire-reports/
+      - backend/Gallery/target/pit-reports/
+    expire_in: 1 week
+  tags:
+    - docker
+  cache:
+    key: maven-$CI_COMMIT_REF_SLUG
+    paths:
+      - .m2/repository/
+
+backend:build:
+  image: maven:3.9.6-eclipse-temurin-21
+  stage: test_and_build
+  needs: ["backend:test"]
+  before_script:
+    - echo "Building backend with Java 21"
     - cd backend/Gallery
   script:
-    - mvn clean test package -T 1C # Optimized testing
-    - echo "Backend test and build complete"
+    - mvn package -DskipTests
+    - echo "Backend build complete"
+  artifacts:
+    paths:
+      - backend/Gallery/target/*.jar
+    expire_in: 1 week
   tags:
     - docker
   cache:
-    key: maven
+    key: maven-$CI_COMMIT_REF_SLUG
     paths:
-      - /root/.m2/repository
+      - .m2/repository/
 
-
-test_and_build_frontend:
+# Frontend jobs
+frontend:build:
   image: node:20
-  stage: test_and_build
+  stage: build
   before_script:
+    - echo "Building frontend with Node 20"
     - cd Frontend/DAT251-frontend
+    - node --version
+    - npm --version
   script:
-    - npm install  # Install frontend dependencies (only once)
-    - npm run build  # Build the frontend
-    - echo "Frontend test and build complete"
+    - npm ci  # More reliable than npm install for CI environments
+    - npm run build
+    - echo "Frontend build complete"
+  artifacts:
+    paths:
+      - Frontend/DAT251-frontend/dist/
+    expire_in: 1 week
   tags:
     - docker
   cache:
-    key: frontend
+    key: npm-$CI_COMMIT_REF_SLUG
     paths:
+      - .npm/
       - Frontend/DAT251-frontend/node_modules/
 
-
-e2e_test:
+frontend:e2e:
   image: cypress/included:14.2.0
   stage: e2e_test
+  needs: ["frontend:build"]
   before_script:
+    - echo "Running E2E tests with Cypress"
     - cd Frontend/DAT251-frontend
+    - cypress --version
   script:
+    - npm ci
     - npx cypress run --headless
-
+    - echo "E2E tests completed"
+  after_script:
+    - cd Frontend/DAT251-frontend
+    - mkdir -p $CI_PROJECT_DIR/cypress-artifacts
+    - cp -r cypress/screenshots $CI_PROJECT_DIR/cypress-artifacts/ || true
+    - cp -r cypress/videos $CI_PROJECT_DIR/cypress-artifacts/ || true
+  artifacts:
+    when: always
+    paths:
+      - cypress-artifacts/
+    expire_in: 1 week
   tags:
     - docker
+  cache:
+    key: npm-$CI_COMMIT_REF_SLUG
+    paths:
+      - .npm/
+      - Frontend/DAT251-frontend/node_modules/
