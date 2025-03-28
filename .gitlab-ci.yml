@@ -9,6 +9,9 @@ variables:
   NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
   BACKEND_DIR: "backend/Gallery"
   FRONTEND_DIR: "Frontend/DAT251-frontend"
+  # Global cache settings
+  GLOBAL_CACHE_KEY: "gallery-project-cache"
+  CACHE_CLEANUP_AGE: "7 days"
 
 # Backend Jobs
 java:compile:
@@ -24,9 +27,11 @@ java:compile:
   tags:
     - docker
   cache:
-    key: maven-deps-$CI_COMMIT_REF_SLUG
+    key: ${GLOBAL_CACHE_KEY}
     paths:
       - .m2/repository/
+    policy: pull-push
+    when: on_success
 
 java:test:unit:
   image: maven:3.9.6-eclipse-temurin-21
@@ -52,9 +57,10 @@ java:test:unit:
   tags:
     - docker
   cache:
-    key: maven-deps-$CI_COMMIT_REF_SLUG
+    key: ${GLOBAL_CACHE_KEY}
     paths:
       - .m2/repository/
+    policy: pull
 
 java:package:jar:
   image: maven:3.9.6-eclipse-temurin-21
@@ -74,9 +80,10 @@ java:package:jar:
   tags:
     - docker
   cache:
-    key: maven-deps-$CI_COMMIT_REF_SLUG
+    key: ${GLOBAL_CACHE_KEY}
     paths:
       - .m2/repository/
+    policy: pull
 
 # Frontend Jobs
 js:dependency:check:
@@ -96,10 +103,12 @@ js:dependency:check:
   tags:
     - docker
   cache:
-    key: npm-deps-$CI_COMMIT_REF_SLUG
+    key: ${GLOBAL_CACHE_KEY}
     paths:
       - .npm/
       - ${FRONTEND_DIR}/node_modules/
+    policy: pull-push
+    when: on_success
 
 js:build:assets:
   image: node:20
@@ -120,10 +129,11 @@ js:build:assets:
   tags:
     - docker
   cache:
-    key: npm-deps-$CI_COMMIT_REF_SLUG
+    key: ${GLOBAL_CACHE_KEY}
     paths:
       - .npm/
       - ${FRONTEND_DIR}/node_modules/
+    policy: pull
 
 js:test:e2e:
   image: cypress/included:14.2.0
@@ -151,7 +161,26 @@ js:test:e2e:
   tags:
     - docker
   cache:
-    key: npm-deps-$CI_COMMIT_REF_SLUG
+    key: ${GLOBAL_CACHE_KEY}
     paths:
       - .npm/
       - ${FRONTEND_DIR}/node_modules/
+    policy: pull
+
+# Add a manual cache cleanup job
+cache:cleanup:
+  stage: validate
+  image: alpine:latest
+  script:
+    - echo "Cleaning up old cache files older than ${CACHE_CLEANUP_AGE}"
+    - find .npm -type f -mtime +7 -delete || true
+    - find .m2 -type f -mtime +7 -delete || true
+    - echo "Cache cleanup completed"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $FORCE_CLEANUP == "true"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "web" && $MANUAL_CLEANUP == "true"'
+      when: manual
+  allow_failure: true
+  tags:
+    - docker
