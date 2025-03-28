@@ -13,7 +13,7 @@
 
   async function fetchAnnouncements() {
     try {
-      const response = await fetch("http://backend-API-url/announcements"); // Need to add the actual API where the announcements are located
+      const response = await fetch("http://backend-API-url/announcements");
       if (!response.ok) throw new Error("Failed to fetch announcements");
 
       const data = await response.json();
@@ -34,34 +34,12 @@
   onMount(fetchAnnouncements);
 </script>
 
-<style>
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-  .announcement {
-    border: 1px solid #ccc;
-    padding: 0.5rem;
-    margin: 0.5rem 0;
-    border-radius: 4px;
-  }
-  h3 {
-    margin: 0;
-  }
-  p {
-    margin: 0.5rem 0;
-  }
-  small {
-    color: #666;
-  }
-</style>
-
 <ul>
-  {#each DiscussionTopics as a}
+  {#each DiscussionTopics as DT}
     <li class="announcement">
-      <h3>{a.title}</h3>
-      <p>{a.message}</p>
-      <small>Posted by {a.author.name} on {new Date(a.posted_at).toLocaleString()}</small>
+      <h3>{DT.title}</h3>
+      <p>{DT.message}</p>
+      <small>Posted by {DT.author.name} on {new Date(DT.posted_at).toLocaleString()}</small>
     </li>
   {/each}
 </ul>
