@@ -145,6 +145,7 @@ js:test:e2e:
     # Start the Spring Boot backend server
     - echo "Starting Spring Boot backend in background"
     - cd ${BACKEND_DIR}
+    - apt update
     - apt-get install openjdk-21-jdk
     - chmod +x mvnw
     - ./mvnw --version
