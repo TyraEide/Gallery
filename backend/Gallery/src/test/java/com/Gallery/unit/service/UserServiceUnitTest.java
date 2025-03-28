@@ -5,16 +5,14 @@ import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.impl.UserServiceImpl;
-import com.Gallery.utilities.Emailvalidator;
+import com.Gallery.utilities.EmailValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -44,7 +42,7 @@ public class UserServiceUnitTest {
         User e = new User();
         e.setUsername("test");
         e.setEmail("test@example.com");
-        e.setPassword("password");
+        e.setPassword("password123!");
         when(userRepository.save(e)).thenReturn(e);
         final User result = userService.createUser(urMapper.toDTO(e));
 
@@ -81,10 +79,18 @@ public class UserServiceUnitTest {
 
     @Test
     public void shouldThrowExceptionWhenEmailIsInvalid() {
-        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "ss@example.com", "ldldld");
+        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "ss#example.com", "ldldld");
 
         String emailAddress = userDTO.getEmail();
-        String regexPattern = "^(.+)@(\\S+)$";
-        assertTrue(Emailvalidator.validateEmail(emailAddress, regexPattern));
+        assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
     }
+
+    @Test
+    public void shouldThrowExceptionWhenPasswordIsInvalid() {
+        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "ss@example.com", "ldldld");
+
+        String password = userDTO.getPassword();
+        assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
+    }
+
 }
