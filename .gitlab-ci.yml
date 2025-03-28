@@ -3,6 +3,7 @@ stages:
   - compile
   - test
   - deploy
+  - integration
 
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
@@ -153,8 +154,8 @@ js:build:assets:
 # Updated E2E job with services
 js:test:e2e:
   image: cypress/browsers:22.14.0
-  stage: test
-  needs: ["js:build:assets", "java:package:docker"]
+  stage: integration
+  needs: ["js:build:assets","java:package:docker"]
   services:
     - name: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
       alias: backend
