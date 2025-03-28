@@ -54,11 +54,52 @@ public class UserControllerUnitTest {
     }
 
     @Test
+    public void shouldBeCreatedWhenEmailIsPlusAdressed() {
+        User e = new User("testuser", "email+java@example.com", "SecurePass123!");
+        UserRegistrationDTO dtoE = urMapper.toDTO(e);
+        ResponseEntity<?> responseEntity = userController.createUser(dtoE);
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+    }
+
+    @Test
     public void shouldFailWhenPasswordIsWeak() {
         User e = new User("testuser", "test@example.com", "123");
         UserRegistrationDTO dtoE = urMapper.toDTO(e);
         ResponseEntity<?> responseEntity = userController.createUser(dtoE);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
+
+    @Test
+    public void shouldFailWhenUsernameAreEmpty() {
+        User e = new User("", "example@example.com", "1deefefefffe!");
+        UserRegistrationDTO dtoE = urMapper.toDTO(e);
+        ResponseEntity<?> responseEntity = userController.createUser(dtoE);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+    @Test
+    public void shouldFailWhenEmptyEmail() {
+        User e = new User("aUserName", "", "1deefefefffe!");
+        UserRegistrationDTO dtoE = urMapper.toDTO(e);
+        ResponseEntity<?> responseEntity = userController.createUser(dtoE);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void shouldFailWhenEmptyPassword() {
+        User e = new User("aUserName", "example@example.com", "");
+        UserRegistrationDTO dtoE = urMapper.toDTO(e);
+        ResponseEntity<?> responseEntity = userController.createUser(dtoE);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void shouldFailWhenUsernameIsTooShort() {
+        User e = new User("t", "example@example.com", "234234sdf234s!");
+        UserRegistrationDTO dtoE = urMapper.toDTO(e);
+        ResponseEntity<?> responseEntity = userController.createUser(dtoE);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+
+    }
+
 
 }
