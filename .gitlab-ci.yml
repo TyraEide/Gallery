@@ -145,6 +145,7 @@ js:test:e2e:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
     - npm ci
+    - npx cypress verify
     - npm install cypress@14.2.1 --save-dev
     - echo "Starting dev server in background"
     - npm run dev -- --port 3000 --host &
