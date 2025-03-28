@@ -136,22 +136,33 @@ js:build:assets:
     policy: pull
 
 js:test:e2e:
-  image: cypress/included:14.2.0
+  image: node:20
   stage: test
   needs: ["js:build:assets"]
+  variables:
+    NODE_OPTIONS: "--max-old-space-size=4096"  # Prevent memory issues
   before_script:
-    - echo "Running end-to-end tests with Cypress"
+    - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
-    - cypress --version
-  script:
     - npm ci
-    - npx cypress run --headless
+    - npm install cypress@14.2.1 --save-dev
+    - echo "Starting dev server in background"
+    - npm run dev -- --port 3000 --host &
+    - echo "Waiting for dev server to start"
+    - sleep 15  # Give the dev server time to initialize
+  script:
+    - echo "Running Cypress tests against dev server"
+    - npx cypress run --config baseUrl=http://localhost:3000
     - echo "End-to-end tests completed"
   after_script:
     - echo "Collecting test artifacts"
     - mkdir -p $CI_PROJECT_DIR/cypress-results
+    - mkdir -p ${FRONTEND_DIR}/cypress/screenshots || true
+    - mkdir -p ${FRONTEND_DIR}/cypress/videos || true
     - cp -r ${FRONTEND_DIR}/cypress/screenshots $CI_PROJECT_DIR/cypress-results/ || true
     - cp -r ${FRONTEND_DIR}/cypress/videos $CI_PROJECT_DIR/cypress-results/ || true
+    # Kill the background dev server
+    - pkill -f "npm run dev" || true
   artifacts:
     name: "e2e-test-results-$CI_COMMIT_SHORT_SHA"
     when: always
