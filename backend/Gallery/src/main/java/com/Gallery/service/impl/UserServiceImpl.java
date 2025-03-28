@@ -43,14 +43,6 @@ public class UserServiceImpl {
             throw new NullPointerException("Email is required");
         }
 
-        if(!EmailValidator.validateEmail(userDTO.getEmail())){
-            throw new IllegalArgumentException("Invalid email format");
-        }
-
-        if(!PasswordValidator.validatePassword(userDTO.getPassword())){
-            throw new IllegalArgumentException("Password must contain letters, numbers, and symbols");
-        }
-
         User user = urMapper.toEntity(userDTO);
         user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);

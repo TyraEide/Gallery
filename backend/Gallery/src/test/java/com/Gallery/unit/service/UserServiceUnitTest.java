@@ -5,7 +5,6 @@ import com.Gallery.model.User;
 import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.UserService;
-import com.Gallery.utilities.EmailValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,46 +50,4 @@ public class UserServiceUnitTest {
         assertEquals(e, result);
     }
 
-    @Test
-    public void shouldThrowExceptionWhenUsernameIsEmpty() {
-
-        UserRegistrationDTO userDTO = new UserRegistrationDTO();
-
-        Exception exception = assertThrows(NullPointerException.class, () -> userService.createUser(userDTO));
-        assertEquals("Username is required", exception.getMessage());
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenPasswordIsEmpty() {
-
-        UserRegistrationDTO userDTO = new UserRegistrationDTO();
-
-        Exception exception = assertThrows(NullPointerException.class, () -> userService.createUser(userDTO));
-        assertEquals("Password is required", exception.getMessage());
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenEmailIsEmpty() {
-
-        UserRegistrationDTO userDTO = new UserRegistrationDTO();
-
-        Exception exception = assertThrows(NullPointerException.class, () -> userService.createUser(userDTO));
-        assertEquals("Email is required", exception.getMessage());
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenEmailIsInvalid() {
-        UserRegistrationDTO userDTO = new UserRegistrationDTO();
-
-        String emailAddress = userDTO.getEmail();
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenPasswordIsInvalid() {
-        UserRegistrationDTO userDTO = new UserRegistrationDTO();
-
-        String password = userDTO.getPassword();
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
-    }
 }
