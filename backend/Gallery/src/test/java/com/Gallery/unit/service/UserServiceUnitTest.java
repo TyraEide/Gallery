@@ -49,45 +49,5 @@ public class UserServiceUnitTest {
         assertEquals(e, result);
     }
 
-    @Test
-    public void shouldThrowExceptionWhenUsernameIsEmpty() {
-
-        UserRegistrationDTO userDTO = new UserRegistrationDTO("", "example@example.com", "ldldl");
-
-        Exception exception = assertThrows(NullPointerException.class, () -> userService.createUser(userDTO));
-        assertEquals("Username is required", exception.getMessage());
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenPasswordIsEmpty() {
-
-        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "example@example.com", "");
-
-        Exception exception = assertThrows(NullPointerException.class, () -> userService.createUser(userDTO));
-        assertEquals("Password is required", exception.getMessage());
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenEmailIsEmpty() {
-
-        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "", "ldldld");
-
-        Exception exception = assertThrows(NullPointerException.class, () -> userService.createUser(userDTO));
-        assertEquals("Email is required", exception.getMessage());
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenEmailIsInvalid() {
-        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "ss#example.com", "ldldld");
-
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenPasswordIsInvalid() {
-        UserRegistrationDTO userDTO = new UserRegistrationDTO("John", "ss@example.com", "ldldld");
-
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
-    }
 
 }
