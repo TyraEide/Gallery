@@ -145,7 +145,8 @@ js:test:e2e:
     # Start the Spring Boot backend server
     - echo "Starting Spring Boot backend in background"
     - cd ${BACKEND_DIR}
-    - ./mvnw spring-boot:run &
+    - mvn --version
+    - mvn spring-boot:run &
     # Set up frontend server
     - echo "Installing Cypress and dependencies"
     - cd ../../${FRONTEND_DIR}
