@@ -143,13 +143,12 @@ js:test:e2e:
     NODE_OPTIONS: "--max-old-space-size=4096"  # Prevent memory issues
   before_script:
     # Start the Spring Boot backend server
-    - cd ${BACKEND_DIR}
     - echo "Starting Spring Boot backend in background"
     - cd ${BACKEND_DIR}
     - mvn spring-boot:run -Dspring-boot.run.profiles=test &
     # Set up frontend server
     - echo "Installing Cypress and dependencies"
-    - cd ${FRONTEND_DIR}
+    - cd ../../${FRONTEND_DIR}
     - npm ci
     - npx cypress verify
     - npm install cypress@14.2.1 --save-dev
