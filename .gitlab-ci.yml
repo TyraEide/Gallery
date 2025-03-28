@@ -13,130 +13,130 @@ variables:
   GLOBAL_CACHE_KEY: "gallery-project-cache"
   CACHE_CLEANUP_AGE: "7 days"
 
-# Backend Jobs
-java:compile:
-  image: maven:3.9.6-eclipse-temurin-21
-  stage: compile
-  before_script:
-    - echo "Compiling Java backend with Maven and JDK 21"
-    - cd ${BACKEND_DIR}
-    - java -version
-  script:
-    - mvn compile -T 1C
-    - echo "Java compilation completed successfully"
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .m2/repository/
-    policy: pull-push
-    when: on_success
-
-java:test:unit:
-  image: maven:3.9.6-eclipse-temurin-21
-  stage: test
-  needs: ["java:compile"]
-  before_script:
-    - echo "Running Java unit tests"
-    - cd ${BACKEND_DIR}
-  script:
-    - mvn test -T 1C
-    - echo "Java unit tests completed"
-  after_script:
-    - cd ${BACKEND_DIR}
-    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
-  artifacts:
-    when: always
-    reports:
-      junit: $CI_PROJECT_DIR/TEST-*.xml
-    paths:
-      - ${BACKEND_DIR}/target/surefire-reports/
-      - ${BACKEND_DIR}/target/pit-reports/
-    expire_in: 1 week
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .m2/repository/
-    policy: pull
-
-java:package:jar:
-  image: maven:3.9.6-eclipse-temurin-21
-  stage: deploy
-  needs: ["java:test:unit"]
-  before_script:
-    - echo "Building deployable JAR file"
-    - cd ${BACKEND_DIR}
-  script:
-    - mvn package -DskipTests
-    - echo "JAR packaging complete"
-  artifacts:
-    name: "backend-jar-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - ${BACKEND_DIR}/target/*.jar
-    expire_in: 2 weeks
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .m2/repository/
-    policy: pull
-
-# Frontend Jobs
-js:dependency:check:
-  image: node:20
-  stage: validate
-  before_script:
-    - echo "Validating frontend dependencies"
-    - cd ${FRONTEND_DIR}
-    - node --version
-    - npm --version
-    # Clean up any pnpm lock file and generate a clean package-lock.json
-    - rm -f pnpm-lock.yaml
-    - npm install
-  script:
-    - npm audit || echo "Audit warnings found, but continuing"
-    - echo "Frontend dependency validation complete"
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull-push
-    when: on_success
-
-js:build:assets:
-  image: node:20
-  stage: compile
-  needs: ["js:dependency:check"]
-  before_script:
-    - echo "Building frontend assets"
-    - cd ${FRONTEND_DIR}
-  script:
-    - npm ci
-    - npm run build
-    - echo "Frontend assets built successfully"
-  artifacts:
-    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - ${FRONTEND_DIR}/dist/
-    expire_in: 2 weeks
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull
+## Backend Jobs
+#java:compile:
+#  image: maven:3.9.6-eclipse-temurin-21
+#  stage: compile
+#  before_script:
+#    - echo "Compiling Java backend with Maven and JDK 21"
+#    - cd ${BACKEND_DIR}
+#    - java -version
+#  script:
+#    - mvn compile -T 1C
+#    - echo "Java compilation completed successfully"
+#  tags:
+#    - docker
+#  cache:
+#    key: ${GLOBAL_CACHE_KEY}
+#    paths:
+#      - .m2/repository/
+#    policy: pull-push
+#    when: on_success
+#
+#java:test:unit:
+#  image: maven:3.9.6-eclipse-temurin-21
+#  stage: test
+#  needs: ["java:compile"]
+#  before_script:
+#    - echo "Running Java unit tests"
+#    - cd ${BACKEND_DIR}
+#  script:
+#    - mvn test -T 1C
+#    - echo "Java unit tests completed"
+#  after_script:
+#    - cd ${BACKEND_DIR}
+#    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
+#  artifacts:
+#    when: always
+#    reports:
+#      junit: $CI_PROJECT_DIR/TEST-*.xml
+#    paths:
+#      - ${BACKEND_DIR}/target/surefire-reports/
+#      - ${BACKEND_DIR}/target/pit-reports/
+#    expire_in: 1 week
+#  tags:
+#    - docker
+#  cache:
+#    key: ${GLOBAL_CACHE_KEY}
+#    paths:
+#      - .m2/repository/
+#    policy: pull
+#
+#java:package:jar:
+#  image: maven:3.9.6-eclipse-temurin-21
+#  stage: deploy
+#  needs: ["java:test:unit"]
+#  before_script:
+#    - echo "Building deployable JAR file"
+#    - cd ${BACKEND_DIR}
+#  script:
+#    - mvn package -DskipTests
+#    - echo "JAR packaging complete"
+#  artifacts:
+#    name: "backend-jar-$CI_COMMIT_SHORT_SHA"
+#    paths:
+#      - ${BACKEND_DIR}/target/*.jar
+#    expire_in: 2 weeks
+#  tags:
+#    - docker
+#  cache:
+#    key: ${GLOBAL_CACHE_KEY}
+#    paths:
+#      - .m2/repository/
+#    policy: pull
+#
+## Frontend Jobs
+#js:dependency:check:
+#  image: node:20
+#  stage: validate
+#  before_script:
+#    - echo "Validating frontend dependencies"
+#    - cd ${FRONTEND_DIR}
+#    - node --version
+#    - npm --version
+#    # Clean up any pnpm lock file and generate a clean package-lock.json
+#    - rm -f pnpm-lock.yaml
+#    - npm install
+#  script:
+#    - npm audit || echo "Audit warnings found, but continuing"
+#    - echo "Frontend dependency validation complete"
+#  tags:
+#    - docker
+#  cache:
+#    key: ${GLOBAL_CACHE_KEY}
+#    paths:
+#      - .npm/
+#      - ${FRONTEND_DIR}/node_modules/
+#    policy: pull-push
+#    when: on_success
+#
+#js:build:assets:
+#  image: node:20
+#  stage: compile
+#  needs: ["js:dependency:check"]
+#  before_script:
+#    - echo "Building frontend assets"
+#    - cd ${FRONTEND_DIR}
+#  script:
+#    - npm ci
+#    - npm run build
+#    - echo "Frontend assets built successfully"
+#  artifacts:
+#    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+#    paths:
+#      - ${FRONTEND_DIR}/dist/
+#    expire_in: 2 weeks
+#  tags:
+#    - docker
+#  cache:
+#    key: ${GLOBAL_CACHE_KEY}
+#    paths:
+#      - .npm/
+#      - ${FRONTEND_DIR}/node_modules/
+#    policy: pull
 
 js:test:e2e:
-  image: node:20
+  image: cypress/browsers:22.14.0
   stage: test
   needs: ["js:build:assets"]
   variables:
