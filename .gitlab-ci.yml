@@ -3,6 +3,7 @@ stages:
   - compile
   - test
   - deploy
+  - integration
 
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
@@ -14,156 +15,169 @@ variables:
   CACHE_CLEANUP_AGE: "7 days"
 
 ## Backend Jobs
-#java:compile:
-#  image: maven:3.9.6-eclipse-temurin-21
-#  stage: compile
-#  before_script:
-#    - echo "Compiling Java backend with Maven and JDK 21"
-#    - cd ${BACKEND_DIR}
-#    - java -version
-#  script:
-#    - mvn compile -T 1C
-#    - echo "Java compilation completed successfully"
-#  tags:
-#    - docker
-#  cache:
-#    key: ${GLOBAL_CACHE_KEY}
-#    paths:
-#      - .m2/repository/
-#    policy: pull-push
-#    when: on_success
-#
-#java:test:unit:
-#  image: maven:3.9.6-eclipse-temurin-21
-#  stage: test
-#  needs: ["java:compile"]
-#  before_script:
-#    - echo "Running Java unit tests"
-#    - cd ${BACKEND_DIR}
-#  script:
-#    - mvn test -T 1C
-#    - echo "Java unit tests completed"
-#  after_script:
-#    - cd ${BACKEND_DIR}
-#    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
-#  artifacts:
-#    when: always
-#    reports:
-#      junit: $CI_PROJECT_DIR/TEST-*.xml
-#    paths:
-#      - ${BACKEND_DIR}/target/surefire-reports/
-#      - ${BACKEND_DIR}/target/pit-reports/
-#    expire_in: 1 week
-#  tags:
-#    - docker
-#  cache:
-#    key: ${GLOBAL_CACHE_KEY}
-#    paths:
-#      - .m2/repository/
-#    policy: pull
-#
-#java:package:jar:
-#  image: maven:3.9.6-eclipse-temurin-21
-#  stage: deploy
-#  needs: ["java:test:unit"]
-#  before_script:
-#    - echo "Building deployable JAR file"
-#    - cd ${BACKEND_DIR}
-#  script:
-#    - mvn package -DskipTests
-#    - echo "JAR packaging complete"
-#  artifacts:
-#    name: "backend-jar-$CI_COMMIT_SHORT_SHA"
-#    paths:
-#      - ${BACKEND_DIR}/target/*.jar
-#    expire_in: 2 weeks
-#  tags:
-#    - docker
-#  cache:
-#    key: ${GLOBAL_CACHE_KEY}
-#    paths:
-#      - .m2/repository/
-#    policy: pull
-#
-## Frontend Jobs
-#js:dependency:check:
-#  image: node:20
-#  stage: validate
-#  before_script:
-#    - echo "Validating frontend dependencies"
-#    - cd ${FRONTEND_DIR}
-#    - node --version
-#    - npm --version
-#    # Clean up any pnpm lock file and generate a clean package-lock.json
-#    - rm -f pnpm-lock.yaml
-#    - npm install
-#  script:
-#    - npm audit || echo "Audit warnings found, but continuing"
-#    - echo "Frontend dependency validation complete"
-#  tags:
-#    - docker
-#  cache:
-#    key: ${GLOBAL_CACHE_KEY}
-#    paths:
-#      - .npm/
-#      - ${FRONTEND_DIR}/node_modules/
-#    policy: pull-push
-#    when: on_success
-#
-#js:build:assets:
-#  image: node:20
-#  stage: compile
-#  needs: ["js:dependency:check"]
-#  before_script:
-#    - echo "Building frontend assets"
-#    - cd ${FRONTEND_DIR}
-#  script:
-#    - npm ci
-#    - npm run build
-#    - echo "Frontend assets built successfully"
-#  artifacts:
-#    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
-#    paths:
-#      - ${FRONTEND_DIR}/dist/
-#    expire_in: 2 weeks
-#  tags:
-#    - docker
-#  cache:
-#    key: ${GLOBAL_CACHE_KEY}
-#    paths:
-#      - .npm/
-#      - ${FRONTEND_DIR}/node_modules/
-#    policy: pull
+java:compile:
+  image: maven:3.9.6-eclipse-temurin-21
+  stage: compile
+  before_script:
+    - echo "Compiling Java backend with Maven and JDK 21"
+    - cd ${BACKEND_DIR}
+    - java -version
+  script:
+    - mvn compile -T 1C
+    - echo "Java compilation completed successfully"
+  tags:
+    - docker
+  cache:
+    key: ${GLOBAL_CACHE_KEY}
+    paths:
+      - .m2/repository/
+    policy: pull-push
+    when: on_success
 
+java:test:unit:
+  image: maven:3.9.6-eclipse-temurin-21
+  stage: test
+  needs: ["java:compile"]
+  before_script:
+    - echo "Running Java unit tests"
+    - cd ${BACKEND_DIR}
+  script:
+    - mvn test -T 1C
+    - echo "Java unit tests completed"
+  after_script:
+    - cd ${BACKEND_DIR}
+    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
+  artifacts:
+    when: always
+    reports:
+      junit: $CI_PROJECT_DIR/TEST-*.xml
+    paths:
+      - ${BACKEND_DIR}/target/surefire-reports/
+      - ${BACKEND_DIR}/target/pit-reports/
+    expire_in: 1 week
+  tags:
+    - docker
+  cache:
+    key: ${GLOBAL_CACHE_KEY}
+    paths:
+      - .m2/repository/
+    policy: pull
+
+# New combined job to package jar and build Docker image
+java:package:docker:
+  image: docker:stable
+  stage: deploy
+  needs: ["java:test:unit"]
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
+  before_script:
+    - echo "Building JAR and Docker image for backend"
+    - apk add --no-cache maven openjdk21
+    - cd ${BACKEND_DIR}
+  script:
+    - mvn package -DskipTests
+    - echo "JAR packaging complete"
+    # Build and push Docker image
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t ${BACKEND_IMAGE} .
+    - docker push ${BACKEND_IMAGE}
+    - echo "Docker image pushed to ${BACKEND_IMAGE}"
+  artifacts:
+    name: "backend-jar-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - ${BACKEND_DIR}/target/*.jar
+    expire_in: 2 weeks
+  tags:
+    - docker
+  cache:
+    key: ${GLOBAL_CACHE_KEY}
+    paths:
+      - .m2/repository/
+    policy: pull
+
+## Frontend Jobs
+js:dependency:check:
+  image: node:20
+  stage: validate
+  before_script:
+    - echo "Validating frontend dependencies"
+    - cd ${FRONTEND_DIR}
+    - node --version
+    - npm --version
+    # Clean up any pnpm lock file and generate a clean package-lock.json
+    - rm -f pnpm-lock.yaml
+    - npm install
+  script:
+    - npm audit || echo "Audit warnings found, but continuing"
+    - echo "Frontend dependency validation complete"
+  tags:
+    - docker
+  cache:
+    key: ${GLOBAL_CACHE_KEY}
+    paths:
+      - .npm/
+      - ${FRONTEND_DIR}/node_modules/
+    policy: pull-push
+    when: on_success
+
+js:build:assets:
+  image: node:20
+  stage: compile
+  needs: ["js:dependency:check"]
+  before_script:
+    - echo "Building frontend assets"
+    - cd ${FRONTEND_DIR}
+  script:
+    - npm ci
+    - npm run build
+    - echo "Frontend assets built successfully"
+  artifacts:
+    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - ${FRONTEND_DIR}/dist/
+    expire_in: 2 weeks
+  tags:
+    - docker
+  cache:
+    key: ${GLOBAL_CACHE_KEY}
+    paths:
+      - .npm/
+      - ${FRONTEND_DIR}/node_modules/
+    policy: pull
+
+# Updated E2E job with services
 js:test:e2e:
   image: cypress/browsers:22.14.0
-  stage: test
-#  needs: ["js:build:assets"]
+  stage: integration
+  needs: ["js:build:assets","java:package:docker"]
+  services:
+    - name: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
+      alias: backend
   variables:
-    NODE_OPTIONS: "--max-old-space-size=4096"  # Prevent memory issues
+    NODE_OPTIONS: "--max-old-space-size=4096"
+    CYPRESS_BACKEND_URL: "http://backend:8080"
   before_script:
-    # Start the Spring Boot backend server
-    - echo "Starting Spring Boot backend in background"
-    - cd ${BACKEND_DIR}
-    - java -version 
-    - chmod +x mvnw
-    - ./mvnw --version
-    - ./mvnw spring-boot:run &
-    # Set up frontend server
     - echo "Installing Cypress and dependencies"
-    - cd ../../${FRONTEND_DIR}
+    - cd ${FRONTEND_DIR}
     - npm ci
     - npx cypress verify
     - npm install cypress@14.2.1 --save-dev
-    - echo "Starting dev server in background"
+    # Configure frontend to use backend service
+    - echo "Configuring frontend to use backend service at http://backend:8080"
+    # Start dev server pointing to the backend service
     - npm run dev -- --port 5173 --host &
     - echo "Waiting for dev server to start"
-    # Set up backend server (spring boot)
-    - sleep 15  # Give the dev server time to initialize
+    - sleep 15
 
   script:
-    - echo "Running Cypress tests against dev server"
-    - npx cypress run --config baseUrl=http://localhost:5173
+    - echo "Running Cypress tests against dev server with backend service"
+    - npx cypress run --config baseUrl=http://localhost:5173,env.backendUrl=http://backend:8080
     - echo "End-to-end tests completed"
   after_script:
     - echo "Collecting test artifacts"
@@ -174,7 +188,6 @@ js:test:e2e:
     - cp -r ${FRONTEND_DIR}/cypress/videos $CI_PROJECT_DIR/cypress-results/ || true
     # Kill the background dev server
     - pkill -f "npm run dev" || true
-    - pkill -f "mvn spring-boot:run" || true
   artifacts:
     name: "e2e-test-results-$CI_COMMIT_SHORT_SHA"
     when: always
