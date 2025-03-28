@@ -5,6 +5,8 @@ import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.UserService;
+import com.Gallery.utilities.EmailValidator;
+import com.Gallery.utilities.PasswordValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -39,6 +41,14 @@ public class UserServiceImpl implements UserService {
 
         if(userDTO.getEmail() == null || userDTO.getEmail().isBlank()) {
             throw new NullPointerException("Email is required");
+        }
+
+        if(!EmailValidator.validateEmail(userDTO.getEmail())){
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        if(!PasswordValidator.validatePassword(userDTO.getPassword())){
+            throw new IllegalArgumentException("Password must contain letters, numbers, and symbols");
         }
 
         User user = urMapper.toEntity(userDTO);
