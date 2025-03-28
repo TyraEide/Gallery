@@ -145,7 +145,7 @@ js:test:e2e:
     # Start the Spring Boot backend server
     - echo "Starting Spring Boot backend in background"
     - cd ${BACKEND_DIR}
-    - jave -version 
+    - java -version 
     - chmod +x mvnw
     - ./mvnw --version
     - ./mvnw spring-boot:run &
