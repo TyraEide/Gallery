@@ -3,7 +3,7 @@ package com.Gallery.unit.service;
 import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
-import com.Gallery.service.impl.UserServiceImpl;
+import com.Gallery.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,14 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for {@link UserServiceImpl}.
+ * Unit tests for {@link UserService}.
  */
 @ExtendWith(MockitoExtension.class)
 public class UserServiceUnitTest {
 
     @Mock private UserRepository userRepository;
-    @InjectMocks private UserServiceImpl userService;
-    private UserRegistrationMapper urMapper = new UserRegistrationMapper();
+    @InjectMocks private UserService userService;
+    private final UserRegistrationMapper urMapper = new UserRegistrationMapper();
 
     @Test
     public void shouldReturnUserByIdWhenPresentFromRepository() {
