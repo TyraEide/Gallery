@@ -37,7 +37,7 @@ public class UserControllerIntegrationTest {
         e = new User();
         e.setUsername("Test");
         e.setEmail("test@example.com");
-        e.setPassword("securePassword");
+        e.setPassword("securePassword1!");
     }
 
     @AfterEach
