@@ -5,6 +5,18 @@ public class UserRegistrationDTO {
     private String email;
     private String password;
 
+    public void validateEmail() {
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new IllegalArgumentException("Invalid email format.");
+        }
+    }
+
+    public void validatePassword() {
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters long.");
+        }
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }

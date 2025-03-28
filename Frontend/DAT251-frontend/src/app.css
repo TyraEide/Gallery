@@ -56,13 +56,22 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  margin: 10px;
+
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+input { 
+  padding: 8px; 
+  margin: 5px 0; 
 }
 
 @media (prefers-color-scheme: light) {
@@ -77,3 +86,13 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 200px;
+  margin: auto;
+}
+
+
