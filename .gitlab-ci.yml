@@ -142,6 +142,12 @@ js:test:e2e:
   variables:
     NODE_OPTIONS: "--max-old-space-size=4096"  # Prevent memory issues
   before_script:
+    # Start the Spring Boot backend server
+    - cd ${BACKEND_DIR}
+    - echo "Starting Spring Boot backend in background"
+    - cd ${BACKEND_DIR}
+    - mvn spring-boot:run -Dspring-boot.run.profiles=test &
+    # Set up frontend server
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
     - npm ci
@@ -150,7 +156,9 @@ js:test:e2e:
     - echo "Starting dev server in background"
     - npm run dev -- --port 5173 --host &
     - echo "Waiting for dev server to start"
+    # Set up backend server (spring boot)
     - sleep 15  # Give the dev server time to initialize
+
   script:
     - echo "Running Cypress tests against dev server"
     - npx cypress run --config baseUrl=http://localhost:5173
@@ -164,6 +172,7 @@ js:test:e2e:
     - cp -r ${FRONTEND_DIR}/cypress/videos $CI_PROJECT_DIR/cypress-results/ || true
     # Kill the background dev server
     - pkill -f "npm run dev" || true
+    - pkill -f "mvn spring-boot:run" || true
   artifacts:
     name: "e2e-test-results-$CI_COMMIT_SHORT_SHA"
     when: always
