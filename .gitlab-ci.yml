@@ -138,7 +138,7 @@ variables:
 js:test:e2e:
   image: cypress/browsers:22.14.0
   stage: test
-  needs: ["js:build:assets"]
+#  needs: ["js:build:assets"]
   variables:
     NODE_OPTIONS: "--max-old-space-size=4096"  # Prevent memory issues
   before_script:
