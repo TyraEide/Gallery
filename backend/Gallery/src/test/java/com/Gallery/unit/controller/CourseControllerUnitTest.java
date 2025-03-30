@@ -16,10 +16,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -75,20 +82,28 @@ public class CourseControllerUnitTest {
 
 
     @Test
-    public void shouldReturnAnnouncementsWhenValidCourseIdsAndInstitution() throws JsonProcessingException {
-        // Expected response
-        Map<String, Map<Course, List<DiscussionTopic>>> expected = mockedApi;
-        expected.remove("hvl");
-
+    public void shouldReturnAnnouncementsUponGetAllAnnouncements() throws JsonProcessingException {
         // Prep arguments
-        String validInstitution = "uib";
         List<String> validCourseIds = List.of("Course1, Course2");
         User authorizedUser = new User();
         authorizedUser.setUibToken("validToken");
+        authorizedUser.setHvlToken("validToken");
 
-        when(courseService.getAnnouncements(validInstitution, validCourseIds, authorizedUser)).thenReturn(expected);
-        DiscussionTopic[] result = courseController.getAllAnnouncements(authorizedUser);
-        verify(courseService).getAnnouncements(validInstitution, validCourseIds, authorizedUser);
-        assertEquals(expected, result);
+        // Get announcements
+        when(courseService.getAllAnnouncements(authorizedUser)).thenReturn(mockedApi);
+        Map<String, Map<Course, List<DiscussionTopic>>> result = courseController.getAllAnnouncements(authorizedUser);
+        verify(courseService).getAllAnnouncements(authorizedUser);
+
+        // Validate result
+        List<String> institutions = List.of("uib", "hvl");
+        for (String institution : institutions) {
+            Map<Course, List<DiscussionTopic>> expected = mockedApi.get(institution);
+            Map<Course, List<DiscussionTopic>> actual = result.get(institution);
+            for (Course course : mockedApi.get(institution).keySet()) {
+                for (DiscussionTopic announcement : expected.get(course)) {
+                    assertTrue(actual.get(course).contains(announcement));
+                }
+            }
+        }
     }
 }
