@@ -70,7 +70,7 @@ java:package:docker:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [""]
   stage: deploy
-  needs: ["java:test:unit"]
+#  needs: ["java:test:unit"]
   variables:
     BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
   before_script:
@@ -190,19 +190,20 @@ js:test:e2e:
     policy: pull
 
 # Add a manual cache cleanup job
-cache:cleanup:
-  stage: validate
-  image: alpine:latest
-  script:
-    - echo "Cleaning up old cache files older than ${CACHE_CLEANUP_AGE}"
-    - find .npm -type f -mtime +7 -delete || true
-    - find .m2 -type f -mtime +7 -delete || true
-    - echo "Cache cleanup completed"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $FORCE_CLEANUP == "true"'
-      when: always
-    - if: '$CI_PIPELINE_SOURCE == "web" && $MANUAL_CLEANUP == "true"'
-      when: manual
-  allow_failure: true
-  tags:
-    - docker
+#cache:cleanup:
+#  stage: validate
+#  image: alpine:latest
+#  script:
+#    - echo "Cleaning up old cache files older than ${CACHE_CLEANUP_AGE}"
+#    - find .npm -type f -mtime +7 -delete || true
+#    - find .m2 -type f -mtime +7 -delete || true
+#    - echo "Cache cleanup completed"
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule" || $FORCE_CLEANUP == "true"'
+#      when: always
+#    - if: '$CI_PIPELINE_SOURCE == "web" && $MANUAL_CLEANUP == "true"'
+#      when: manual
+#  allow_failure: true
+#  tags:
+#    - docker
+#
