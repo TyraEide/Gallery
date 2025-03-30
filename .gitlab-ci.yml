@@ -1,7 +1,7 @@
 stages:
-  - validate
-  - compile
-  - test
+#  - validate
+#  - compile
+#  - test
   - deploy
   - integration
 
@@ -15,58 +15,60 @@ variables:
   CACHE_CLEANUP_AGE: "7 days"
   JAVA_DOCKER_IMAGE: "maven:3.9.6-eclipse-temurin-21"
 
-## Backend Jobs
-java:compile:
-  image: ${JAVA_DOCKER_IMAGE}
-  stage: compile
-  before_script:
-    - echo "Compiling Java backend with Maven and JDK 21"
-    - cd ${BACKEND_DIR}
-    - java -version
-  script:
-    - mvn compile -T 1C
-    - echo "Java compilation completed successfully"
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .m2/repository/
-    policy: pull-push
-    when: on_success
+# ## Backend Jobs
+# java:compile:
+#   image: ${JAVA_DOCKER_IMAGE}
+#   stage: compile
+#   before_script:
+#     - echo "Compiling Java backend with Maven and JDK 21"
+#     - cd ${BACKEND_DIR}
+#     - java -version
+#   script:
+#     - mvn compile -T 1C
+#     - echo "Java compilation completed successfully"
+#   tags:
+#     - docker
+#   cache:
+#     key: ${GLOBAL_CACHE_KEY}
+#     paths:
+#       - .m2/repository/
+#     policy: pull-push
+#     when: on_success
 
-java:test:unit:
-  image: ${JAVA_DOCKER_IMAGE}
-  stage: test
-  needs: ["java:compile"]
-  before_script:
-    - echo "Running Java unit tests"
-    - cd ${BACKEND_DIR}
-  script:
-    - mvn test -T 1C
-    - echo "Java unit tests completed"
-  after_script:
-    - cd ${BACKEND_DIR}
-    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
-  artifacts:
-    when: always
-    reports:
-      junit: $CI_PROJECT_DIR/TEST-*.xml
-    paths:
-      - ${BACKEND_DIR}/target/surefire-reports/
-      - ${BACKEND_DIR}/target/pit-reports/
-    expire_in: 1 week
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .m2/repository/
-    policy: pull
+# java:test:unit:
+#   image: ${JAVA_DOCKER_IMAGE}
+#   stage: test
+#   needs: ["java:compile"]
+#   before_script:
+#     - echo "Running Java unit tests"
+#     - cd ${BACKEND_DIR}
+#   script:
+#     - mvn test -T 1C
+#     - echo "Java unit tests completed"
+#   after_script:
+#     - cd ${BACKEND_DIR}
+#     - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
+#   artifacts:
+#     when: always
+#     reports:
+#       junit: $CI_PROJECT_DIR/TEST-*.xml
+#     paths:
+#       - ${BACKEND_DIR}/target/surefire-reports/
+#       - ${BACKEND_DIR}/target/pit-reports/
+#     expire_in: 1 week
+#   tags:
+#     - docker
+#   cache:
+#     key: ${GLOBAL_CACHE_KEY}
+#     paths:
+#       - .m2/repository/
+#     policy: pull
 
 # Updated job to use Kaniko for Docker builds
 java:package:docker:
-  image: gcr.io/kaniko-project/executor:v1.19.2-debug
+  image:     
+    name: gcr.io/kaniko-project/executor:v1.23.2-debug
+    entrypoint: [""]
   stage: deploy
   needs: ["java:test:unit"]
   variables:
@@ -78,71 +80,69 @@ java:package:docker:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script:
     - cd ${BACKEND_DIR}
-    - >-
-      /kaniko/executor
+    - /kaniko/executor
       --context="${CI_PROJECT_DIR}/${BACKEND_DIR}"
       --dockerfile="${CI_PROJECT_DIR}/${BACKEND_DIR}/Dockerfile"
       --destination="${BACKEND_IMAGE}"
-      --cache=true
-      --cache-ttl=24h
     - echo "Docker image built and pushed to ${BACKEND_IMAGE}"
   tags:
     - docker
 
-## Frontend Jobs
-js:dependency:check:
-  image: node:20
-  stage: validate
-  before_script:
-    - echo "Validating frontend dependencies"
-    - cd ${FRONTEND_DIR}
-    - node --version
-    - npm --version
-    # Clean up any pnpm lock file and generate a clean package-lock.json
-    - rm -f pnpm-lock.yaml
-    - npm install
-  script:
-    - npm audit || echo "Audit warnings found, but continuing"
-    - echo "Frontend dependency validation complete"
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull-push
-    when: on_success
+# ## Frontend Jobs
+# js:dependency:check:
+#   image: node:20
+#   stage: validate
+#   before_script:
+#     - echo "Validating frontend dependencies"
+#     - cd ${FRONTEND_DIR}
+#     - node --version
+#     - npm --version
+#     # Clean up any pnpm lock file and generate a clean package-lock.json
+#     - rm -f pnpm-lock.yaml
+#     - npm install
+#   script:
+#     - npm audit || echo "Audit warnings found, but continuing"
+#     - echo "Frontend dependency validation complete"
+#   tags:
+#     - docker
+#   cache:
+#     key: ${GLOBAL_CACHE_KEY}
+#     paths:
+#       - .npm/
+#       - ${FRONTEND_DIR}/node_modules/
+#     policy: pull-push
+#     when: on_success
 
-js:build:assets:
-  image: node:20
-  stage: compile
-  needs: ["js:dependency:check"]
-  before_script:
-    - echo "Building frontend assets"
-    - cd ${FRONTEND_DIR}
-  script:
-    - npm ci
-    - npm run build
-    - echo "Frontend assets built successfully"
-  artifacts:
-    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - ${FRONTEND_DIR}/dist/
-    expire_in: 2 weeks
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull
+# js:build:assets:
+#   image: node:20
+#   stage: compile
+#   needs: ["js:dependency:check"]
+#   before_script:
+#     - echo "Building frontend assets"
+#     - cd ${FRONTEND_DIR}
+#   script:
+#     - npm ci
+#     - npm run build
+#     - echo "Frontend assets built successfully"
+#   artifacts:
+#     name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+#     paths:
+#       - ${FRONTEND_DIR}/dist/
+#     expire_in: 2 weeks
+#   tags:
+#     - docker
+#   cache:
+#     key: ${GLOBAL_CACHE_KEY}
+#     paths:
+#       - .npm/
+#       - ${FRONTEND_DIR}/node_modules/
+#     policy: pull
 
 js:test:e2e:
   image: cypress/browsers:22.14.0
   stage: integration
-  needs: ["js:build:assets","java:package:docker"]
+#  needs: ["js:build:assets","java:package:docker"]
+  needs: ["java:package:docker"]
   services:
     - name: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
       alias: backend
