@@ -148,14 +148,15 @@ js:test:e2e:
       alias: backend
   variables:
     NODE_OPTIONS: "--max-old-space-size=4096"
-#    CYPRESS_BACKEND_URL: "http://backend:8080"
   before_script:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
     - npm ci
     - npx cypress verify
     - npm install cypress@14.2.1 --save-dev
-    # Build the app first (if not already done by previous stage)
+    # Create a custom .env file for CI environment
+    - echo "VITE_SPRING_API_URL=http://backend:8080" > .env
+    # Build the app with the environment variables
     - npm run build
     # Use vite preview instead of dev server
     - npm run preview -- --port 5173 --host &

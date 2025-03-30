@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { redirect } from "../ts_modules/routing"; 
+    import config from "../config";
 
     let username: string = "";
     let email: string = "";
@@ -28,14 +29,10 @@
             return;
         }
 
-
-        
-
         try {
-
             loading = true;
 
-            const response = await fetch("http://localhost:8080/api/users", {
+            const response = await fetch(`${config.springApiUrl}/api/users`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -55,8 +52,6 @@
                 setTimeout(() => {
                     redirect("registrationSuccessful");
                 }, 1500);
-
-                
             }
         } catch (error) {
             message = "A field is missing. Please try again.";
