@@ -148,7 +148,7 @@ js:test:e2e:
       alias: backend
   variables:
     NODE_OPTIONS: "--max-old-space-size=4096"
-    CYPRESS_BACKEND_URL: "http://backend:8080"
+#    CYPRESS_BACKEND_URL: "http://backend:8080"
   before_script:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
