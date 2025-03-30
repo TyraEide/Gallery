@@ -1,18 +1,21 @@
 package com.Gallery.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.Objects;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Course {
-    private final String id;
+    private String id;
     private String name;
     private String course_code;
     private boolean is_public;
-    private Calendar calendar;
     private String timezone;
 
-    public Course(String id) {
+
+    public void setId(String id) {
         this.id = id;
     }
-
     public String getId() {
         return id;
     }
@@ -25,27 +28,19 @@ public class Course {
         return name;
     }
 
-    public void setCourseCode(String course_code) {
+    public void setCourse_code(String course_code) {
         this.course_code = course_code;
     }
 
-    public String getCourseCode() {
+    public String getCourse_code() {
         return course_code;
     }
 
-    public void setCalendar(Calendar calendar) {
-        this.calendar = calendar;
-    }
-
-    public Calendar getCalendar() {
-        return calendar;
-    }
-
-    public void setPublic(boolean is_public) {
+    public void setIs_public(boolean is_public) {
         this.is_public = is_public;
     }
 
-    public boolean isPublic() {
+    public boolean getIs_public() {
         return is_public;
     }
 
@@ -55,5 +50,23 @@ public class Course {
 
     public String getTimezone() {
         return timezone;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+
+        Course other = (Course) obj;
+
+        if (this.getId() != other.getId())
+            return false;
+        if (this.getName() != other.getName())
+            return false;
+        return this.getCourse_code() == other.getCourse_code();
     }
 }
