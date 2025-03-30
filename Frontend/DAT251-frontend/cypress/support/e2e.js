@@ -4,3 +4,8 @@ if (Cypress.env('backendUrl')) {
   Cypress.config('backendUrl', Cypress.env('backendUrl'));
   console.log(`Using backend URL from environment: ${Cypress.env('backendUrl')}`);
 }
+
+// Add a utility function to get the backend URL
+Cypress.Commands.add('getBackendUrl', () => {
+  return Cypress.env('backendUrl') || 'http://localhost:8080';
+});
