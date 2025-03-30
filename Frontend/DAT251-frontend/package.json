@@ -10,7 +10,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "serve:ci": "vite preview --port 3000 --host"
+    "serve:ci": "vite preview --port 5173 --host",
+    "serve": "vite preview"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.0.3",

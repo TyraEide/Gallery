@@ -2,10 +2,11 @@ import { defineConfig } from "cypress";
 
 export default defineConfig({
   e2e: {
-    setupNodeEvents(on, config) {
-      // setup code here
-    },
     baseUrl: "http://localhost:5173", 
-    supportFile: false,  
+    supportFile: "cypress/support/e2e.js",
+    env: {
+      // Default backend URL for local development
+      backendUrl: "http://localhost:8080"
+    }
   },
 });
