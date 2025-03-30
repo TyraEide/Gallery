@@ -72,7 +72,7 @@ java:package:docker:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [""]
   stage: deploy
-#  needs: ["java:test:unit"]
+  needs: ["java:test:unit"]
   variables:
     BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
   before_script:
@@ -143,8 +143,7 @@ js:build:assets:
 js:test:e2e:
   image: cypress/browsers:22.14.0
   stage: integration
-#  needs: ["js:build:assets","java:package:docker"]
-  needs: ["java:package:docker"]
+  needs: ["js:build:assets","java:package:docker"]
   services:
     - name: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
       alias: backend
@@ -155,7 +154,6 @@ js:test:e2e:
   before_script:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
-    - npm ci
     - npx cypress verify
     - npm install cypress@14.2.1 --save-dev
     # Create a custom .env file for CI environment
@@ -195,7 +193,7 @@ js:test:e2e:
     policy: pull
 
 # Add a manual cache cleanup job
-#cache:cleanup:
+cache:cleanup:
   stage: validate
   image: alpine:latest
   script:
