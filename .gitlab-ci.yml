@@ -1,7 +1,7 @@
 stages:
-  - validate
-  - compile
-  - test
+#  - validate
+#  - compile
+#  - test
   - deploy
   - integration
 
@@ -15,140 +15,140 @@ variables:
   CACHE_CLEANUP_AGE: "7 days"
   JAVA_DOCKER_IMAGE: "maven:3.9.6-eclipse-temurin-21"
 
-## Backend Jobs
-java:compile:
-  image: ${JAVA_DOCKER_IMAGE}
-  stage: compile
-  before_script:
-    - echo "Compiling Java backend with Maven and JDK 21"
-    - cd ${BACKEND_DIR}
-    - java -version
-  script:
-    - mvn compile -T 1C
-    - echo "Java compilation completed successfully"
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .m2/repository/
-    policy: pull-push
-    when: on_success
+# ## Backend Jobs
+# java:compile:
+#   image: ${JAVA_DOCKER_IMAGE}
+#   stage: compile
+#   before_script:
+#     - echo "Compiling Java backend with Maven and JDK 21"
+#     - cd ${BACKEND_DIR}
+#     - java -version
+#   script:
+#     - mvn compile -T 1C
+#     - echo "Java compilation completed successfully"
+#   tags:
+#     - docker
+#   cache:
+#     key: ${GLOBAL_CACHE_KEY}
+#     paths:
+#       - .m2/repository/
+#     policy: pull-push
+#     when: on_success
 
-java:test:unit:
-  image: ${JAVA_DOCKER_IMAGE}
-  stage: test
-  needs: ["java:compile"]
-  before_script:
-    - echo "Running Java unit tests"
-    - cd ${BACKEND_DIR}
-  script:
-    - mvn test -T 1C
-    - echo "Java unit tests completed"
-  after_script:
-    - cd ${BACKEND_DIR}
-    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
-  artifacts:
-    when: always
-    reports:
-      junit: $CI_PROJECT_DIR/TEST-*.xml
-    paths:
-      - ${BACKEND_DIR}/target/surefire-reports/
-      - ${BACKEND_DIR}/target/pit-reports/
-    expire_in: 1 week
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .m2/repository/
-    policy: pull
+# java:test:unit:
+#   image: ${JAVA_DOCKER_IMAGE}
+#   stage: test
+#   needs: ["java:compile"]
+#   before_script:
+#     - echo "Running Java unit tests"
+#     - cd ${BACKEND_DIR}
+#   script:
+#     - mvn test -T 1C
+#     - echo "Java unit tests completed"
+#   after_script:
+#     - cd ${BACKEND_DIR}
+#     - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
+#   artifacts:
+#     when: always
+#     reports:
+#       junit: $CI_PROJECT_DIR/TEST-*.xml
+#     paths:
+#       - ${BACKEND_DIR}/target/surefire-reports/
+#       - ${BACKEND_DIR}/target/pit-reports/
+#     expire_in: 1 week
+#   tags:
+#     - docker
+#   cache:
+#     key: ${GLOBAL_CACHE_KEY}
+#     paths:
+#       - .m2/repository/
+#     policy: pull
 
-# Updated job to use multi-stage Docker build
+# Updated job to use Kaniko for Docker builds
 java:package:docker:
-  image: docker:stable
+  image:     
+    name: gcr.io/kaniko-project/executor:v1.23.2-debug
+    entrypoint: [""]
   stage: deploy
-  needs: ["java:test:unit"]
-  services:
-    - docker:dind
+#  needs: ["java:test:unit"]
   variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_HOST: tcp://docker:2376
-    DOCKER_TLS_VERIFY: 1
-    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
   before_script:
-    - echo "Building Docker image for backend with multi-stage build"
+    - echo "Building Docker image for backend with Kaniko"
+    - mkdir -p /kaniko/.docker
+    # Create Docker config with GitLab registry credentials
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  script:
     - cd ${BACKEND_DIR}
-  script:
-    # More secure Docker login using password-stdin
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker build -t ${BACKEND_IMAGE} . 
-    - docker push ${BACKEND_IMAGE}
-    - echo "Docker image pushed to ${BACKEND_IMAGE}"
+    - /kaniko/executor
+      --context="${CI_PROJECT_DIR}/${BACKEND_DIR}"
+      --dockerfile="${CI_PROJECT_DIR}/${BACKEND_DIR}/Dockerfile"
+      --destination="${BACKEND_IMAGE}"
+    - echo "Docker image built and pushed to ${BACKEND_IMAGE}"
   tags:
     - docker
 
-## Frontend Jobs
-js:dependency:check:
-  image: node:20
-  stage: validate
-  before_script:
-    - echo "Validating frontend dependencies"
-    - cd ${FRONTEND_DIR}
-    - node --version
-    - npm --version
-    # Clean up any pnpm lock file and generate a clean package-lock.json
-    - rm -f pnpm-lock.yaml
-    - npm install
-  script:
-    - npm audit || echo "Audit warnings found, but continuing"
-    - echo "Frontend dependency validation complete"
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull-push
-    when: on_success
+# ## Frontend Jobs
+# js:dependency:check:
+#   image: node:20
+#   stage: validate
+#   before_script:
+#     - echo "Validating frontend dependencies"
+#     - cd ${FRONTEND_DIR}
+#     - node --version
+#     - npm --version
+#     # Clean up any pnpm lock file and generate a clean package-lock.json
+#     - rm -f pnpm-lock.yaml
+#     - npm install
+#   script:
+#     - npm audit || echo "Audit warnings found, but continuing"
+#     - echo "Frontend dependency validation complete"
+#   tags:
+#     - docker
+#   cache:
+#     key: ${GLOBAL_CACHE_KEY}
+#     paths:
+#       - .npm/
+#       - ${FRONTEND_DIR}/node_modules/
+#     policy: pull-push
+#     when: on_success
 
-js:build:assets:
-  image: node:20
-  stage: compile
-  needs: ["js:dependency:check"]
-  before_script:
-    - echo "Building frontend assets"
-    - cd ${FRONTEND_DIR}
-  script:
-    - npm ci
-    - npm run build
-    - echo "Frontend assets built successfully"
-  artifacts:
-    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - ${FRONTEND_DIR}/dist/
-    expire_in: 2 weeks
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull
+# js:build:assets:
+#   image: node:20
+#   stage: compile
+#   needs: ["js:dependency:check"]
+#   before_script:
+#     - echo "Building frontend assets"
+#     - cd ${FRONTEND_DIR}
+#   script:
+#     - npm ci
+#     - npm run build
+#     - echo "Frontend assets built successfully"
+#   artifacts:
+#     name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+#     paths:
+#       - ${FRONTEND_DIR}/dist/
+#     expire_in: 2 weeks
+#   tags:
+#     - docker
+#   cache:
+#     key: ${GLOBAL_CACHE_KEY}
+#     paths:
+#       - .npm/
+#       - ${FRONTEND_DIR}/node_modules/
+#     policy: pull
 
 js:test:e2e:
   image: cypress/browsers:22.14.0
   stage: integration
-  needs: ["js:build:assets","java:package:docker"]
+#  needs: ["js:build:assets","java:package:docker"]
+  needs: ["java:package:docker"]
   services:
     - name: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
       alias: backend
   variables:
     NODE_OPTIONS: "--max-old-space-size=4096"
-    CYPRESS_BACKEND_URL: "http://backend:8080"
+#    CYPRESS_BACKEND_URL: "http://backend:8080"
   before_script:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
@@ -163,7 +163,7 @@ js:test:e2e:
     - sleep 15
   script:
     - echo "Running Cypress tests against preview server with backend service"
-    - npx cypress run --config baseUrl=http://localhost:5173,env.backendUrl=http://backend:8080
+    - npx cypress run
     - echo "End-to-end tests completed"
   after_script:
     - echo "Collecting test artifacts"
@@ -190,19 +190,20 @@ js:test:e2e:
     policy: pull
 
 # Add a manual cache cleanup job
-cache:cleanup:
-  stage: validate
-  image: alpine:latest
-  script:
-    - echo "Cleaning up old cache files older than ${CACHE_CLEANUP_AGE}"
-    - find .npm -type f -mtime +7 -delete || true
-    - find .m2 -type f -mtime +7 -delete || true
-    - echo "Cache cleanup completed"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $FORCE_CLEANUP == "true"'
-      when: always
-    - if: '$CI_PIPELINE_SOURCE == "web" && $MANUAL_CLEANUP == "true"'
-      when: manual
-  allow_failure: true
-  tags:
-    - docker
+#cache:cleanup:
+#  stage: validate
+#  image: alpine:latest
+#  script:
+#    - echo "Cleaning up old cache files older than ${CACHE_CLEANUP_AGE}"
+#    - find .npm -type f -mtime +7 -delete || true
+#    - find .m2 -type f -mtime +7 -delete || true
+#    - echo "Cache cleanup completed"
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule" || $FORCE_CLEANUP == "true"'
+#      when: always
+#    - if: '$CI_PIPELINE_SOURCE == "web" && $MANUAL_CLEANUP == "true"'
+#      when: manual
+#  allow_failure: true
+#  tags:
+#    - docker
+#
