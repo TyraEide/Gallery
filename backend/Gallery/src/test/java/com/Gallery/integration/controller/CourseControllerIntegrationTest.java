@@ -143,4 +143,15 @@ public class CourseControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andDo(print());
     }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenUserHasNotSetToken() throws Exception {
+        User user = new User();
+
+        mockMvc.perform(get("/api/courses/announcements")
+                        .with(csrf())
+                        .with(user(user)))
+                .andExpect(status().isUnauthorized())
+                .andDo(print());
+    }
 }
