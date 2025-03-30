@@ -6,6 +6,9 @@ import { defineConfig as defineVitestConfig } from 'vitest/config';
 export default mergeConfig(
   defineConfig({
     plugins: [svelte()],
+    resolve: {
+      conditions: process.env.NODE_ENV === 'test' ? ['browser'] : [],
+    },
   }),
   defineVitestConfig({
     test: {
