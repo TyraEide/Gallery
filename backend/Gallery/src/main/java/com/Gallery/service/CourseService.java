@@ -78,12 +78,14 @@ public class CourseService {
     }
 
     /**
-     * Returns a map linking each course from the courseIds list to the canvas announcements for that course.
-     * If announcements from all institutions are wanted, {@link #getAllAnnouncements(User)} should be used instead.
-     * @param institution the institution the courses belong to
-     * @param courseIds the courses for which to get announcements
-     * @param user the user who makes the request
-     * @return a map linking each course id from the courseIds list to the canvas announcements for that course.
+     * Gets the announcements for the specified courses at the specified institution.
+     * The user must have set a valid authorization token for the institutions.
+     * @param institution a valid institution name that all the wanted courses belong to
+     * @param courseIds a list of valid course ids for which to collect announcements
+     * @param user the user for which to collect the announcements
+     * @return A map linking each institution to its courses, and each course to its announcements
+     * @throws JsonProcessingException if the json response from the Canvas api cannot be processed
+     * @throws HttpClientErrorException if the user has not set an authorization token or if the institution is invalid
      */
     public Map<String, Map<Course, List<DiscussionTopic>>> getAnnouncements(String institution, List<String> courseIds, User user) throws JsonProcessingException {
         String token = getToken(institution, user);
@@ -138,11 +140,12 @@ public class CourseService {
     }
 
     /**
-     * Returns a map linking each institution to the user's courses, and these are then mapped
-     * to the announcements the user has authorization to see from the course.
-     * @param user the user to get announcements for
-     * @return a map linking each institution to the user's courses, and these are then mapped
-     * to the announcements the user has authorization to see from the course.
+     * Gets all announcements for all courses the user is enrolled in on all institutions.
+     * The user must have set a valid token for both institutions.
+     * @param user the user for which to collect the announcements
+     * @return A map linking each institution to its courses, and each course to its announcements
+     * @throws JsonProcessingException if the json response from the Canvas api cannot be processed
+     * @throws HttpClientErrorException if the user has not set both tokens
      */
     public Map<String, Map<Course, List<DiscussionTopic>>> getAllAnnouncements(User user) throws JsonProcessingException {
         Map<String, Map<Course, List<DiscussionTopic>>> announcements = new HashMap<>();
