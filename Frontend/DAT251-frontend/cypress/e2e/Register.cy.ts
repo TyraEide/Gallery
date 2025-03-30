@@ -8,7 +8,7 @@ describe('User Registration', () => {
 
   it('Registers a user successfully', () => {
     // Use dynamic backend URL from environment/config
-    const backendUrl = Cypress.env('backendUrl') || 'http://localhost:8080';
+    const backendUrl = Cypress.env('backendUrl');
     cy.log("Using " + backendUrl)
     cy.intercept('POST', `${backendUrl}/api/users`).as('registerUser');
     const randomness = Math.random().toString();

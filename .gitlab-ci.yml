@@ -14,6 +14,8 @@ variables:
   GLOBAL_CACHE_KEY: "gallery-project-cache"
   CACHE_CLEANUP_AGE: "7 days"
   JAVA_DOCKER_IMAGE: "maven:3.9.6-eclipse-temurin-21"
+  CI_BACKEN_HOSTNAME_ALIAS: "backend"
+  CI_BACKEND_URL_ENDPOINT: "http://backend:8080"
 
 # ## Backend Jobs
 # java:compile:
@@ -148,6 +150,8 @@ js:test:e2e:
       alias: backend
   variables:
     NODE_OPTIONS: "--max-old-space-size=4096"
+    CYPRESS_backendUrl: ${CI_BACKEND_URL_ENDPOINT}
+    VITE_SPRING_API_URL: ${CI_BACKEND_URL_ENDPOINT}
   before_script:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
@@ -164,7 +168,7 @@ js:test:e2e:
     - sleep 15
   script:
     - echo "Running Cypress tests against preview server with backend service"
-    - CYPRESS_backendUrl=backend:8080  npx cypress run
+    - npx cypress run
     - echo "End-to-end tests completed"
   after_script:
     - echo "Collecting test artifacts"
