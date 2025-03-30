@@ -163,7 +163,7 @@ js:test:e2e:
     - sleep 15
   script:
     - echo "Running Cypress tests against preview server with backend service"
-    - npx cypress run --config baseUrl=http://localhost:5173,env.backendUrl=http://backend:8080
+    - npx cypress run
     - echo "End-to-end tests completed"
   after_script:
     - echo "Collecting test artifacts"
