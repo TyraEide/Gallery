@@ -56,7 +56,9 @@
         } catch (error) {
             message = "A field is missing. Please try again.";
             console.error(error);
-        } 
+        } finally {
+            loading = false;
+        }
     }
 </script>
 

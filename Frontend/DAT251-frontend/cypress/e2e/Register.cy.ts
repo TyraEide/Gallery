@@ -11,9 +11,9 @@ describe('User Registration', () => {
     const backendUrl = Cypress.env('backendUrl') || 'http://localhost:8080';
     cy.log("Using " + backendUrl)
     cy.intercept('POST', `${backendUrl}/api/users`).as('registerUser');
-
-    cy.get('input[id="username"]').type('testuser1');
-    cy.get('input[id="email"]').type('test1@example.com');
+    const randomness = Math.random().toString();
+    cy.get('input[id="username"]').type('testuser1'+randomness);
+    cy.get('input[id="email"]').type('test1'+randomness+'@example.com');
     cy.get('input[id="password"]').type('SecurePass123!');
     cy.get('input[id="confirmPassword"]').type('SecurePass123!');
     cy.get('button[type="submit"]').click();
