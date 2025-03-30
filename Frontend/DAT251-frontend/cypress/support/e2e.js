@@ -11,12 +11,3 @@ Cypress.on('test:before:run', () => {
     console.warn('No backendUrl found in Cypress environment, will use fallback URL');
   }
 });
-
-// Override the app's config.springApiUrl with Cypress.env('backendUrl') if available
-// This forces the app to use the correct Spring API URL during tests
-Cypress.on('window:before:load', (win) => {
-  if (Cypress.env('backendUrl')) {
-    // Create a fake env variable to match what Vite would normally provide
-    win.VITE_SPRING_API_URL = Cypress.env('backendUrl');
-  }
-});
