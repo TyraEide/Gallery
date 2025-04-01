@@ -2,33 +2,20 @@ package com.Gallery.integration.controller;
 
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
-import com.Gallery.service.impl.UserServiceImpl;
+import com.Gallery.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -41,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerIntegrationTest {
     @Autowired MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
-    @Autowired private UserServiceImpl userService;
+    @Autowired private UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private User e = new User();
 
@@ -120,5 +107,18 @@ public class UserControllerIntegrationTest {
 
         User updatedUser = userRepository.findById(e.getId()).get();
         assertEquals(e.getHvlToken(), updatedUser.getHvlToken());
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenSettingTokenForOtherUser() throws Exception {
+        userRepository.save(e);
+        e.setUibToken("secureToken");
+
+        mockMvc.perform(put("/api/users/{id}/setUibToken", e.getId())
+                        .with(csrf())
+                        .content(e.getUibToken()))
+                .andExpect(status().isUnauthorized())
+                .andDo(print())
+        ;
     }
 }
