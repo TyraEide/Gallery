@@ -10,10 +10,11 @@
   };
 
   let DiscussionTopics: DiscussionTopic[] = [];
+  let selectedTopic: DiscussionTopic | null = null;
 
   async function fetchAnnouncements() {
     try {
-      const response = await fetch("http://backend-API-url/announcements");
+      const response = await fetch("http://localhost:8080/api/courses/announcements");
       if (!response.ok) throw new Error("Failed to fetch announcements");
 
       const data = await response.json();
@@ -31,15 +32,34 @@
     }
   }
 
+  function selectTopic(topic: DiscussionTopic) {
+    selectedTopic = topic;
+  }
+
+  function goBack() {
+    selectedTopic = null;
+  }
+
   onMount(fetchAnnouncements);
 </script>
 
-<ul>
-  {#each DiscussionTopics as DT}
-    <li class="announcement">
-      <h3>{DT.title}</h3>
-      <p>{DT.message}</p>
-      <small>Posted by {DT.author.name} on {new Date(DT.posted_at).toLocaleString()}</small>
-    </li>
-  {/each}
-</ul>
+{#if selectedTopic}
+  <div class="selected-topic">
+    <h2>{selectedTopic.title}</h2>
+    <p>{selectedTopic.message}</p>
+    <small>Posted by {selectedTopic.author.name} on {new Date(selectedTopic.posted_at).toLocaleString()}</small>
+  </div>
+  <button on:click={goBack}>Back</button>
+{:else}
+  <ul>
+    {#each DiscussionTopics as DT}
+      <li class="announcement">
+        <button type="button" on:click={() => selectTopic(DT)} tabindex="0" class="announcement-button">
+          <h3>{DT.title}</h3>
+          <p>{DT.message}</p>
+          <small>Posted by {DT.author.name} on {new Date(DT.posted_at).toLocaleString()}</small>
+        </button>
+      </li>
+    {/each}
+  </ul>
+{/if}
