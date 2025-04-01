@@ -15,7 +15,9 @@
     "checkJs": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "types": ["cypress"]
+    "types": ["cypress", "vitest"],
+    "composite": true
+
   },
   "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
 }
