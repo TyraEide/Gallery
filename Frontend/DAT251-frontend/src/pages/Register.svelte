@@ -1,4 +1,4 @@
-<script lang="ts">    import { redirect } from "../ts_modules/routing"; 
+<script lang="ts">    import { redirect } from "../ts_modules/routing";
 
     let username: string = "";
     let email: string = "";
@@ -10,7 +10,7 @@
 
     async function register(event: Event) {
         event.preventDefault();
-        
+
         if (!username || !email || !password || !confirmPassword) {
             message = "A field is missing. Please try again.";
             return;
@@ -56,7 +56,7 @@
             }, 1500);
 
         }
-        
+
     }
 </script>
 
@@ -68,6 +68,8 @@
             id="username"
             type="text"
             bind:value={username}
+            required
+            minlength="3"
             maxlength="30"
             autocomplete="off"
         />
@@ -77,6 +79,7 @@
             id="email"
             type="text"
             bind:value={email}
+            required
             autocomplete="email"
         />
 
@@ -85,6 +88,8 @@
             id="password"
             type="password"
             bind:value={password}
+            required
+            minlength="8"
             autocomplete="new-password"
         />
 
@@ -93,6 +98,8 @@
             id="confirmPassword"
             type="password"
             bind:value={confirmPassword}
+            required
+            minlength="8"
             autocomplete="new-password"
         />
 
