@@ -47,6 +47,7 @@
 
         if (!response.ok) {
             message = data.message || "Username or email was already taken. Please try again.";
+            loading = false;
         } else {
             message = data.message || "Registration successful!";
 
@@ -67,8 +68,6 @@
             id="username"
             type="text"
             bind:value={username}
-            required
-            minlength="3"
             maxlength="30"
             autocomplete="off"
         />
@@ -78,7 +77,6 @@
             id="email"
             type="text"
             bind:value={email}
-            required
             autocomplete="email"
         />
 
@@ -87,8 +85,6 @@
             id="password"
             type="password"
             bind:value={password}
-            required
-            minlength="8"
             autocomplete="new-password"
         />
 
@@ -97,8 +93,6 @@
             id="confirmPassword"
             type="password"
             bind:value={confirmPassword}
-            required
-            minlength="8"
             autocomplete="new-password"
         />
 

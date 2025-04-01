@@ -7,7 +7,7 @@ export default mergeConfig(
   defineConfig({
     plugins: [svelte()],
     resolve: {
-      conditions: process.env.NODE_ENV === 'test' ? ['browser'] : [],
+      conditions: ['browser'],
     },
   }),
   defineVitestConfig({

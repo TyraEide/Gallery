@@ -1,15 +1,13 @@
 import { render, fireEvent, screen, waitFor } from "@testing-library/svelte";
 import userEvent from "@testing-library/user-event";
 import Register from "../pages/Register.svelte";
-import { beforeEach, expect, test, vi } from "vitest";
-import '@testing-library/jest-dom';
+import { beforeEach, expect, test, vi, describe } from "vitest";
+import "@testing-library/jest-dom";
 
-// Mocking browser-specific methods
 vi.mock("../ts_modules/routing", () => ({
     redirect: vi.fn(),
 }));
 
-// Mock global fetch
 global.fetch = vi.fn();
 
 describe("Register Component", () => {
@@ -28,7 +26,7 @@ describe("Register Component", () => {
         await fireEvent.click(screen.getByRole("button", { name: "Register" }));
     };
 
-    test("renders the register form", () => {
+    test("renders the registration form correctly", () => {
         render(Register);
         expect(screen.getByText("Register User")).toBeInTheDocument();
         expect(screen.getByLabelText("Username")).toBeInTheDocument();
@@ -38,108 +36,93 @@ describe("Register Component", () => {
         expect(screen.getByRole("button", { name: "Register" })).toBeInTheDocument();
     });
 
-    test("shows validation message for short password", async () => {
+    test("shows error when required fields are empty and does not submit", async () => {
         render(Register);
-        await fillForm("testuser", "test@example.com", "short", "short");
         await clickRegisterButton();
-
-        // Wait for the error message to appear in the document
-        await waitFor(() => expect(screen.getByText("Password must be at least 8 characters.")).toBeInTheDocument());
+        await waitFor(() => expect(screen.getByText("A field is missing. Please try again.")).toBeInTheDocument());
+        expect(global.fetch).not.toHaveBeenCalled();
     });
 
-    test("shows validation message for mismatched passwords", async () => {
-        render(Register);
-        await fillForm("testuser", "test@example.com", "password123", "password321");
-        await clickRegisterButton();
-
-        // Wait for the error message to appear in the document
-        await waitFor(() => expect(screen.getByText("Passwords do not match.")).toBeInTheDocument());
-    });
-
-    test("shows validation message for invalid email", async () => {
+    test("shows error for invalid email format and does not submit", async () => {
         render(Register);
         await fillForm("testuser", "invalid-email", "password123", "password123");
         await clickRegisterButton();
-
-        // Wait for the error message to appear in the document
         await waitFor(() => expect(screen.getByText("Please provide a valid email address.")).toBeInTheDocument());
+        expect(global.fetch).not.toHaveBeenCalled();
     });
 
-    test("does not allow submission if required fields are empty", async () => {
+    test("shows error for short password and does not submit", async () => {
         render(Register);
-        const registerButton = screen.getByRole("button", { name: "Register" });
-        await fireEvent.click(registerButton);
-
-        // Wait for the error message to appear in the document
-        await waitFor(() => expect(screen.getByText("A field is missing. Please try again.")).toBeInTheDocument());
+        await fillForm("testuser", "test@example.com", "short", "short");
+        await clickRegisterButton();
+        await waitFor(() => expect(screen.getByText("Password must be at least 8 characters.")).toBeInTheDocument());
+        expect(global.fetch).not.toHaveBeenCalled();
     });
 
-    test("successfully registers a user", async () => {
+    test("shows error for mismatched passwords and does not submit", async () => {
+        render(Register);
+        await fillForm("testuser", "test@example.com", "password123", "password321");
+        await clickRegisterButton();
+        await waitFor(() => expect(screen.getByText("Passwords do not match.")).toBeInTheDocument());
+        expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    test("successfully registers a user and shows success message", async () => {
         (global.fetch as vi.Mock).mockResolvedValueOnce({
             ok: true,
-            json: async () => ({ message: "Registration successful!" }),
+            json: async () => ({ message: "Registration successful!" })
         });
         render(Register);
         await fillForm("testuser", "test@example.com", "password123", "password123");
         await clickRegisterButton();
-
-        // Wait for success message
         await waitFor(() => expect(screen.getByText("Registration successful!")).toBeInTheDocument());
     });
 
-    test("shows error when registration fails", async () => {
+    test("shows error when username or email is already taken", async () => {
         (global.fetch as vi.Mock).mockResolvedValueOnce({
             ok: false,
-            json: async () => ({ message: "Username or email was already taken. Please try again." }),
+            json: async () => ({ message: "Username or email was already taken. Please try again." })
         });
         render(Register);
         await fillForm("testuser", "test@example.com", "password123", "password123");
         await clickRegisterButton();
-
-        // Wait for error message
         await waitFor(() => expect(screen.getByText("Username or email was already taken. Please try again.")).toBeInTheDocument());
     });
 
-    // Additional tests to handle form submission behavior
-    describe("Additional Tests", () => {
-        test("disables the submit button when loading", async () => {
-            (global.fetch as vi.Mock).mockResolvedValueOnce({
+    test("disables register button during form submission", async () => {
+        (global.fetch as vi.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ message: "Registration successful!" })
+        });
+        render(Register);
+        await fillForm("testuser", "test@example.com", "password123", "password123");
+        const registerButton = screen.getByRole("button", { name: "Register" });
+        await fireEvent.click(registerButton);
+        await waitFor(() => expect(registerButton).toBeDisabled());
+    });
+
+    test("shows loading indicator while submitting", async () => {
+        (global.fetch as vi.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ message: "Registration successful!" })
+        });
+        render(Register);
+        await fillForm("testuser", "test@example.com", "password123", "password123");
+        await clickRegisterButton();
+        await waitFor(() => expect(screen.getByText("Loading...")).toBeInTheDocument());
+    });
+
+    test("ensures CSRF token is included in the request headers", async () => {
+        (global.fetch as vi.Mock).mockImplementation((url, options) => {
+            const headers = new Headers(options?.headers);
+            expect(headers.get("X-CSRF-Token")).not.toBeNull();
+            return Promise.resolve({
                 ok: true,
-                json: async () => ({ message: "Registration successful!" }),
+                json: async () => ({ message: "Registration successful!" })
             });
-            render(Register);
-            await fillForm("testuser", "test@example.com", "password123", "password123");
-            const registerButton = screen.getByRole("button", { name: "Register" });
-            await fireEvent.click(registerButton);
-
-            // Ensure the button is disabled while loading
-            await waitFor(() => expect(registerButton).toBeDisabled());
         });
-
-        test("shows a loading indicator when submitting", async () => {
-            (global.fetch as vi.Mock).mockResolvedValueOnce({
-                ok: true,
-                json: async () => ({ message: "Registration successful!" }),
-            });
-            render(Register);
-            await fillForm("testuser", "test@example.com", "password123", "password123");
-            await fireEvent.click(screen.getByRole("button", { name: "Register" }));
-
-            // Wait for the loading text to appear
-            await waitFor(() => expect(screen.getByText("Loading...")).toBeInTheDocument());
-        });
-
-        test("shows error message when API call fails", async () => {
-            (global.fetch as vi.Mock).mockResolvedValueOnce({
-                ok: false,
-                json: async () => ({ message: "Unexpected error occurred." }),
-            });
-            render(Register);
-            await fillForm("testuser", "test@example.com", "password123", "password123");
-            await fireEvent.click(screen.getByRole("button", { name: "Register" }));
-
-            // Wait for the error message to appear
-            await waitFor(() => expect(screen.getByText("Unexpected error occurred.")).toBeInTheDocument());
-        });
+        render(Register);
+        await fillForm("testuser", "test@example.com", "password123", "password123");
+        await clickRegisterButton();
     });
 });
