@@ -15,6 +15,7 @@
     "checkJs": true,
     "isolatedModules": true,
     "moduleDetection": "force",
+    "types": ["cypress", "vitest"],
     "composite": true
 
   },

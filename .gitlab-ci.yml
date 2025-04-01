@@ -27,6 +27,7 @@ test_and_build_frontend:
   script:
     - npm install  # Install frontend dependencies (only once)
     - npm run build  # Build the frontend
+    - npm test
     - echo "Frontend test and build complete"
   tags:
     - docker
