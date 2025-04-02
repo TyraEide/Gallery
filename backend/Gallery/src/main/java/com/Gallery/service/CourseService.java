@@ -16,8 +16,6 @@ import java.util.*;
 @Service
 public class CourseService {
     private final RestTemplate restTemplate;
-    private final String uibApiUrlBase = "https://mitt.uib.no/api/v1";
-    private final String hvlApiUrlBase = "https://hvl.instructure.com/api/v1";
 
     public CourseService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -114,10 +112,10 @@ public class CourseService {
 
     private String getBaseApiUrl(String institution) {
         if(institution.equals("uib")) {
-            return uibApiUrlBase;
+            return "https://mitt.uib.no/api/v1";
         }
         else if(institution.equals("hvl")) {
-            return hvlApiUrlBase;
+            return "https://hvl.instructure.com/api/v1";
         }
         else {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No such institution found: " + institution);
