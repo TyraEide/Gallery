@@ -47,7 +47,10 @@ public class CourseService {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response.getBody());
 
-        // Link announcements to course in the map
+        return getAnnouncementsPerCourse(courses, root, mapper);
+    }
+
+    private Map<Course, List<DiscussionTopic>> getAnnouncementsPerCourse(List<Course> courses, JsonNode root, ObjectMapper mapper) throws JsonProcessingException {
         Map<Course, List<DiscussionTopic>> announcementsPerCourse = new HashMap<>();
         for (JsonNode node : root) {
             String courseContext = node.get("context_code").asText();
@@ -65,7 +68,6 @@ public class CourseService {
                 }
             }
         }
-
         return announcementsPerCourse;
     }
 
@@ -89,9 +91,6 @@ public class CourseService {
      */
     public Map<String, Map<Course, List<DiscussionTopic>>> getAnnouncements(String institution, List<String> courseIds, User user) throws JsonProcessingException {
         String token = getToken(institution, user);
-        if(token == null) {
-            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "User has not set " + institution + " authorization token.");
-        }
 
         String baseApiUrl = getBaseApiUrl(institution);
 
@@ -136,6 +135,9 @@ public class CourseService {
         else {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No such institution found: " + institution);
         }
+        if(token == null) {
+            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "User has not set " + institution + " authorization token.");
+        }
         return token;
     }
 
@@ -154,9 +156,6 @@ public class CourseService {
         List<String> institutions = List.of("uib", "hvl");
         for (String institution : institutions) {
             String token = getToken(institution, user);
-            if(token == null) {
-                throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "User has not set " + institution + " authorization token.");
-            }
             String baseApiUrl = getBaseApiUrl(institution);
             String apiUrl = baseApiUrl + "/courses";
 
