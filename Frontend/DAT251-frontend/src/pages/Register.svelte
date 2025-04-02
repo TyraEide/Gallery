@@ -1,3 +1,9 @@
+
+<!--/*
+This script is created with a lot of help from ChatGPT multiple times. Here is two of the revisions:
+https://chatgpt.com/share/67ed0b01-c148-8007-960b-87bc9015966f
+https://chatgpt.com/share/67ed0a56-54c0-8007-a6fa-672a3f8fe841
+*/-->
 <script lang="ts">    import { redirect } from "../ts_modules/routing"; 
 
     let username: string = "";
