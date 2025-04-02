@@ -2,8 +2,10 @@ package com.Gallery.unit.service;
 
 import com.Gallery.model.Course;
 import com.Gallery.model.DiscussionTopic;
+import com.Gallery.model.Institution;
 import com.Gallery.model.User;
 import com.Gallery.service.CourseService;
+import com.Gallery.service.InstitutionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +13,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeCreator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -33,6 +36,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class CourseServiceUnitTest {
     @Mock RestTemplate restTemplate;
+    @Mock
+    InstitutionService institutionService;
     @InjectMocks CourseService courseService;
     private static Map<String, Map<Course, List<DiscussionTopic>>> mockedApi;
     private static Map<String, String> jsonAnnouncements;
@@ -78,6 +83,24 @@ public class CourseServiceUnitTest {
         }
         mockedApi = api;
         jsonAnnouncements = json;
+    }
+
+    @BeforeEach
+    public void mockInstitutionService() {
+        Institution uib = new Institution();
+        uib.setFullName("The University of Bergen");
+        uib.setShortName("uib");
+        uib.setApiUrl("https://mitt.uib.no/api/v1");
+
+        Institution hvl = new Institution();
+        hvl.setFullName("The Western Norway University of Applied Sciences");
+        hvl.setShortName("hvl");
+        hvl.setApiUrl("https://hvl.instructure.com/api/v1");
+
+        List<Institution> allInstitutions = List.of(uib, hvl);
+        for (Institution institution : allInstitutions) {
+            lenient().when(institutionService.getApiUrlByShortName(institution.getShortName())).thenReturn(institution.getApiUrl());
+        }
     }
 
     @Test

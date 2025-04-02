@@ -113,15 +113,11 @@ public class CourseService {
     }
 
     private String getBaseApiUrl(String institution) {
-        if(institution.equals("uib")) {
-            return "https://mitt.uib.no/api/v1";
+        String baseApiUrl = institutionService.getApiUrlByShortName(institution);
+        if (baseApiUrl == null) {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No such institution found" + institution);
         }
-        else if(institution.equals("hvl")) {
-            return "https://hvl.instructure.com/api/v1";
-        }
-        else {
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No such institution found: " + institution);
-        }
+        return baseApiUrl;
     }
 
     private String getToken(String institution, User user) {

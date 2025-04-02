@@ -3,8 +3,11 @@ package com.Gallery.integration.controller;
 import com.Gallery.controller.CourseController;
 import com.Gallery.model.Course;
 import com.Gallery.model.DiscussionTopic;
+import com.Gallery.model.Institution;
 import com.Gallery.model.User;
+import com.Gallery.repository.InstitutionRepository;
 import com.Gallery.service.CourseService;
+import com.Gallery.service.InstitutionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +31,7 @@ import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -43,6 +47,7 @@ public class CourseControllerIntegrationTest {
     @MockitoBean private RestTemplate restTemplate;
     @Autowired private CourseService courseService;
     @Autowired private CourseController courseController;
+    @Autowired private InstitutionRepository institutionRepository;
     @Autowired MockMvc mockMvc;
 
     private static Map<String, Map<Course, List<DiscussionTopic>>> mockedApi;
@@ -89,6 +94,23 @@ public class CourseControllerIntegrationTest {
         }
         mockedApi = api;
         jsonAnnouncements = json;
+    }
+
+    @BeforeEach
+    public void mockInstitutionService() {
+        Institution uib = new Institution();
+        uib.setFullName("The University of Bergen");
+        uib.setShortName("uib");
+        uib.setApiUrl("https://mitt.uib.no/api/v1");
+
+        Institution hvl = new Institution();
+        hvl.setFullName("The Western Norway University of Applied Sciences");
+        hvl.setShortName("hvl");
+        hvl.setApiUrl("https://hvl.instructure.com/api/v1");
+
+        List<Institution> allInstitutions = List.of(uib, hvl);
+
+        institutionRepository.saveAllAndFlush(allInstitutions);
     }
 
     @Test
