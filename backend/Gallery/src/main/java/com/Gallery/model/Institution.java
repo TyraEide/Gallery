@@ -1,35 +1,47 @@
 package com.Gallery.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
-public enum Institution {
-    UIB("The University of Bergen", "UiB", "https://mitt.uib.no/api/v1/"),
-    HVL("The Western Norway University of Applied Sciences", "HvL", "https://hvl.instructure.com/api/v1/");
+@Entity
+@Table(name = "institution")
+public class Institution {
 
-    private final String fullName;
-    private final String shortName;
-    private final String apiUrl;
+    @Column(unique = true, nullable = false)
+    private String fullName;
 
-    Institution(String fullName, String shortName, String apiUrl) {
-        this.fullName = fullName;
-        this.shortName = shortName;
-        this.apiUrl = apiUrl;
-    }
+    @Id
+    @Column(unique = true, nullable = false)
+    private String shortName;
+
+    @Column(unique = true, nullable = false)
+    private String apiUrl;
+
+    public Institution() {}
 
     public String getFullName() {
         return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getShortName() {
         return shortName;
     }
 
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
+
     public String getApiUrl() {
         return apiUrl;
     }
 
-    public List<Institution> getAllInstitutions() {
-        return List.of(Institution.values());
+    public void setApiUrl(String apiUrl) {
+        this.apiUrl = apiUrl;
     }
 }
