@@ -2,9 +2,11 @@ package com.Gallery.service;
 
 import com.Gallery.model.Institution;
 import com.Gallery.repository.InstitutionRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class InstitutionService {
     private InstitutionRepository institutionRepository;
 

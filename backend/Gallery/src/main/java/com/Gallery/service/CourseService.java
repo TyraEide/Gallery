@@ -16,8 +16,10 @@ import java.util.*;
 @Service
 public class CourseService {
     private final RestTemplate restTemplate;
+    private final InstitutionService institutionService;
 
-    public CourseService(RestTemplate restTemplate) {
+    public CourseService(RestTemplate restTemplate, InstitutionService institutionService) {
+        this.institutionService = institutionService;
         this.restTemplate = restTemplate;
     }
 
