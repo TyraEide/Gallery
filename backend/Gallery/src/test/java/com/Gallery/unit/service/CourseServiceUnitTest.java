@@ -99,7 +99,8 @@ public class CourseServiceUnitTest {
 
         List<Institution> allInstitutions = List.of(uib, hvl);
         for (Institution institution : allInstitutions) {
-            lenient().when(institutionService.getApiUrlByShortName(institution.getShortName())).thenReturn(institution.getApiUrl());
+            lenient().when(institutionService.getApiUrlByShortName(institution.getShortName()))
+                    .thenReturn(Optional.of(institution.getApiUrl()));
         }
     }
 

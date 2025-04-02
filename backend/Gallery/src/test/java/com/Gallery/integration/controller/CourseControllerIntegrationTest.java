@@ -98,6 +98,9 @@ public class CourseControllerIntegrationTest {
 
     @BeforeEach
     public void mockInstitutionService() {
+        // Clear any existing institutions
+        institutionRepository.deleteAll();
+        
         Institution uib = new Institution();
         uib.setFullName("The University of Bergen");
         uib.setShortName("uib");

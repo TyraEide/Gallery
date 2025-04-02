@@ -113,11 +113,12 @@ public class CourseService {
     }
 
     private String getBaseApiUrl(String institution) {
-        String baseApiUrl = institutionService.getApiUrlByShortName(institution);
-        if (baseApiUrl == null) {
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No such institution found" + institution);
+        Optional<String> baseApiUrl = institutionService.getApiUrlByShortName(institution);
+        if (baseApiUrl.isPresent()) {
+            return baseApiUrl.get();
+        } else {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No such institution found: " + institution);
         }
-        return baseApiUrl;
     }
 
     private String getToken(String institution, User user) {
