@@ -42,7 +42,7 @@ public class CourseUnitTest {
     @Test
     public void shouldSerializeFromJson() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        File jsonFile = new File("src/test/java/com/Gallery/unit/model/courseTestJson.json");
+        File jsonFile = new File("src/test/java/com/Gallery/unit/model/CourseTestJson.json");
         Course course = objectMapper.readValue(jsonFile, Course.class);
         assertDoesNotThrow(() -> objectMapper.readValue(jsonFile, Course.class));
 
