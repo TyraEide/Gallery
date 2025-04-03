@@ -1,52 +1,31 @@
 stages:
-  - validate
   - compile
   - test
   - deploy
   - integration
 
 variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
-  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
+  MAVEN_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -Dmaven.artifact.threads=1 "
+  NPM_CONFIG_CACHE: "${CI_PROJECT_DIR}/.npm"
   BACKEND_DIR: "backend/Gallery"
   FRONTEND_DIR: "Frontend/DAT251-frontend"
   # Global cache settings
-  GLOBAL_CACHE_KEY: "gallery-project-cache"
+  CACHE_KEY: "${CI_JOB_STAGE}"
   CACHE_CLEANUP_AGE: "7 days"
   JAVA_DOCKER_IMAGE: "maven:3.9.6-eclipse-temurin-21"
-  CI_BACKEN_HOSTNAME_ALIAS: "backend"
+  CI_BACKEND_HOSTNAME_ALIAS: "backend"
   CI_BACKEND_URL_ENDPOINT: "http://backend:8080"
-
-## Backend Jobs
-java:compile:
-  image: ${JAVA_DOCKER_IMAGE}
-  stage: compile
-  before_script:
-    - echo "Compiling Java backend with Maven and JDK 21"
-    - cd ${BACKEND_DIR}
-    - java -version
-  script:
-    - mvn compile -T 1C
-    - echo "Java compilation completed successfully"
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .m2/repository/
-    policy: pull-push
-    when: on_success
 
 java:test:unit:
   image: ${JAVA_DOCKER_IMAGE}
   stage: test
-  needs: ["java:compile"]
   before_script:
     - echo "Running Java unit tests"
     - cd ${BACKEND_DIR}
+    - java -version
   script:
-    - mvn test -T 1C
-    - echo "Java unit tests completed"
+    - mvn verify
+    - echo "Java test's completed"
   after_script:
     - cd ${BACKEND_DIR}
     - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
@@ -61,10 +40,11 @@ java:test:unit:
   tags:
     - docker
   cache:
-    key: ${GLOBAL_CACHE_KEY}
+    key: ${CACHE_KEY}
     paths:
-      - .m2/repository/
-    policy: pull
+      - .m2/
+    policy: pull-push
+    when: on_success
 
 # Updated job to use Kaniko for Docker builds
 java:package:docker:
@@ -90,35 +70,9 @@ java:package:docker:
   tags:
     - docker
 
-## Frontend Jobs
-js:dependency:check:
-  image: node:20
-  stage: validate
-  before_script:
-    - echo "Validating frontend dependencies"
-    - cd ${FRONTEND_DIR}
-    - node --version
-    - npm --version
-    # Clean up any pnpm lock file and generate a clean package-lock.json
-    - rm -f pnpm-lock.yaml
-    - npm install
-  script:
-    - npm audit || echo "Audit warnings found, but continuing"
-    - echo "Frontend dependency validation complete"
-  tags:
-    - docker
-  cache:
-    key: ${GLOBAL_CACHE_KEY}
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull-push
-    when: on_success
-
 js:build:assets:
   image: node:20
   stage: compile
-  needs: ["js:dependency:check"]
   before_script:
     - echo "Building frontend assets"
     - cd ${FRONTEND_DIR}
@@ -134,7 +88,7 @@ js:build:assets:
   tags:
     - docker
   cache:
-    key: ${GLOBAL_CACHE_KEY}
+    key: ${CACHE_KEY}
     paths:
       - .npm/
       - ${FRONTEND_DIR}/node_modules/
@@ -154,8 +108,8 @@ js:test:e2e:
   before_script:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
+    - npm install 
     - npx cypress verify
-    - npm install cypress@14.2.1 --save-dev
     # Create a custom .env file for CI environment
     - echo "VITE_SPRING_API_URL=http://backend:8080" > .env
     # Build the app with the environment variables
@@ -186,27 +140,8 @@ js:test:e2e:
   tags:
     - docker
   cache:
-    key: ${GLOBAL_CACHE_KEY}
+    key: ${CACHE_KEY}
     paths:
       - .npm/
       - ${FRONTEND_DIR}/node_modules/
     policy: pull
-
-# Add a manual cache cleanup job
-cache:cleanup:
-  stage: validate
-  image: alpine:latest
-  script:
-    - echo "Cleaning up old cache files older than ${CACHE_CLEANUP_AGE}"
-    - find .npm -type f -mtime +7 -delete || true
-    - find .m2 -type f -mtime +7 -delete || true
-    - echo "Cache cleanup completed"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $FORCE_CLEANUP == "true"'
-      when: always
-    - if: '$CI_PIPELINE_SOURCE == "web" && $MANUAL_CLEANUP == "true"'
-      when: manual
-  allow_failure: true
-  tags:
-    - docker
- 
