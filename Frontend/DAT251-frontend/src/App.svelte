@@ -13,7 +13,7 @@
     "/login": Login,
     "/register": Register,
     "/registrationSuccessful": RegistrationSuccessful,
-    "/announcement": Announcement,
+    "/announcements": Announcement,
     "*": PageMissing
   }
 </script>
