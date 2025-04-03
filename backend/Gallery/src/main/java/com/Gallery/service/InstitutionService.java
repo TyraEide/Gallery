@@ -5,6 +5,7 @@ import com.Gallery.repository.InstitutionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class InstitutionService {
@@ -14,10 +15,9 @@ public class InstitutionService {
         this.institutionRepository = institutionRepository;
     }
 
-    public String getApiUrlByShortName(String shortName) {
+    public Optional<String> getApiUrlByShortName(String shortName) {
         return institutionRepository.findByShortName(shortName)
-                .map(Institution::getApiUrl)
-                .orElse(null);
+                .map(Institution::getApiUrl);
     }
 
     public List<Institution> getAllInstitutions() {
