@@ -108,8 +108,8 @@ js:test:e2e:
   before_script:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
-    - npx cypress verify
     - npm install 
+    - npx cypress verify
     # Create a custom .env file for CI environment
     - echo "VITE_SPRING_API_URL=http://backend:8080" > .env
     # Build the app with the environment variables
