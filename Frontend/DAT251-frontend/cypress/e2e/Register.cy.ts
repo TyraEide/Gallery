@@ -2,15 +2,12 @@
 
 describe('User Registration', () => {
   beforeEach(() => {
-    // Use baseUrl configuration instead of hardcoded URL
     cy.visit('/#/register');
   });
 
   it('Registers a user successfully', () => {
-    // Use dynamic backend URL from environment/config
-    const backendUrl = Cypress.env('backendUrl');
-    cy.log("Using " + backendUrl)
-    cy.intercept('POST', `${backendUrl}/api/users`).as('registerUser');
+    // Intercept any request to the users endpoint, without specifying full URL
+    cy.intercept('POST', `/api/users`).as('registerUser');
     const randomness = Math.random().toString();
     cy.get('input[id="username"]').type('testuser1'+randomness);
     cy.get('input[id="email"]').type('test1'+randomness+'@example.com');

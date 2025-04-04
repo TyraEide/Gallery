@@ -1,5 +1,5 @@
 stages:
-  - compile
+  - build
   - test
   - deploy
   - integration
@@ -52,9 +52,9 @@ js:test:unit:
   before_script:
     - echo "Running frontend unit tests"
     - cd ${FRONTEND_DIR}
-    - npm ci
+    - npm ci  # Doing a clean install, see: https://stackoverflow.com/questions/52499617/what-is-the-difference-between-npm-install-and-npm-ci
   script:
-    - npm run test
+    - npm test
     - echo "Frontend unit tests completed"
   artifacts:
     when: always
@@ -106,7 +106,7 @@ java:package:docker:
 
 js:build:assets:
   image: node:20
-  stage: compile
+  stage: build
   before_script:
     - echo "Building frontend assets"
     - cd ${FRONTEND_DIR}
@@ -140,10 +140,8 @@ js:test:e2e:
   before_script:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
-    - npm install 
+    - npm install         # No need for a clean install because we already did that with the build step and the caches have the right dependencies.
     - npx cypress verify
-    # Create a custom .env file for CI environment
-    - echo "VITE_SPRING_API_URL=http://backend:8080" > .env
     # Build the app with the environment variables
     - npm run build
     # Use vite preview instead of dev server

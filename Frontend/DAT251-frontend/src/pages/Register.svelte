@@ -32,7 +32,7 @@
         try {
             loading = true;
 
-            const response = await fetch(`${config.springApiUrl}/api/users`, {
+            const response = await fetch(`${config.API_BASE_URL}/api/users`, {
                 method: "POST",
                 credentials: "include",
                 headers: {

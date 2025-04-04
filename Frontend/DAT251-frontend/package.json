@@ -19,6 +19,7 @@
     "@tsconfig/svelte": "^5.0.4",
     "@types/cypress": "^0.1.6",
     "cypress": "^14.2.1",
+    "dotenv": "^16.4.7",
     "esm-env": "^1.2.2",
     "svelte": "^5.25.3",
     "svelte-check": "^4.1.5",
