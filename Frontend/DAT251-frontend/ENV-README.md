@@ -8,12 +8,11 @@ This project uses the following environment files:
 
 ## Environment Variables
 
-- `VITE_SPRING_API_URL` - URL of the Spring Boot backend API
+- `API_BASE_URL` - URL of our own Spring Boot backend API, in the ../../backend directory
 
 ## Local Development
 
 For local development, either use the defaults in `.env` or create an `.env.local` file with your own settings.
 
-## CI/CD Pipeline
-
-The CI/CD pipeline creates its own environment settings and doesn't use the committed `.env` files.
+## Cypress ENV configuration
+Now in the Cypress configuration file, it uses the node package dotenv to load the right url for the webserver based on the .env files. 

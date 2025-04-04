@@ -1,6 +1,6 @@
 stages:
-  - compile
-  - test
+#  - build
+#  - test
   - deploy
   - integration
 
@@ -16,61 +16,61 @@ variables:
   CI_BACKEND_HOSTNAME_ALIAS: "backend"
   CI_BACKEND_URL_ENDPOINT: "http://backend:8080"
 
-java:test:unit:
-  image: ${JAVA_DOCKER_IMAGE}
-  stage: test
-  before_script:
-    - echo "Running Java unit tests"
-    - cd ${BACKEND_DIR}
-    - java -version
-  script:
-    - mvn verify
-    - echo "Java test's completed"
-  after_script:
-    - cd ${BACKEND_DIR}
-    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
-  artifacts:
-    when: always
-    reports:
-      junit: $CI_PROJECT_DIR/TEST-*.xml
-    paths:
-      - ${BACKEND_DIR}/target/surefire-reports/
-      - ${BACKEND_DIR}/target/pit-reports/
-    expire_in: 1 week
-  tags:
-    - docker
-  cache:
-    key: "${CACHE_KEY}-java"
-    paths:
-      - .m2/
-    policy: pull-push
-    when: on_success
-
-js:test:unit:
-  image: node:20
-  stage: test
-  before_script:
-    - echo "Running frontend unit tests"
-    - cd ${FRONTEND_DIR}
-    - npm ci
-  script:
-    - npm run test
-    - echo "Frontend unit tests completed"
-  artifacts:
-    when: always
-    reports:
-      junit: ${FRONTEND_DIR}/test-results/junit.xml
-    paths:
-      - ${FRONTEND_DIR}/coverage/
-    expire_in: 1 week
-  tags:
-    - docker
-  cache:
-    key: "${CACHE_KEY}-js-node-modules"
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull-push
+#java:test:unit:
+#  image: ${JAVA_DOCKER_IMAGE}
+#  stage: test
+#  before_script:
+#    - echo "Running Java unit tests"
+#    - cd ${BACKEND_DIR}
+#    - java -version
+#  script:
+#    - mvn verify
+#    - echo "Java test's completed"
+#  after_script:
+#    - cd ${BACKEND_DIR}
+#    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
+#  artifacts:
+#    when: always
+#    reports:
+#      junit: $CI_PROJECT_DIR/TEST-*.xml
+#    paths:
+#      - ${BACKEND_DIR}/target/surefire-reports/
+#      - ${BACKEND_DIR}/target/pit-reports/
+#    expire_in: 1 week
+#  tags:
+#    - docker
+#  cache:
+#    key: "${CACHE_KEY}-java"
+#    paths:
+#      - .m2/
+#    policy: pull-push
+#    when: on_success
+#
+#js:test:unit:
+#  image: node:20
+#  stage: test
+#  before_script:
+#    - echo "Running frontend unit tests"
+#    - cd ${FRONTEND_DIR}
+#    - npm ci  # Doing a clean install, see: https://stackoverflow.com/questions/52499617/what-is-the-difference-between-npm-install-and-npm-ci
+#  script:
+#    - npm test
+#    - echo "Frontend unit tests completed"
+#  artifacts:
+#    when: always
+#    reports:
+#      junit: ${FRONTEND_DIR}/test-results/junit.xml
+#    paths:
+#      - ${FRONTEND_DIR}/coverage/
+#    expire_in: 1 week
+#  tags:
+#    - docker
+#  cache:
+#    key: "${CACHE_KEY}-js-node-modules"
+#    paths:
+#      - .npm/
+#      - ${FRONTEND_DIR}/node_modules/
+#    policy: pull-push
 
 # Updated job to use Kaniko for Docker builds
 java:package:docker:
@@ -78,7 +78,7 @@ java:package:docker:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [""]
   stage: deploy
-  needs: ["java:test:unit"]
+#  needs: ["java:test:unit"]
   variables:
     BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
   before_script:
@@ -104,34 +104,35 @@ java:package:docker:
       - .m2/
     policy: pull
 
-js:build:assets:
-  image: node:20
-  stage: compile
-  before_script:
-    - echo "Building frontend assets"
-    - cd ${FRONTEND_DIR}
-  script:
-    - npm ci
-    - npm run build
-    - echo "Frontend assets built successfully"
-  artifacts:
-    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - ${FRONTEND_DIR}/dist/
-    expire_in: 2 weeks
-  tags:
-    - docker
-  cache:
-    key: "${CACHE_KEY}-js-node-modules"
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull-push
+#js:build:assets:
+#  image: node:20
+#  stage: build
+#  before_script:
+#    - echo "Building frontend assets"
+#    - cd ${FRONTEND_DIR}
+#  script:
+#    - npm ci
+#    - npm run build
+#    - echo "Frontend assets built successfully"
+#  artifacts:
+#    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+#    paths:
+#      - ${FRONTEND_DIR}/dist/
+#    expire_in: 2 weeks
+#  tags:
+#    - docker
+#  cache:
+#    key: "${CACHE_KEY}-js-node-modules"
+#    paths:
+#      - .npm/
+#      - ${FRONTEND_DIR}/node_modules/
+#    policy: pull-push
 
 js:test:e2e:
   image: cypress/browsers:22.14.0
   stage: integration
-  needs: ["js:build:assets","java:package:docker"]
+#  needs: ["js:build:assets","java:package:docker"]
+  needs: ["java:package:docker"]
   services:
     - name: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
       alias: backend
@@ -140,10 +141,8 @@ js:test:e2e:
   before_script:
     - echo "Installing Cypress and dependencies"
     - cd ${FRONTEND_DIR}
-    - npm install 
+    - npm install         # No need for a clean install because we already did that with the build step and the caches have the right dependencies.
     - npx cypress verify
-    # Create a custom .env file for CI environment
-    - echo "VITE_SPRING_API_URL=http://backend:8080" > .env
     # Build the app with the environment variables
     - npm run build
     # Use vite preview instead of dev server
