@@ -4,10 +4,10 @@ import * as dotenv from 'dotenv';
 // Load environment variables from .env file
 dotenv.config();
 
-cy.log(`CYPRESS_WEB_SERVER_OF_SPA from Cypress: ${Cypress.env('CYPRESS_WEB_SERVER_OF_SPA')}`);
-cy.log(`CYPRESS_WEB_SERVER_OF_SPA from process.env: ${process.env.CYPRESS_WEB_SERVER_OF_SPA}`);
-cy.log(`API_BASE_URL from Cypress: ${Cypress.env('API_BASE_URL')}`);
-cy.log(`API_BASE_URL: ${process.env.VITE_API_BASE_URL}`);
+console.log(`CYPRESS_WEB_SERVER_OF_SPA from Cypress: ${Cypress.env('CYPRESS_WEB_SERVER_OF_SPA')}`);
+console.log(`CYPRESS_WEB_SERVER_OF_SPA from process.env: ${process.env.CYPRESS_WEB_SERVER_OF_SPA}`);
+console.log(`API_BASE_URL from Cypress: ${Cypress.env('API_BASE_URL')}`);
+console.log(`API_BASE_URL: ${process.env.VITE_API_BASE_URL}`);
 
 export default defineConfig({
   e2e: {
