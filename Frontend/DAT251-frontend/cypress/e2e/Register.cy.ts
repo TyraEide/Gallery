@@ -7,7 +7,7 @@ describe('User Registration', () => {
 
   it('Registers a user successfully', () => {
     // Intercept any request to the users endpoint, without specifying full URL
-    cy.intercept('POST', `/api/users`).as('registerUser');
+    cy.intercept('POST', `http://backend:8080/api/users`).as('registerUser');
     const randomness = Math.random().toString();
     cy.get('input[id="username"]').type('testuser1'+randomness);
     cy.get('input[id="email"]').type('test1'+randomness+'@example.com');
