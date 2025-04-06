@@ -7,11 +7,6 @@ describe('User Registration', () => {
 
   it('Registers a user successfully', () => {
     // Intercept any request to the users endpoint, without specifying full URL
-
-    //const apiBaseUrl = Cypress.env('VITE_API_BASE_URL'); // Get the API base URL dynamically
-    cy.log(`VITE API Base URL: ${Cypress.env('VITE_API_BASE_URL')}`);
-    // cy.log("Using: "+ Cypress.env('API_BASE_URL'));
-    //cy.intercept('POST',  `${apiBaseUrl}/api/users`).as('registerUser');
     cy.intercept('POST', "/api/users").as('registerUser');
     const randomness = Math.random().toString();
     cy.get('input[id="username"]').type('testuser1' + randomness);
