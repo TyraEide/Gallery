@@ -113,4 +113,5 @@
         </button>
     </form>
     <p>{message}</p>
+    <p>{config.API_BASE_URL}</p>
 </main>
