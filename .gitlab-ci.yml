@@ -1,7 +1,6 @@
 stages:
-  - build
   - test
-  - deploy
+  - make_docker_image
   - integration
 
 variables:
@@ -77,8 +76,8 @@ java:package:docker:
   image:     
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [""]
-  stage: deploy
-#  needs: ["java:test:unit"]
+  stage: make_docker_image
+  needs: ["java:test:unit"]
   variables:
     BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
   before_script:
@@ -106,7 +105,7 @@ java:package:docker:
 
 js:build:assets:
   image: node:20
-  stage: build
+  stage: test
   before_script:
     - echo "Building frontend assets"
     - cd ${FRONTEND_DIR}
@@ -131,8 +130,7 @@ js:build:assets:
 js:test:e2e:
   image: cypress/browsers:22.14.0
   stage: integration
-#  needs: ["js:build:assets","java:package:docker"]
-  needs: ["java:package:docker"]
+  needs: ["js:build:assets","java:package:docker"]
   services:
     - name: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
       alias: backend
