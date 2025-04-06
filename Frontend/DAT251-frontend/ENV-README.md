@@ -8,7 +8,7 @@ This project uses the following environment files:
 
 ## Environment Variables
 
-- `API_BASE_URL` - URL of our own Spring Boot backend API, in the ../../backend directory
+- `VITE_API_BASE_URL` - URL of our own Spring Boot backend API, in the ../../backend directory
 
 ## Local Development
 
