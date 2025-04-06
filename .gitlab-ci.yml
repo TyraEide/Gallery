@@ -104,29 +104,29 @@ java:package:docker:
       - .m2/
     policy: pull
 
-js:build:assets:
-  image: node:20
-  stage: build
-  before_script:
-    - echo "Building frontend assets"
-    - cd ${FRONTEND_DIR}
-  script:
-    - npm ci
-    - npm run build
-    - echo "Frontend assets built successfully"
-  artifacts:
-    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - ${FRONTEND_DIR}/dist/
-    expire_in: 2 weeks
-  tags:
-    - docker
-  cache:
-    key: "${CACHE_KEY}-js-node-modules"
-    paths:
-      - .npm/
-      - ${FRONTEND_DIR}/node_modules/
-    policy: pull-push
+#js:build:assets:
+#  image: node:20
+#  stage: build
+#  before_script:
+#    - echo "Building frontend assets"
+#    - cd ${FRONTEND_DIR}
+#  script:
+#    - npm ci
+#    - npm run build
+#    - echo "Frontend assets built successfully"
+#  artifacts:
+#    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+#    paths:
+#      - ${FRONTEND_DIR}/dist/
+#    expire_in: 2 weeks
+#  tags:
+#    - docker
+#  cache:
+#    key: "${CACHE_KEY}-js-node-modules"
+#    paths:
+#      - .npm/
+#      - ${FRONTEND_DIR}/node_modules/
+#    policy: pull-push
 
 js:test:e2e:
   image: cypress/browsers:22.14.0
