@@ -1,85 +1,134 @@
-
 <script lang="ts">
 
-    import {redirect } from "../ts_modules/routing"
+  import {api_url,set_jwt_token,jwt_token_header} from "../ts_modules/api"
+  import {redirect } from "../ts_modules/routing"
 
-    // General notice ⚠️
-    // Session ID is not set up correctly
-    // Should be set with set_cookie header / HTTPS
-    // Causes error when host domain == client domain
+  console.log("page loaded")
 
-    // General notice ⚠️
-    // Application should be modified to communicate with back end instead of python flask test server
+  // TODO
+  // CSRF implementation ?
 
-    let username:       string = ""
-    let password:       string = ""
-    let cookie_val:     string = ""
-    let response_msg:   string = ""
-  
-    function setCookie(cookie_name:string,val:string){
-          // ⚠️ WARNING : This cookie will not be sent with other requests due to misaligned domain
-          // Session ID should be set with the set_cookie header. Use HTTPS 
-          document.cookie = cookie_name + " = " + val
-          
-    }
-    
-    // Default login request to specified URL
-    async function login_request(url:string){
+  let email:          string = ""
+  let password:       string = ""
+
+  let message:        string = "..."
+  let cached_email:   string = ""
+
+
+  // Login request
+  async function login_request(event:Event){
+
+    event.preventDefault()
+
+    cached_email = email // to avoid concurrency errors // working as lock too
+
+    try{
+
       // request
-      const response_json = await fetch(url, {method: "POST", credentials: "include", headers: {
+      const response = await fetch(api_url("/login"), 
+        {method: "POST", 
+        signal : AbortSignal.timeout(8000),
+        headers: {
           'content-type': 'application/json'
           }, body: JSON.stringify({
-                  username: username,
+                  email: email,
                   password: password
               })
-      }).then((r) => r.json())
+      })
 
-      // output value
-      response_msg = response_json.message
+      if(!response.ok){
+        switch(response.status){
+          case 401: 
+            message = "Incorrect email or password"
+            break
 
-      // set sessionID cookie from JSON
-      if(response_json.sessionID != undefined){
-        setCookie("SessionID",response_json.sessionID)
-        redirect()
+          default:
+            message = "unknown error (status error)"
+            console.log("response status code:" + response.status)
+            break
+
+        }
       }
       else{
-        console.log("Missing Cookie")
+
+        const response_json = await response.json()
+
+        //check for contents
+        if(response_json.token != undefined && response_json.user != undefined){
+          if(response_json.user.email == cached_email){
+            set_jwt_token(response_json.token)
+            message = "Login Successful"
+            setTimeout(() => redirect("dashboard"), 600)
+          }
+          else{
+            message = "Internal response error"
+          }
+        }
+        else{
+          message = response_json.token
+          console.log("malformed response error")
+        }
       }
-      
-    }
+    } 
+    catch(err){
+      message = "Issue reaching server | " + (err)
+    } 
 
-    // Debug function for "localhost:5000"
-    async function check_message_cookie_req(){
-      const response_json = await fetch("http://127.0.0.1:5000/cookie", {credentials: "include"}).then((r) => r.json())
-      response_msg = response_json.message
-    }
-  
-  </script>
-  
-  <main>
-    <div>
-      <h2>Login Section</h2>
-      <div>
-        Username: <input type="text" bind:value={username}><br>
-        Password: <input type="text" bind:value={password}><br>
-        <button onclick={() => {login_request("http://127.0.0.1:5000/login")}}>Login</button>
-      </div>
+    cached_email = ""
+  }
 
-      <div>
-        <p>Output: {response_msg}<p>
+  // For debugging purpouses
+  async function jwt_sample_req(){
+    const headers = jwt_token_header();
+    const response_json = await fetch(api_url("/jwt"),{headers}).then((r) => r.json())
+    message = response_json.message
+  }
 
-        <p>Do you not have an account?<p>
-        <button onclick={() => {redirect("register")}}>Register user</button>
-      </div>
-    </div>
+</script>
 
-  
-    <div>
-      <h2>Debug Section</h2>
-      <button onclick={() => {check_message_cookie_req()}}>Check if cookie?</button>
-    </div>
-  
-    <a href="https://vite.dev">Vite docs</a><br>
-    <a href="https://svelte.dev">Svelte docs</a>
-  </main>
-   
+<main>
+  <div>
+
+    <h2>Login</h2>
+    <form onsubmit={login_request}>
+
+        <label for="email">Email</label>
+        <input
+            id="email"
+            type="text"
+            bind:value={email}
+            required
+            autocomplete="email"
+        />
+
+        <label for="password">Password</label>
+        <input
+            id="password"
+            type="password"
+            bind:value={password}
+            required
+            autocomplete="current-password"
+        />
+
+        <button type="submit" disabled={cached_email != ""}>
+            {#if cached_email != ""}
+                <span class="spinner"></span> Loading...
+            {:else}
+                Login
+            {/if}
+        </button>
+
+        
+    </form>
+    
+    <p>{message}</p>
+
+    <hr>
+
+    Sign up instead?
+    <p><button type="button" onclick={() => {redirect("register")}}>Register account</button></p>
+  </div>
+</main>
+ 
+<style>
+</style>

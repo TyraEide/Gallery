@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { redirect } from "../ts_modules/routing"; 
+    import { redirect } from "../ts_modules/routing";
     import config from "../config";
 
     let username: string = "";
@@ -9,10 +8,15 @@
     let confirmPassword: string = "";
     let message: string = "";
     let csrfToken: string = "";
-    let loading: boolean = false; 
+    let loading: boolean = false;
 
     async function register(event: Event) {
         event.preventDefault();
+
+        if (!username || !email || !password || !confirmPassword) {
+            message = "A field is missing. Please try again.";
+            return;
+        }
 
         if (password.length < 8) {
             message = "Password must be at least 8 characters.";
@@ -24,7 +28,7 @@
             return;
         }
 
-        if (!email.includes('.') || !email.includes('@')) {
+        if (!email.includes(".") || !email.includes("@")) {
             message = "Please provide a valid email address.";
             return;
         }
@@ -44,13 +48,17 @@
             const data = await response.json();
 
             if (!response.ok) {
-                message = data.message || "Username or email was already taken. Please try again.";
+                message =
+                    data.message ||
+                    "Username or email was already taken. Please try again.";
+                loading = false;
             } else {
                 message = data.message || "Registration successful!";
 
                 setTimeout(() => {
                     redirect("registrationSuccessful");
                 }, 1500);
+                loading = false;
             }
         } catch (error) {
             message = "A field is missing. Please try again.";
@@ -104,7 +112,7 @@
             autocomplete="new-password"
         />
 
-        <button type="submit" disabled={loading}> 
+        <button type="submit" disabled={loading}>
             {#if loading}
                 <span class="spinner"></span> Loading...
             {:else}

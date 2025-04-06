@@ -3,8 +3,10 @@
   import Login from "./pages/Login.svelte";
   import PageMissing from "./pages/Err404.svelte";
   import Home from "./pages/Home.svelte";
+  import Dashboard from "./pages/Dashboard.svelte";
   import Register from "./pages/Register.svelte";
   import RegistrationSuccessful from "./pages/RegistrationSuccessful.svelte";
+  import Announcement from "./pages/Announcement.svelte";
 
   // Routing paths
   let routes = {
@@ -12,6 +14,8 @@
     "/login": Login,
     "/register": Register,
     "/registrationSuccessful": RegistrationSuccessful,
+    "/announcement": Announcement,
+    "/dashboard": Dashboard,
     "*": PageMissing
   }
 </script>

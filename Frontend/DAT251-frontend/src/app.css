@@ -57,6 +57,7 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
   margin: 10px;
+  border-color: darkgray;
 
 }
 
@@ -93,6 +94,34 @@ form {
   gap: 10px;
   width: 200px;
   margin: auto;
+  padding: 20px;
+  border: 1px solid grey;
+  
 }
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+.announcement {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border-radius: 4px;
+}
+
+h3 {
+  margin: 0;
+}
+
+p {
+  margin: 0.5rem 0;
+}
+
+small {
+  color: #666;
+}
+
 
 
