@@ -31,7 +31,7 @@
 
         try {
             loading = true;
-
+            console.warn("Trying to fetch from: "+ config.API_BASE_URL + "/api/users" )
             const response = await fetch(`${config.API_BASE_URL}/api/users`, {
                 method: "POST",
                 credentials: "include",

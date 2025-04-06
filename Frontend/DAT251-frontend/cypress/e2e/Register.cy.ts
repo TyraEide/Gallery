@@ -5,6 +5,12 @@ describe('User Registration', () => {
     cy.visit('/#/register');
   });
 
+  Cypress.on('window:console', (type, message) => {
+    if (type === 'log' || type === 'error' || type === 'warn') {
+      cy.task('log', `[${type.toUpperCase()}] ${message}`);
+    }
+  });
+
   it('Registers a user successfully', () => {
     // Intercept any request to the users endpoint, without specifying full URL
     cy.log(Cypress.env("baseUrl"))
