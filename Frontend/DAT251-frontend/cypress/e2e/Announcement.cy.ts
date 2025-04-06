@@ -1,6 +1,8 @@
+/// <reference types="cypress" />
+
 describe('Announcements', () => {
   beforeEach(() => {
-    cy.intercept('GET', '/announcements', {
+    cy.intercept('GET', '/api/courses/announcements', {
       body: [
         {
           title: "Title",
