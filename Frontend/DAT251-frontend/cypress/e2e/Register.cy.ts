@@ -7,10 +7,16 @@ describe('User Registration', () => {
 
   it('Registers a user successfully', () => {
     // Intercept any request to the users endpoint, without specifying full URL
-    cy.intercept('POST', `http://backend:8080/api/users`).as('registerUser');
+
+    //const apiBaseUrl = Cypress.env('API_BASE_URL'); // Get the API base URL dynamically
+    // cy.log("Using: "+ Cypress.env('API_BASE_URL'));
+    // cy.intercept('POST',  `${apiBaseUrl}/api/users`).as('registerUser');
+    cy.intercept('POST', "/api/users", (req) => {
+      cy.log(`Intercepted request to: ${req.url}`);
+    }).as('registerUser');
     const randomness = Math.random().toString();
-    cy.get('input[id="username"]').type('testuser1'+randomness);
-    cy.get('input[id="email"]').type('test1'+randomness+'@example.com');
+    cy.get('input[id="username"]').type('testuser1' + randomness);
+    cy.get('input[id="email"]').type('test1' + randomness + '@example.com');
     cy.get('input[id="password"]').type('SecurePass123!');
     cy.get('input[id="confirmPassword"]').type('SecurePass123!');
     cy.get('button[type="submit"]').click();
@@ -45,7 +51,7 @@ describe('User Registration', () => {
     cy.get('input[id="password"]').type('SecurePass123!');
     cy.get('input[id="confirmPassword"]').type('SecurePass123!');
     cy.get('button[type="submit"]').click();
-    
+
     cy.contains('Please provide a valid email address.').should('be.visible');
   });
 
@@ -55,7 +61,7 @@ describe('User Registration', () => {
     cy.get('input[id="password"]').type('SecurePass123!');
     cy.get('input[id="confirmPassword"]').type('SecurePass123!').should('be.visible');
     cy.get('button[type="submit"]').click();
-    
+
     cy.contains('Please provide a valid email address.');
   });
 });
