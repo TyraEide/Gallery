@@ -143,7 +143,7 @@ js:test:e2e:
     - cd ${FRONTEND_DIR}
     - npm install         # No need for a clean install because we already did that with the build step and the caches have the right dependencies.
     - npx cypress verify
-    - echo .env.production > .env
+    - cat .env.production > .env
     # Build the app with the environment variables
     - npm run build
     # Use vite preview instead of dev server
