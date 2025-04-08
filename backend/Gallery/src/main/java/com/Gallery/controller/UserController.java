@@ -41,16 +41,4 @@ public class UserController {
         return userService.getUser(id);
     }
 
-    @PutMapping("/{id}/setUibToken")
-    @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody User setUibToken(@RequestBody String token, @PathVariable UUID id, @AuthenticationPrincipal User auth) {
-        return userService.setUibToken(token, id, auth);
-    }
-
-    @PutMapping("/{id}/setHvlToken")
-    @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody User setHvlToken(@RequestBody String token, @PathVariable UUID id, @AuthenticationPrincipal User auth) {
-        return userService.setHvlToken(token, id, auth);
-    }
-
 }
