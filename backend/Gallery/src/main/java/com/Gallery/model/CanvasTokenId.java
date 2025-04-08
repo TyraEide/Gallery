@@ -8,6 +8,11 @@ public class CanvasTokenId implements Serializable {
 
     private Institution institution;
 
+    public CanvasTokenId(User user, Institution institution) {
+        this.user = user;
+        this.institution = institution;
+    }
+
     public CanvasTokenId() {
     }
 
