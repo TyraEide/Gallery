@@ -8,10 +8,12 @@ import com.Gallery.repository.InstitutionRepository;
 import com.Gallery.repository.TokenRepository;
 import com.Gallery.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Optional;
 
+@Service
 public class TokenService {
 
     private TokenRepository tokenRepository;
