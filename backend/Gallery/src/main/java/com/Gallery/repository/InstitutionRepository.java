@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface InstitutionRepository extends JpaRepository<Institution, String> {
-    Optional<Institution> findByShortName(String shortName);
+
 }

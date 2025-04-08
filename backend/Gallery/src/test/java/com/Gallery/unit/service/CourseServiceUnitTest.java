@@ -9,24 +9,18 @@ import com.Gallery.service.InstitutionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeCreator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.sql.Array;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -99,7 +93,7 @@ public class CourseServiceUnitTest {
 
         List<Institution> allInstitutions = List.of(uib, hvl);
         for (Institution institution : allInstitutions) {
-            lenient().when(institutionService.getApiUrlByShortName(institution.getShortName()))
+            lenient().when(institutionService.findApiUrlByShortName(institution.getShortName()))
                     .thenReturn(Optional.of(institution.getApiUrl()));
         }
     }

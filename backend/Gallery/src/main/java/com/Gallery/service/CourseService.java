@@ -113,7 +113,7 @@ public class CourseService {
     }
 
     private String getBaseApiUrl(String institution) {
-        Optional<String> baseApiUrl = institutionService.getApiUrlByShortName(institution);
+        Optional<String> baseApiUrl = institutionService.findApiUrlByShortName(institution);
         if (baseApiUrl.isPresent()) {
             return baseApiUrl.get();
         } else {

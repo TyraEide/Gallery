@@ -15,12 +15,16 @@ public class InstitutionService {
         this.institutionRepository = institutionRepository;
     }
 
-    public Optional<String> getApiUrlByShortName(String shortName) {
-        return institutionRepository.findByShortName(shortName)
+    public Optional<String> findApiUrlByShortName(String shortName) {
+        return institutionRepository.findById(shortName)
                 .map(Institution::getApiUrl);
     }
 
-    public List<Institution> getAllInstitutions() {
+    public List<Institution> findAllInstitutions() {
         return institutionRepository.findAll();
+    }
+
+    public Optional<Institution> findByShortName(String shortName) {
+        return institutionRepository.findById(shortName);
     }
 }
