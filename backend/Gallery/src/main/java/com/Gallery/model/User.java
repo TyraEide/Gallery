@@ -27,12 +27,6 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Convert(converter = StringCryptoConverter.class)
-    private String uibToken;
-
-    @Convert(converter = StringCryptoConverter.class)
-    private String hvlToken;
-
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
@@ -75,23 +69,6 @@ public class User implements UserDetails {
 
     public String getEmail() {
         return email;
-    }
-
-    public void setUibToken(String canvasAuthToken) {
-
-        this.uibToken = canvasAuthToken;
-    }
-
-    public String getUibToken() {
-        return uibToken;
-    }
-
-    public void setHvlToken(String hvlToken) {
-        this.hvlToken = hvlToken;
-    }
-
-    public String getHvlToken() {
-        return hvlToken;
     }
 
     @Override
