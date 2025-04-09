@@ -45,5 +45,9 @@ public class UserService {
         return userRepository.existsById(userId);
     }
 
+    public void deleteAll() {
+        userRepository.deleteAll();
+    }
+
 
 }
