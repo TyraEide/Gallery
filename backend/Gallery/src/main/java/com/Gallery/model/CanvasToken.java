@@ -3,11 +3,12 @@ package com.Gallery.model;
 import com.Gallery.converter.StringCryptoConverter;
 import jakarta.persistence.*;
 
-@Table(uniqueConstraints = {
+@Table(name = "canvasTokens",
+        uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user", "institution"})
 })
 @IdClass(CanvasTokenId.class)
-@Entity
+@Entity()
 public class CanvasToken {
 
     @Id
