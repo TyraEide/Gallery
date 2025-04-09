@@ -11,6 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface TokenRepository extends JpaRepository<CanvasToken, CanvasTokenId> {
-    Optional<List<CanvasToken>> getAllTokensForUser(User user);
+    Optional<List<CanvasToken>> findCanvasTokenByUser(User user);
 
 }

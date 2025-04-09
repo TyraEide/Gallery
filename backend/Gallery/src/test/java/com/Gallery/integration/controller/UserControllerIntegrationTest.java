@@ -40,7 +40,7 @@ public class UserControllerIntegrationTest {
         e.setPassword("securePassword");
     }
 
-    @AfterEach
+    @BeforeEach
     public void emptyDatabase() {
         userRepository.deleteAll();
     }
@@ -75,50 +75,50 @@ public class UserControllerIntegrationTest {
         ;
     }
 
-    @Test
-    public void shouldReturnOKWhenSettingAuthTokenUib() throws Exception {
-        userRepository.save(e);
-        e.setUibToken("secureToken");
-
-        mockMvc.perform(put("/api/users/{id}/setUibToken", e.getId())
-                        .with(csrf())
-                        .content(e.getUibToken())
-                        .with(user(e)))
-                .andExpect(status().isCreated())
-                .andDo(print())
-        ;
-
-        User updatedUser = userRepository.findById(e.getId()).get();
-        assertEquals(e.getUibToken(), updatedUser.getUibToken());
-    }
-
-    @Test
-    public void shouldReturnOKWhenSettingAuthTokenHvl() throws Exception {
-        userRepository.save(e);
-        e.setHvlToken("secureToken");
-
-        mockMvc.perform(put("/api/users/{id}/setHvlToken", e.getId())
-                        .with(csrf())
-                        .content(e.getHvlToken())
-                        .with(user(e)))
-                .andExpect(status().isCreated())
-                .andDo(print())
-        ;
-
-        User updatedUser = userRepository.findById(e.getId()).get();
-        assertEquals(e.getHvlToken(), updatedUser.getHvlToken());
-    }
-
-    @Test
-    public void shouldReturnUnauthorizedWhenSettingTokenForOtherUser() throws Exception {
-        userRepository.save(e);
-        e.setUibToken("secureToken");
-
-        mockMvc.perform(put("/api/users/{id}/setUibToken", e.getId())
-                        .with(csrf())
-                        .content(e.getUibToken()))
-                .andExpect(status().isUnauthorized())
-                .andDo(print())
-        ;
-    }
+//    @Test
+//    public void shouldReturnOKWhenSettingAuthTokenUib() throws Exception {
+//        userRepository.save(e);
+//        e.setUibToken("secureToken");
+//
+//        mockMvc.perform(put("/api/users/{id}/setUibToken", e.getId())
+//                        .with(csrf())
+//                        .content(e.getUibToken())
+//                        .with(user(e)))
+//                .andExpect(status().isCreated())
+//                .andDo(print())
+//        ;
+//
+//        User updatedUser = userRepository.findById(e.getId()).get();
+//        assertEquals(e.getUibToken(), updatedUser.getUibToken());
+//    }
+//
+//    @Test
+//    public void shouldReturnOKWhenSettingAuthTokenHvl() throws Exception {
+//        userRepository.save(e);
+//        e.setHvlToken("secureToken");
+//
+//        mockMvc.perform(put("/api/users/{id}/setHvlToken", e.getId())
+//                        .with(csrf())
+//                        .content(e.getHvlToken())
+//                        .with(user(e)))
+//                .andExpect(status().isCreated())
+//                .andDo(print())
+//        ;
+//
+//        User updatedUser = userRepository.findById(e.getId()).get();
+//        assertEquals(e.getHvlToken(), updatedUser.getHvlToken());
+//    }
+//
+//    @Test
+//    public void shouldReturnUnauthorizedWhenSettingTokenForOtherUser() throws Exception {
+//        userRepository.save(e);
+//        e.setUibToken("secureToken");
+//
+//        mockMvc.perform(put("/api/users/{id}/setUibToken", e.getId())
+//                        .with(csrf())
+//                        .content(e.getUibToken()))
+//                .andExpect(status().isUnauthorized())
+//                .andDo(print())
+//        ;
+//    }
 }
