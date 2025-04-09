@@ -43,7 +43,7 @@ public class TokenService {
             if (canvasToken.isPresent()) {
                 return canvasToken.get();
             } else {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Could not find token to institution" + institution.getShortName() + "for user " + user.getId());
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Could not find token to institution" + institution.getShortName() + "for user " + userId.getId());
             }
         } else {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "User with id " + userId.getId() + " not found");
