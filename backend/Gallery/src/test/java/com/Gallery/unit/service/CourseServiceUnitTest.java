@@ -93,7 +93,7 @@ public class CourseServiceUnitTest {
                 Map<Course, List<DiscussionTopic>> entryApi = api.get(shortName);
                 entryApi.put(courseObj, announcements);
             }
-            json.put(institution.getShortName(), announcementsJson.toString());
+            json.put(shortName, announcementsJson.toString());
         }
         mockedApi = api;
         jsonAnnouncements = json;
