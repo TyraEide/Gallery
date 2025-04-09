@@ -119,8 +119,8 @@ public class CourseControllerIntegrationTest {
     @Test
     public void shouldReturnOKUponGettingAllAnnouncements() throws Exception {
         User user = new User();
-        user.setHvlToken("hvlToken");
-        user.setUibToken("uibToken");
+//        user.setHvlToken("hvlToken");
+//        user.setUibToken("uibToken");
 
         // Mock response uib
         List<Course> uibCourses = new ArrayList<>(mockedApi.get("uib").keySet());
