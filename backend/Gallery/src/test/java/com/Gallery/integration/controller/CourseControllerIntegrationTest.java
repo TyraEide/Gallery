@@ -1,13 +1,12 @@
 package com.Gallery.integration.controller;
 
 import com.Gallery.controller.CourseController;
-import com.Gallery.model.Course;
-import com.Gallery.model.DiscussionTopic;
-import com.Gallery.model.Institution;
-import com.Gallery.model.User;
-import com.Gallery.repository.InstitutionRepository;
+import com.Gallery.dto.UserRegistrationDTO;
+import com.Gallery.model.*;
 import com.Gallery.service.CourseService;
 import com.Gallery.service.InstitutionService;
+import com.Gallery.service.TokenService;
+import com.Gallery.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,11 +14,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +29,6 @@ import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -47,25 +44,45 @@ public class CourseControllerIntegrationTest {
     @MockitoBean private RestTemplate restTemplate;
     @Autowired private CourseService courseService;
     @Autowired private CourseController courseController;
-    @Autowired private InstitutionRepository institutionRepository;
+    @Autowired private InstitutionService institutionService;
+    @Autowired private TokenService tokenService;
+    @Autowired private UserService userService;
     @Autowired MockMvc mockMvc;
 
+    private static List<Institution> institutionList;
     private static Map<String, Map<Course, List<DiscussionTopic>>> mockedApi;
     private static Map<String, String> jsonAnnouncements;
+    private User user;
 
     @BeforeAll
     public static void initialize() throws JsonProcessingException {
+        initializeInstitutionList();
         mockApiAndJsonCourses();
+    }
+
+    public static void initializeInstitutionList() {
+        Institution uib = new Institution();
+        uib.setFullName("The University of Bergen");
+        uib.setShortName("uib");
+        uib.setApiUrl("https://mitt.uib.no/api/v1");
+
+        Institution hvl = new Institution();
+        hvl.setFullName("The Western Norway University of Applied Sciences");
+        hvl.setShortName("hvl");
+        hvl.setApiUrl("https://hvl.instructure.com/api/v1");
+
+        // Valid institutions return canvasToken
+        institutionList = List.of(uib, hvl);
     }
 
     private static void mockApiAndJsonCourses() throws JsonProcessingException {
         Map<String, Map<Course, List<DiscussionTopic>>> api = new HashMap<>();
         Map<String, String> json = new HashMap<>();
-        String[] institutions = new String[]{"uib", "hvl"};
-        String[] courses = new String[]{"Course1", "Course2"};
+        List<String> courses = List.of("Course1", "Course2");;
 
-        for (String institution : institutions) {
-            api.put(institution, new HashMap<>());
+        for (Institution institution : institutionList) {
+            String shortName = institution.getShortName();
+            api.put(shortName, new HashMap<>());
             ObjectMapper mapper = new ObjectMapper();
             Set<String> announcementsJson = new HashSet<>();
 
@@ -78,7 +95,7 @@ public class CourseControllerIntegrationTest {
 
                 for (int k = 0; k < 3; k++) {
                     DiscussionTopic announcement = new DiscussionTopic();
-                    announcement.setUrl(institution + "/" + course + "/" + k);
+                    announcement.setUrl(shortName + "/" + course + "/" + k);
                     announcements.add(announcement);
 
                     String jsonAnnouncement = mapper.writeValueAsString(announcement);
@@ -87,19 +104,25 @@ public class CourseControllerIntegrationTest {
                     objectNode.put("context_code", "course_"+courseObj.getId());
                     announcementsJson.add(mapper.writeValueAsString(objectNode));
                 }
-                Map<Course, List<DiscussionTopic>> entryApi = api.get(institution);
+                Map<Course, List<DiscussionTopic>> entryApi = api.get(shortName);
                 entryApi.put(courseObj, announcements);
             }
-            json.put(institution, announcementsJson.toString());
+            json.put(shortName, announcementsJson.toString());
         }
         mockedApi = api;
         jsonAnnouncements = json;
     }
 
     @BeforeEach
-    public void mockInstitutionService() {
+    public void initializeServices() {
+        tokenService.deleteAll();
+        initializeInstitutionService();
+        initializeUserService();
+    }
+
+    private void initializeInstitutionService() {
         // Clear any existing institutions
-        institutionRepository.deleteAll();
+        institutionService.deleteAll();
         
         Institution uib = new Institution();
         uib.setFullName("The University of Bergen");
@@ -113,54 +136,58 @@ public class CourseControllerIntegrationTest {
 
         List<Institution> allInstitutions = List.of(uib, hvl);
 
-        institutionRepository.saveAllAndFlush(allInstitutions);
+        institutionService.createAll(allInstitutions);
+    }
+
+    private void initializeUserService() {
+        userService.deleteAll();
+
+        UserRegistrationDTO newUser = new UserRegistrationDTO();
+        newUser.setUsername("test");
+        newUser.setEmail("test@example.com");
+        newUser.setPassword("password");
+
+        user = userService.createUser(newUser);
+    }
+
+    private void setValidTokenForUser(User user, List<Institution> institutions) {
+        User dbUser = userService.getUser(user.getId());
+        for (Institution institution : institutions) {
+            Institution dbInstitution = institutionService.findByShortName(institution.getShortName()).get();
+            CanvasToken token = new CanvasToken();
+            token.setUser(dbUser);
+            token.setInstitution(dbInstitution);
+            token.setToken("validToken");
+
+            tokenService.create(token);
+        }
     }
 
     @Test
     public void shouldReturnOKUponGettingAllAnnouncements() throws Exception {
-        User user = new User();
-//        user.setHvlToken("hvlToken");
-//        user.setUibToken("uibToken");
+        setValidTokenForUser(user, institutionList);
 
-        // Mock response uib
-        List<Course> uibCourses = new ArrayList<>(mockedApi.get("uib").keySet());
+        for (Institution institution : institutionList) {
+            String shortName = institution.getShortName();
+            List<Course> courses = new ArrayList<>(mockedApi.get(shortName).keySet());
 
-        ResponseEntity<Course[]> uibResponseCourseList = new ResponseEntity<>(uibCourses.toArray(new Course[0]), HttpStatus.OK);
-        when(restTemplate.exchange(
-                eq("https://mitt.uib.no/api/v1/courses"),
-                eq(HttpMethod.GET),
-                any(),
-                eq(Course[].class)
-        )).thenReturn(uibResponseCourseList);
+            ResponseEntity<List<Course>> responseCourseList = new ResponseEntity<>(courses, HttpStatus.OK);
+            when(restTemplate.exchange(
+                    eq(institution.getApiUrl() + "/courses"),
+                    eq(HttpMethod.GET),
+                    any(),
+                    eq(new ParameterizedTypeReference<List<Course>>(){})
+            )).thenReturn(responseCourseList);
 
-        ResponseEntity<String> uibResponse = new ResponseEntity<>(jsonAnnouncements.get("uib"), HttpStatus.OK);
-        when(restTemplate.exchange(
-                eq("https://mitt.uib.no/api/v1/announcements?context_codes[]={validCourseIds}"),
-                eq(HttpMethod.GET),
-                any(),
-                eq(String.class),
-                any(Object[].class)
-        )).thenReturn(uibResponse);
-
-        // Mock response hvl
-        List<Course> hvlCourses = new ArrayList<>(mockedApi.get("hvl").keySet());
-
-        ResponseEntity<Course[]> hvlResponseCourseList = new ResponseEntity<>(hvlCourses.toArray(new Course[0]), HttpStatus.OK);
-        when(restTemplate.exchange(
-                eq("https://hvl.instructure.com/api/v1/courses"),
-                eq(HttpMethod.GET),
-                any(),
-                eq(Course[].class)
-        )).thenReturn(hvlResponseCourseList);
-
-        ResponseEntity<String> hvlResponse = new ResponseEntity<>(jsonAnnouncements.get("hvl"), HttpStatus.OK);
-        when(restTemplate.exchange(
-                eq("https://hvl.instructure.com/api/v1/announcements?context_codes[]={validCourseIds}"),
-                eq(HttpMethod.GET),
-                any(),
-                eq(String.class),
-                any(Object[].class)
-        )).thenReturn(hvlResponse);
+            ResponseEntity<String> response = new ResponseEntity<>(jsonAnnouncements.get(shortName), HttpStatus.OK);
+            when(restTemplate.exchange(
+                    eq(institution.getApiUrl() + "/announcements?context_codes[]={validCourseIds}"),
+                    eq(HttpMethod.GET),
+                    any(),
+                    eq(String.class),
+                    any(Object[].class)
+            )).thenReturn(response);
+            }
 
         mockMvc.perform(get("/api/courses/announcements")
                         .with(csrf())
@@ -170,13 +197,11 @@ public class CourseControllerIntegrationTest {
     }
 
     @Test
-    public void shouldReturnUnauthorizedWhenUserHasNotSetToken() throws Exception {
-        User user = new User();
-
+    public void shouldReturnNotFoundWhenUserHasNotSetToken() throws Exception {
         mockMvc.perform(get("/api/courses/announcements")
                         .with(csrf())
                         .with(user(user)))
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isNotFound())
                 .andDo(print());
     }
 }
