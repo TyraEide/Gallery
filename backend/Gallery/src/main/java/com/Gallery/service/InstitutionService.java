@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Service
 public class InstitutionService {
-    private InstitutionRepository institutionRepository;
+    private final InstitutionRepository institutionRepository;
 
     public InstitutionService(InstitutionRepository institutionRepository) {
         this.institutionRepository = institutionRepository;
@@ -32,11 +32,11 @@ public class InstitutionService {
         institutionRepository.deleteAll();
     }
 
-    public Institution createInstitution(Institution institution) {
+    public Institution create(Institution institution) {
         return institutionRepository.save(institution);
     }
 
-    public List<Institution> createAllInstitutions(List<Institution> institutions) {
+    public List<Institution> createAll(List<Institution> institutions) {
         return institutionRepository.saveAll(institutions);
     }
 }
