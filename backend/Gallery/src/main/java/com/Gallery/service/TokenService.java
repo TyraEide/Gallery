@@ -11,14 +11,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class TokenService {
 
-    private TokenRepository tokenRepository;
-    private InstitutionService institutionService;
-    private UserService userService;
+    private final TokenRepository tokenRepository;
+    private final InstitutionService institutionService;
+    private final UserService userService;
 
     public TokenService(TokenRepository tokenRepository, InstitutionService institutionService, UserService userService) {
         this.tokenRepository = tokenRepository;
@@ -59,4 +60,17 @@ public class TokenService {
         Institution institution = getInstitution(shortNameInstitution);
         return getTokenUserAndInstitution(userId, institution);
     }
+
+    public void deleteAll() {
+        tokenRepository.deleteAll();
+    }
+
+    public CanvasToken create(CanvasToken canvasToken) {
+        return tokenRepository.save(canvasToken);
+    }
+
+    public List<CanvasToken> createAll(List<CanvasToken> canvasTokens) {
+        return tokenRepository.saveAll(canvasTokens);
+    }
+
 }
