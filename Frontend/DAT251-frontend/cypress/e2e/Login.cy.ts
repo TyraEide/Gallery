@@ -3,7 +3,7 @@
 describe('User Login', () => {
     beforeEach(() => {
       cy.visit('/#/login');
-      cy.intercept('POST', 'http://localhost:8080/api/login', {
+      cy.intercept('POST', '/api/login', {
         statusCode: 202,
         body:
             {

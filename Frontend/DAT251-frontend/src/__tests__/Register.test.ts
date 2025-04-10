@@ -100,7 +100,7 @@ describe("Register Component", () => {
         render(Register);
         await fillForm("testuser", "test@example.com", "password123", "password123");
         const registerButton = screen.getByRole("button", { name: "Register" });
-        await fireEvent.click(registerButton);
+        fireEvent.click(registerButton);
         await waitFor(() => expect(registerButton).toBeDisabled());
     });
 
@@ -111,7 +111,7 @@ describe("Register Component", () => {
         });
         render(Register);
         await fillForm("testuser", "test@example.com", "password123", "password123");
-        await clickRegisterButton();
+        clickRegisterButton();
         await waitFor(() => expect(screen.getByText("Loading...")).toBeInTheDocument());
     });
 

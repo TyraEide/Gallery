@@ -101,6 +101,10 @@
 				<artifactId>pitest-maven</artifactId>
 				<version>1.17.4</version>
 				<configuration>
+					<outputFormats>
+						<format>xml</format>
+						<format>html</format>
+					</outputFormats>
 					<excludedTestClasses>com.Gallery.integration.*</excludedTestClasses>
 				</configuration>
 				<executions>
