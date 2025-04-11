@@ -22,7 +22,20 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User createUser(UserRegistrationDTO userDTO) {
+    public User createUser(UserRegistrationDTO userDTO) throws NullPointerException {
+
+        if(userDTO.getUsername() == null || userDTO.getUsername().isBlank()) {
+            throw new NullPointerException("Username is required");
+        }
+
+        if(userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
+            throw new NullPointerException("Password is required");
+        }
+
+        if(userDTO.getEmail() == null || userDTO.getEmail().isBlank()) {
+            throw new NullPointerException("Email is required");
+        }
+
         User user = urMapper.toEntity(userDTO);
         user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);
