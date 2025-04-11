@@ -33,15 +33,19 @@ public class UserControllerIntegrationTest {
     private User e;
 
     @BeforeEach
-    public void setupTestUser() {
+    public void initializeTests() {
+        wipeDatabase();
+        setupTestUser();
+    }
+
+    private void setupTestUser() {
         e = new User();
         e.setUsername("Test");
         e.setEmail("test@example.com");
         e.setPassword("securePassword1!");
     }
 
-    @BeforeEach
-    public void emptyDatabase() {
+    private void wipeDatabase() {
         userService.deleteAll();
     }
 
