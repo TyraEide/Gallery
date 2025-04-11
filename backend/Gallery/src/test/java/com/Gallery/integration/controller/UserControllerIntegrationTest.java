@@ -1,5 +1,6 @@
 package com.Gallery.integration.controller;
 
+import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.UserService;
@@ -27,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class UserControllerIntegrationTest {
     @Autowired MockMvc mockMvc;
-    @Autowired private UserRepository userRepository;
     @Autowired private UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private User e;
@@ -40,9 +40,9 @@ public class UserControllerIntegrationTest {
         e.setPassword("securePassword1!");
     }
 
-    @BeforeEach
+    @AfterEach
     public void emptyDatabase() {
-        userRepository.deleteAll();
+        userService.deleteAll();
     }
 
     @Test
@@ -64,7 +64,8 @@ public class UserControllerIntegrationTest {
     @Test
     @WithMockUser
     public void shouldReturnOKWhenGetWithIdExists() throws Exception {
-        userRepository.save(e);
+        UserRegistrationDTO dto = new UserRegistrationDTO(e.getUsername(), e.getEmail(), e.getPassword());
+        e = userService.createUser(dto);
         mockMvc.perform(get("/api/users/{id}", e.getId())
                         .with(csrf()))
                 .andExpect(status().isOk())
