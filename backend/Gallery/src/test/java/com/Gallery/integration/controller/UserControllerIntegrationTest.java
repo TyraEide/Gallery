@@ -30,7 +30,7 @@ public class UserControllerIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private User e = new User();
+    private User e;
 
     @BeforeEach
     public void setupTestUser() {
