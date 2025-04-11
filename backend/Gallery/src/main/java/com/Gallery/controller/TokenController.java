@@ -1,8 +1,10 @@
 package com.Gallery.controller;
 
 import com.Gallery.model.CanvasToken;
+import com.Gallery.model.User;
 import com.Gallery.service.TokenService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +20,7 @@ public class TokenController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createToken(@RequestBody CanvasToken canvasToken) {
-        tokenService.create(canvasToken);
+    public void createToken(@RequestBody CanvasToken canvasToken, @AuthenticationPrincipal User auth) {
+        tokenService.create(canvasToken, auth);
     }
 }

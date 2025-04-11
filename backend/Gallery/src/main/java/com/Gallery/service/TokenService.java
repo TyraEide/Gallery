@@ -65,7 +65,10 @@ public class TokenService {
         tokenRepository.deleteAll();
     }
 
-    public CanvasToken create(CanvasToken canvasToken) {
+    public CanvasToken create(CanvasToken canvasToken, User auth) {
+        if (!canvasToken.getUser().equals(auth)) {
+            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "User is not authorized to perform this request.");
+        }
         return tokenRepository.save(canvasToken);
     }
 
