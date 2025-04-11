@@ -1,7 +1,9 @@
 package com.Gallery.unit.service;
 
+import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
+import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -40,7 +42,7 @@ public class UserServiceUnitTest {
         User e = new User();
         e.setUsername("test");
         e.setEmail("test@example.com");
-        e.setPassword("password");
+        e.setPassword("password123!");
         when(userRepository.save(e)).thenReturn(e);
         final User result = userService.createUser(urMapper.toDTO(e));
 
