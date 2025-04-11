@@ -1,5 +1,6 @@
 package com.Gallery.unit.service;
 
+import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.mapper.UserRegistrationMapper;
 import com.Gallery.model.User;
 import com.Gallery.dto.UserRegistrationDTO;
@@ -14,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 /**
@@ -49,5 +49,4 @@ public class UserServiceUnitTest {
         verify(userRepository).save(e);
         assertEquals(e, result);
     }
-
 }
