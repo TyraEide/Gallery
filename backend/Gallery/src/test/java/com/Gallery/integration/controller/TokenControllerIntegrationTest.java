@@ -39,6 +39,7 @@ public class TokenControllerIntegrationTest {
     private User savedUser;
     private Institution savedInstitution;
 
+
     @BeforeEach
     public void initializeTests() {
         wipeDatabase();
@@ -58,6 +59,7 @@ public class TokenControllerIntegrationTest {
         e.setEmail("test@example.com");
         e.setPassword("securePassword");
         savedUser = userService.createUser(e);
+
     }
 
     private void setupTestInstitution() {
