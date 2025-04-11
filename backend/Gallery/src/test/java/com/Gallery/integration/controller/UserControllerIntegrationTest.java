@@ -40,7 +40,7 @@ public class UserControllerIntegrationTest {
         e.setPassword("securePassword1!");
     }
 
-    @AfterEach
+    @BeforeEach
     public void emptyDatabase() {
         userService.deleteAll();
     }
