@@ -8,7 +8,6 @@ import com.Gallery.model.User;
 import com.Gallery.service.InstitutionService;
 import com.Gallery.service.TokenService;
 import com.Gallery.service.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,9 +36,8 @@ public class TokenControllerIntegrationTest {
     @Autowired TokenController tokenController;
     @Autowired MockMvc mockMvc;
     private final ObjectMapper mapper = new ObjectMapper();
-    private CanvasToken token;
-    private User testUser;
-    private Institution testInstitution;
+    private User savedUser;
+    private Institution savedInstitution;
 
     @BeforeEach
     public void initializeTests() {
@@ -60,7 +57,7 @@ public class TokenControllerIntegrationTest {
         e.setUsername("Test");
         e.setEmail("test@example.com");
         e.setPassword("securePassword");
-        testUser = userService.createUser(e);
+        savedUser = userService.createUser(e);
     }
 
     private void setupTestInstitution() {
@@ -68,11 +65,11 @@ public class TokenControllerIntegrationTest {
         e.setApiUrl("https://mitt.uib.no/api/v1");
         e.setShortName("uib");
         e.setFullName("The University of Bergen");
-        testInstitution = institutionService.create(e);
+        savedInstitution = institutionService.create(e);
     }
 
     private CanvasToken createTestToken(User user, Institution institution) {
-        token = new CanvasToken();
+        CanvasToken token = new CanvasToken();
         token.setToken("token");
         token.setUser(user);
         token.setInstitution(institution);
@@ -81,12 +78,12 @@ public class TokenControllerIntegrationTest {
 
     @Test
     public void shouldReturnCreatedWhenSettingAuthToken() throws Exception {
-        CanvasToken token = createTestToken(testUser, testInstitution);
+        CanvasToken token = createTestToken(savedUser, savedInstitution);
         String tokenJson = mapper.writeValueAsString(token);
 
         mockMvc.perform(post("/api/tokens")
                         .with(csrf())
-                        .with(user(testUser))
+                        .with(user(savedUser))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(tokenJson))
                 .andExpect(status().isCreated())
@@ -98,7 +95,7 @@ public class TokenControllerIntegrationTest {
     @Test
     @WithMockUser
     public void shouldReturnUnauthorizedWhenSettingTokenForSomeoneElse() throws Exception {
-        CanvasToken token = createTestToken(testUser, testInstitution);
+        CanvasToken token = createTestToken(savedUser, savedInstitution);
         String tokenJson = mapper.writeValueAsString(token);
 
         mockMvc.perform(post("/api/tokens")
