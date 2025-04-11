@@ -70,7 +70,7 @@ public class UserControllerUnitTest {
     }
 
     @Test
-    public void shouldFailWhenUsernameAreEmpty() {
+    public void shouldFailWhenEmptyUsername() {
         User e = new User("", "example@example.com", "1deefefefffe!");
         UserRegistrationDTO dtoE = urMapper.toDTO(e);
         ResponseEntity<?> responseEntity = userController.createUser(dtoE);
