@@ -80,7 +80,7 @@ public class TokenControllerIntegrationTest {
     }
 
     @Test
-    public void shouldReturnOKWhenSettingAuthToken() throws Exception {
+    public void shouldReturnCreatedWhenSettingAuthToken() throws Exception {
         CanvasToken token = createTestToken(testUser, testInstitution);
         String tokenJson = mapper.writeValueAsString(token);
 
@@ -90,6 +90,22 @@ public class TokenControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(tokenJson))
                 .andExpect(status().isCreated())
+                .andDo(print())
+        ;
+    }
+
+
+    @Test
+    @WithMockUser
+    public void shouldReturnUnauthorizedWhenSettingTokenForSomeoneElse() throws Exception {
+        CanvasToken token = createTestToken(testUser, testInstitution);
+        String tokenJson = mapper.writeValueAsString(token);
+
+        mockMvc.perform(post("/api/tokens")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(tokenJson))
+                .andExpect(status().isUnauthorized())
                 .andDo(print())
         ;
     }
