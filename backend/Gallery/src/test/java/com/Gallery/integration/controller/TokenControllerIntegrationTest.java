@@ -9,6 +9,7 @@ import com.Gallery.service.InstitutionService;
 import com.Gallery.service.TokenService;
 import com.Gallery.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,15 +43,16 @@ public class TokenControllerIntegrationTest {
 
     @BeforeEach
     public void initializeTests() {
-        wipeDatabase();
         setupTestUser();
         setupTestInstitution();
     }
 
-    private void wipeDatabase() {
+    @AfterEach
+    public void wipeDatabase() {
+        tokenService.deleteAll();
         userService.deleteAll();
         institutionService.deleteAll();
-        tokenService.deleteAll();
+
     }
 
     private void setupTestUser() {
