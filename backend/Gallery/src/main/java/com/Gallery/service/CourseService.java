@@ -84,7 +84,7 @@ public class CourseService {
     }
 
     /**
-     * Gets the announcements for the specified courses at the specified institution.
+     * Gets the user's announcements for the specified courses at the specified institution.
      * The user must have set a valid authorization token for the institutions.
      * @param institution a valid institution name that all the wanted courses belong to
      * @param courseIds a list of valid course ids for which to collect announcements
@@ -95,7 +95,6 @@ public class CourseService {
      */
     public Map<String, Map<Course, List<DiscussionTopic>>> getAnnouncements(String institution, List<String> courseIds, User user) throws JsonProcessingException {
         String token = getToken(institution, user);
-
         String baseApiUrl = getBaseApiUrl(institution);
 
         // Get courses from the canvas api
@@ -114,6 +113,29 @@ public class CourseService {
         Map<String, Map<Course, List<DiscussionTopic>>> announcements = new HashMap<>();
         announcements.put(institution, getAnnouncements(baseApiUrl, courseIds, courses, token));
         return announcements;
+    }
+
+    /**
+     * Gets the user's courses for the specified institution.
+     * The user must have set a valid authorization token for the institutions.
+     * @param institution a valid institution name that all the wanted courses belong to
+     * @param user the user for which to collect the announcements
+     * @return A list of courses the user is enrolled in at the given institutions Canvas
+     * @throws HttpClientErrorException if the user has not set an authorization token or if the institution is invalid
+     */
+    public List<Course> getCourses(String institution, User user) {
+        String token = getToken(institution, user);
+        String baseApiUrl = getBaseApiUrl(institution);
+        String apiUrl = baseApiUrl + "/courses";
+
+        ResponseEntity<List<Course>> response = restTemplate.exchange(
+                apiUrl,
+                HttpMethod.GET,
+                buildRequest(token),
+                new ParameterizedTypeReference<>(){}
+        );
+
+        return response.getBody();
     }
 
     private String getBaseApiUrl(String institution) {

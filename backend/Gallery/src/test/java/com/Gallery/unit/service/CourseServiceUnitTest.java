@@ -133,6 +133,15 @@ public class CourseServiceUnitTest {
         lenient().when(institutionService.findAllInstitutions()).thenReturn(institutionList);
     }
 
+    private HttpEntity<String> createRequestWithAuthorizationHeaders(CanvasToken authorizationToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.set("Authorization", "Bearer " + authorizationToken.getToken());
+        return new HttpEntity<>(headers);
+    }
+
+
     @Test
     public void shouldReturnAPIAnnouncementsUponGetAnnouncements() throws JsonProcessingException {
         // Mock services
@@ -192,14 +201,43 @@ public class CourseServiceUnitTest {
         }
     }
 
-    private HttpEntity<String> createRequestWithAuthorizationHeaders(CanvasToken authorizationToken) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.set("Authorization", "Bearer " + authorizationToken.getToken());
-        return new HttpEntity<>(headers);
-    }
+    @Test
+    public void shouldReturnApiCoursesUponGetCourses() {
+        // Mock services
+        Institution institution = institutionList.getFirst();
+        mockTokenService(List.of(institution), false);
+        mockInstitutionService(List.of(institution), false);
 
+        String institutionShortName = institution.getShortName();
+        List<Course> expected = new ArrayList<>(mockedApi.get(institutionShortName).keySet());
+        String baseApiUrl = institutionService.findApiUrlByShortName(institutionShortName).get();
+
+        // Mock restTemplate response
+        List<Course> courses = new ArrayList<>(mockedApi.get(institution.getShortName()).keySet());
+
+        ResponseEntity<List<Course>> responseCourseList = new ResponseEntity<>(courses, HttpStatus.OK);
+        when(restTemplate.exchange(
+                eq(institution.getApiUrl() + "/courses"),
+                eq(HttpMethod.GET),
+                any(),
+                eq(new ParameterizedTypeReference<List<Course>>(){})
+        )).thenReturn(responseCourseList);
+
+
+        CanvasToken authorizationToken = tokenService.getTokenForUserAndInstitutionShortName(emptyUser, institutionShortName);
+        HttpEntity<String> request = createRequestWithAuthorizationHeaders(authorizationToken);
+
+        List<Course> actual = courseService.getCourses(institutionShortName, emptyUser);
+
+        // Assertions
+        verify(restTemplate).exchange(
+                baseApiUrl + "/courses",
+                HttpMethod.GET,
+                request,
+                new ParameterizedTypeReference<List<Course>>(){});
+
+        assertEquals(expected, actual);
+    }
     @Test
     public void shouldThrowErrorUponInvalidInstitution() {
         mockTokenService(new ArrayList<>(), true);
@@ -212,38 +250,36 @@ public class CourseServiceUnitTest {
         assertThrows(HttpClientErrorException.class, () -> courseService.getAnnouncements(institutionList.getFirst().getShortName(), null, emptyUser));
     }
 
-    private void verifyCorrectBaseApiUrl(Institution institution, List<String> courseIds, User authorizedUser) throws JsonProcessingException {
+    private void verifyCorrectBaseApiUrl(Institution institution, User authorizedUser) {
         String institutionBaseUrl = institution.getApiUrl();
-        ResponseEntity<String> response = new ResponseEntity<>("", HttpStatus.OK);
-        lenient().when(restTemplate.exchange(
-                any(),
+        ResponseEntity<List<Course>> response = new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        when(restTemplate.exchange(
+                eq(institutionBaseUrl + "/courses"),
                 eq(HttpMethod.GET),
                 any(),
-                eq(String.class),
-                any(Object[].class)
+                eq(new ParameterizedTypeReference<List<Course>>(){})
         )).thenReturn(response);
 
-        String apiUrl = institutionBaseUrl + "/announcements?context_codes[]={validCourseIds}";
+        String apiUrl = institutionBaseUrl + "/courses";
         CanvasToken token = tokenService.getTokenForUserAndInstitutionShortName(authorizedUser, institution.getShortName());
         HttpEntity<String> request = createRequestWithAuthorizationHeaders(token);
 
-        courseService.getAnnouncements(institution.getShortName(), courseIds, authorizedUser);
+        courseService.getCourses(institution.getShortName(), authorizedUser);
 
         verify(restTemplate).exchange(
                 apiUrl,
                 HttpMethod.GET,
                 request,
-                String.class,
-                courseIds.toString()
+                new ParameterizedTypeReference<List<Course>>() {}
         );
     }
 
     @Test
-    public void shouldUseCorrectBaseApiUrlForValidInstitution() throws JsonProcessingException {
+    public void shouldUseCorrectBaseApiUrlForValidInstitution() {
         mockInstitutionService(institutionList, false);
         mockTokenService(institutionList, false);
         for (Institution institution : institutionList) {
-            verifyCorrectBaseApiUrl(institution, new ArrayList<>(), emptyUser);
+            verifyCorrectBaseApiUrl(institution, emptyUser);
         }
     }
 
