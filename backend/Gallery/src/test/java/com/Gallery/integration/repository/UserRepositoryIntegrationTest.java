@@ -42,26 +42,4 @@ public class UserRepositoryIntegrationTest {
         assertNotNull(inserted);
         assertEquals(testEntityManager.find(User.class, inserted.getId()), e);
     }
-
-    @Test
-    public void shouldEncryptTokensWhenSaving() {
-        String uibToken = "uibToken";
-        String hvlToken = "hvlToken";
-
-        e.setUibToken(uibToken);
-        e.setHvlToken(hvlToken);
-        userRepository.saveAndFlush(e);
-
-        String sqlUib = "SELECT uib_token FROM users WHERE id='%s'".formatted(e.getId());
-        String secretUibTokenInDB = jdbcTemplate.queryForObject(sqlUib, String.class);
-        assertNotEquals(uibToken, secretUibTokenInDB);
-
-        String sqlHvl = "SELECT hvl_token FROM users WHERE id='%s'".formatted(e.getId());
-        String secretHvlTokenInDB = jdbcTemplate.queryForObject(sqlHvl, String.class);
-        assertNotEquals(hvlToken, secretHvlTokenInDB);
-
-        User inserted = userRepository.findById(e.getId()).get();
-        assertEquals(uibToken, inserted.getUibToken());
-        assertEquals(hvlToken, inserted.getHvlToken());
-    }
 }

@@ -1,5 +1,6 @@
 package com.Gallery.integration.controller;
 
+import com.Gallery.dto.UserRegistrationDTO;
 import com.Gallery.model.User;
 import com.Gallery.repository.UserRepository;
 import com.Gallery.service.UserService;
@@ -27,22 +28,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class UserControllerIntegrationTest {
     @Autowired MockMvc mockMvc;
-    @Autowired private UserRepository userRepository;
     @Autowired private UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private User e = new User();
+    private User e;
 
     @BeforeEach
-    public void setupTestUser() {
+    public void initializeTests() {
+        wipeDatabase();
+        setupTestUser();
+    }
+
+    private void setupTestUser() {
         e = new User();
         e.setUsername("Test");
         e.setEmail("test@example.com");
         e.setPassword("securePassword1!");
     }
 
-    @AfterEach
-    public void emptyDatabase() {
-        userRepository.deleteAll();
+    private void wipeDatabase() {
+        userService.deleteAll();
     }
 
     @Test
@@ -64,60 +68,14 @@ public class UserControllerIntegrationTest {
     @Test
     @WithMockUser
     public void shouldReturnOKWhenGetWithIdExists() throws Exception {
-        userRepository.save(e);
+        UserRegistrationDTO dto = new UserRegistrationDTO(e.getUsername(), e.getEmail(), e.getPassword());
+        e = userService.createUser(dto);
         mockMvc.perform(get("/api/users/{id}", e.getId())
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username", is(e.getUsername())))
                 .andExpect(jsonPath("$.email", is(e.getEmail())))
                 .andExpect(jsonPath("$.password", is(e.getPassword())))
-                .andDo(print())
-        ;
-    }
-
-    @Test
-    public void shouldReturnOKWhenSettingAuthTokenUib() throws Exception {
-        userRepository.save(e);
-        e.setUibToken("secureToken");
-
-        mockMvc.perform(put("/api/users/{id}/setUibToken", e.getId())
-                        .with(csrf())
-                        .content(e.getUibToken())
-                        .with(user(e)))
-                .andExpect(status().isCreated())
-                .andDo(print())
-        ;
-
-        User updatedUser = userRepository.findById(e.getId()).get();
-        assertEquals(e.getUibToken(), updatedUser.getUibToken());
-    }
-
-    @Test
-    public void shouldReturnOKWhenSettingAuthTokenHvl() throws Exception {
-        userRepository.save(e);
-        e.setHvlToken("secureToken");
-
-        mockMvc.perform(put("/api/users/{id}/setHvlToken", e.getId())
-                        .with(csrf())
-                        .content(e.getHvlToken())
-                        .with(user(e)))
-                .andExpect(status().isCreated())
-                .andDo(print())
-        ;
-
-        User updatedUser = userRepository.findById(e.getId()).get();
-        assertEquals(e.getHvlToken(), updatedUser.getHvlToken());
-    }
-
-    @Test
-    public void shouldReturnUnauthorizedWhenSettingTokenForOtherUser() throws Exception {
-        userRepository.save(e);
-        e.setUibToken("secureToken");
-
-        mockMvc.perform(put("/api/users/{id}/setUibToken", e.getId())
-                        .with(csrf())
-                        .content(e.getUibToken()))
-                .andExpect(status().isUnauthorized())
                 .andDo(print())
         ;
     }

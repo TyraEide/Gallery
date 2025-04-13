@@ -84,10 +84,7 @@ public class CourseControllerUnitTest {
     @Test
     public void shouldReturnAnnouncementsUponGetAllAnnouncements() throws JsonProcessingException {
         // Prep arguments
-        List<String> validCourseIds = List.of("Course1, Course2");
         User authorizedUser = new User();
-        authorizedUser.setUibToken("validToken");
-        authorizedUser.setHvlToken("validToken");
 
         // Get announcements
         when(courseService.getAllAnnouncements(authorizedUser)).thenReturn(mockedApi);

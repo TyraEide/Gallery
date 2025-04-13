@@ -1,26 +1,30 @@
 package com.Gallery.service;
 
-import com.Gallery.model.Course;
-import com.Gallery.model.DiscussionTopic;
-import com.Gallery.model.User;
+import com.Gallery.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 @Service
 public class CourseService {
     private final RestTemplate restTemplate;
     private final InstitutionService institutionService;
+    private final TokenService tokenService;
 
-    public CourseService(RestTemplate restTemplate, InstitutionService institutionService) {
+
+    public CourseService(RestTemplate restTemplate, InstitutionService institutionService, TokenService tokenService) {
         this.institutionService = institutionService;
         this.restTemplate = restTemplate;
+        this.tokenService = tokenService;
     }
 
     private HttpEntity<String> buildRequest(String token) {
@@ -113,7 +117,7 @@ public class CourseService {
     }
 
     private String getBaseApiUrl(String institution) {
-        Optional<String> baseApiUrl = institutionService.getApiUrlByShortName(institution);
+        Optional<String> baseApiUrl = institutionService.findApiUrlByShortName(institution);
         if (baseApiUrl.isPresent()) {
             return baseApiUrl.get();
         } else {
@@ -122,20 +126,7 @@ public class CourseService {
     }
 
     private String getToken(String institution, User user) {
-        String token;
-        if(institution.equals("uib")) {
-            token = user.getUibToken();
-        }
-        else if(institution.equals("hvl")) {
-            token = user.getHvlToken();
-        }
-        else {
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No such institution found: " + institution);
-        }
-        if(token == null) {
-            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "User has not set " + institution + " authorization token.");
-        }
-        return token;
+        return tokenService.getTokenForUserAndInstitutionShortName(user, institution).getToken();
     }
 
     /**
@@ -150,25 +141,26 @@ public class CourseService {
         Map<String, Map<Course, List<DiscussionTopic>>> announcements = new HashMap<>();
 
         // Get all courses for each institution
-        List<String> institutions = List.of("uib", "hvl");
-        for (String institution : institutions) {
-            String token = getToken(institution, user);
-            String baseApiUrl = getBaseApiUrl(institution);
+        List<Institution> institutions = institutionService.findAllInstitutions();
+        for (Institution institution : institutions) {
+            String token = getToken(institution.getShortName(), user);
+            String baseApiUrl = institution.getApiUrl();
             String apiUrl = baseApiUrl + "/courses";
 
-            ResponseEntity<Course[]> response = restTemplate.exchange(
+            ResponseEntity<List<Course>> response = restTemplate.exchange(
                     apiUrl,
                     HttpMethod.GET,
                     buildRequest(token),
-                    Course[].class);
+                    new ParameterizedTypeReference<>(){}
+            );
 
-            List<Course> courses = List.of(response.getBody());
+            List<Course> courses = response.getBody();
             List<String> courseIds = new ArrayList<>();
             for (Course course : courses) {
                 courseIds.add(course.getId());
             }
 
-            announcements.put(institution, getAnnouncements(baseApiUrl, courseIds, courses, token));
+            announcements.put(institution.getShortName(), getAnnouncements(baseApiUrl, courseIds, courses, token));
         }
         return announcements;
     }

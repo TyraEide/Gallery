@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -26,12 +27,6 @@ public class User implements UserDetails {
 
     @Column(unique = true, nullable = false)
     private String email;
-
-    @Convert(converter = StringCryptoConverter.class)
-    private String uibToken;
-
-    @Convert(converter = StringCryptoConverter.class)
-    private String hvlToken;
 
     public User(String username, String email, String password) {
         this.username = username;
@@ -77,53 +72,16 @@ public class User implements UserDetails {
         return email;
     }
 
-    public void setUibToken(String canvasAuthToken) {
-
-        this.uibToken = canvasAuthToken;
-    }
-
-    public String getUibToken() {
-        return uibToken;
-    }
-
-    public void setHvlToken(String hvlToken) {
-        this.hvlToken = hvlToken;
-    }
-
-    public String getHvlToken() {
-        return hvlToken;
-    }
-
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-
-        User other = (User) obj;
-
-        // If ID is different
-        if (this.getId() != other.getId())
-            return false;
-        // If username is different
-        if (!this.getUsername().equals(other.getUsername()))
-            return false;
-        // If email is different
-        return this.getEmail().equals(other.getEmail());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(username, user.username) && Objects.equals(email, user.email);
     }
 
-    /**
-     * source: <a href="https://mkyong.com/spring-boot/spring-mockito-unable-to-mock-save-method/">...</a>
-     */
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (getId() != null ? getId().hashCode() : 0);
-        result = 31 * result + (getUsername() != null ? getUsername().hashCode() : 0);
-        result = 31 * result + (getEmail() != null ? getEmail().hashCode() : 0);
-        return result;
+        return Objects.hash(id, username, email);
     }
 }
