@@ -100,19 +100,28 @@ public class CourseService {
         // Get courses from the canvas api
         List<Course> courses = new ArrayList<>();
         for (String courseId : courseIds) {
-            ResponseEntity<Course> course = restTemplate.exchange(
-                    baseApiUrl + "/courses/{courseId}",
-                    HttpMethod.GET,
-                    buildRequest(token),
-                    Course.class,
-                    courseId
-            );
-            courses.add(course.getBody());
+            Course course = getCourse(courseId, institution, user);
+            courses.add(course);
         }
 
         Map<String, Map<Course, List<DiscussionTopic>>> announcements = new HashMap<>();
         announcements.put(institution, getAnnouncements(baseApiUrl, courseIds, courses, token));
         return announcements;
+    }
+
+    public Course getCourse(String courseId, String institution, User user) {
+        String token = getToken(institution, user);
+        String baseApiUrl = getBaseApiUrl(institution);
+
+        ResponseEntity<Course> course = restTemplate.exchange(
+                baseApiUrl + "/courses/{courseId}",
+                HttpMethod.GET,
+                buildRequest(token),
+                Course.class,
+                courseId
+        );
+
+        return course.getBody();
     }
 
     /**

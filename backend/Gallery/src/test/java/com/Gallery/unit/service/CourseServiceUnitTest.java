@@ -238,6 +238,43 @@ public class CourseServiceUnitTest {
 
         assertEquals(expected, actual);
     }
+
+    @Test
+    public void shouldReturnApiCourseUponGetCourse() {
+        // Mock services
+        Institution institution = institutionList.getFirst();
+        mockTokenService(List.of(institution), false);
+        mockInstitutionService(List.of(institution), false);
+
+        String institutionShortName = institution.getShortName();
+        Course expected = new ArrayList<>(mockedApi.get(institutionShortName).keySet()).getFirst();
+        String baseApiUrl = institutionService.findApiUrlByShortName(institutionShortName).get();
+
+        // Mock restTemplate response
+        ResponseEntity<Course> responseCourse = new ResponseEntity<>(expected, HttpStatus.OK);
+        when(restTemplate.exchange(
+                eq(institution.getApiUrl() + "/courses/{courseId}"),
+                eq(HttpMethod.GET),
+                any(),
+                eq(Course.class),
+                any(String.class)
+        )).thenReturn(responseCourse);
+
+        CanvasToken authorizationToken = tokenService.getTokenForUserAndInstitutionShortName(emptyUser, institutionShortName);
+        HttpEntity<String> request = createRequestWithAuthorizationHeaders(authorizationToken);
+        Course actual = courseService.getCourse(expected.getId(), institutionShortName, emptyUser);
+
+        // Assertions
+        verify(restTemplate).exchange(
+                baseApiUrl + "/courses/{courseId}",
+                HttpMethod.GET,
+                request,
+                Course.class,
+                expected.getId());
+
+        assertEquals(expected, actual);
+    }
+
     @Test
     public void shouldThrowErrorUponInvalidInstitution() {
         mockTokenService(new ArrayList<>(), true);
@@ -312,7 +349,6 @@ public class CourseServiceUnitTest {
         }
 
     }
-
 
     @Test
     public void shouldReturnAllAnnouncementsForAllInstitutionsUponGetAllAnnouncements() throws JsonProcessingException {
