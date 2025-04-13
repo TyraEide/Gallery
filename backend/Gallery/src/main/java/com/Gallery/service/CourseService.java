@@ -167,16 +167,8 @@ public class CourseService {
         for (Institution institution : institutions) {
             String token = getToken(institution.getShortName(), user);
             String baseApiUrl = institution.getApiUrl();
-            String apiUrl = baseApiUrl + "/courses";
 
-            ResponseEntity<List<Course>> response = restTemplate.exchange(
-                    apiUrl,
-                    HttpMethod.GET,
-                    buildRequest(token),
-                    new ParameterizedTypeReference<>(){}
-            );
-
-            List<Course> courses = response.getBody();
+            List<Course> courses = getCourses(institution.getShortName(), user);
             List<String> courseIds = new ArrayList<>();
             for (Course course : courses) {
                 courseIds.add(course.getId());
