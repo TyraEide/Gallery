@@ -99,11 +99,6 @@ public class CourseServiceUnitTest {
         jsonAnnouncements = json;
     }
 
-    @BeforeEach
-    public void mockServices() {
-
-    }
-
     private void mockInstitutionService(List<Institution> validInstitutions, boolean invalidInstitutions) {
         for (Institution institution : validInstitutions) {
             lenient().when(institutionService.findApiUrlByShortName(institution.getShortName()))
