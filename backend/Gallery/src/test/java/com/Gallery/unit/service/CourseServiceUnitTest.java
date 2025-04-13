@@ -284,6 +284,37 @@ public class CourseServiceUnitTest {
     }
 
     @Test
+    public void shouldReturnAllCoursesForAllInstitutionsUponGetAllCourses() {
+        mockTokenService(institutionList, false);
+        mockInstitutionService(institutionList, false);
+
+        for (Institution institution : institutionList) {
+            List<Course> expected = new ArrayList<>(mockedApi.get(institution.getShortName()).keySet());
+
+            ResponseEntity<List<Course>> responseCourseList = new ResponseEntity<>(expected, HttpStatus.OK);
+            when(restTemplate.exchange(
+                    eq(institution.getApiUrl() + "/courses"),
+                    eq(HttpMethod.GET),
+                    any(),
+                    eq(new ParameterizedTypeReference<List<Course>>(){})
+            )).thenReturn(responseCourseList);
+        }
+
+        Map<String, List<Course>> result = courseService.getAllCourses(emptyUser);
+
+        for (Institution institution : institutionList) {
+            String shortName = institution.getShortName();
+            List<Course> expected = new ArrayList<>(mockedApi.get(shortName).keySet());
+            List<Course> actual = result.get(shortName);
+            for (Course course : expected) {
+                assertTrue(actual.contains(course));
+            }
+        }
+
+    }
+
+
+    @Test
     public void shouldReturnAllAnnouncementsForAllInstitutionsUponGetAllAnnouncements() throws JsonProcessingException {
         // Mock services
         mockTokenService(institutionList, false);

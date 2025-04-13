@@ -153,7 +153,7 @@ public class CourseService {
 
     /**
      * Gets all announcements for all courses the user is enrolled in on all institutions.
-     * The user must have set a valid token for both institutions.
+     * The user must have set a valid token for all institutions.
      * @param user the user for which to collect the announcements
      * @return A map linking each institution to its courses, and each course to its announcements
      * @throws JsonProcessingException if the json response from the Canvas api cannot be processed
@@ -185,6 +185,25 @@ public class CourseService {
             announcements.put(institution.getShortName(), getAnnouncements(baseApiUrl, courseIds, courses, token));
         }
         return announcements;
+    }
+
+    /**
+     * Gets all courses the user is enrolled in on all institutions.
+     * The user must have set a valid token for all institutions.
+     * @param user the user for which to collect the courses
+     * @return A map linking each institution to its courses
+     * @throws HttpClientErrorException if the user has not set both tokens
+     */
+    public Map<String, List<Course>> getAllCourses(User user) {
+        Map<String, List<Course>> courses = new HashMap<>();
+
+        // Get all courses for each institution
+        List<Institution> institutions = institutionService.findAllInstitutions();
+        for (Institution institution : institutions) {
+            String institutionShortName = institution.getShortName();
+            courses.put(institutionShortName, getCourses(institutionShortName, user));
+        }
+        return courses;
     }
 
 
