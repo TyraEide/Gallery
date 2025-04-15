@@ -25,6 +25,11 @@ public class CourseController {
         return courseService.getAllCourses(user);
     }
 
+    @GetMapping("/{id}")
+    public Course getCourse(@PathVariable String id, @RequestBody String institutionShortName, @AuthenticationPrincipal User user) {
+        return courseService.getCourse(id, institutionShortName, user);
+    }
+
     @GetMapping("/announcements")
     public Map<String, Map<Course, List<DiscussionTopic>>> getAllAnnouncements(@AuthenticationPrincipal User user) throws JsonProcessingException {
         return courseService.getAllAnnouncements(user);

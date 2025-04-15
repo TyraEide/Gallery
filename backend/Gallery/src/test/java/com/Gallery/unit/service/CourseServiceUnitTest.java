@@ -162,7 +162,7 @@ public class CourseServiceUnitTest {
             contextCodes.add("course_"+courses.get(i).getId());
             ResponseEntity<Course> response = new ResponseEntity<>(courses.get(i), HttpStatus.OK);
             when(restTemplate.exchange(
-                    eq(baseApiUrl + "/courses/{courseId}"),
+                    eq(baseApiUrl + "/courses/{id}"),
                     eq(HttpMethod.GET),
                     any(),
                     eq(Course.class),
@@ -253,7 +253,7 @@ public class CourseServiceUnitTest {
         // Mock restTemplate response
         ResponseEntity<Course> responseCourse = new ResponseEntity<>(expected, HttpStatus.OK);
         when(restTemplate.exchange(
-                eq(institution.getApiUrl() + "/courses/{courseId}"),
+                eq(institution.getApiUrl() + "/courses/{id}"),
                 eq(HttpMethod.GET),
                 any(),
                 eq(Course.class),
@@ -266,7 +266,7 @@ public class CourseServiceUnitTest {
 
         // Assertions
         verify(restTemplate).exchange(
-                baseApiUrl + "/courses/{courseId}",
+                baseApiUrl + "/courses/{id}",
                 HttpMethod.GET,
                 request,
                 Course.class,

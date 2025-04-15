@@ -114,7 +114,7 @@ public class CourseService {
         String baseApiUrl = getBaseApiUrl(institution);
 
         ResponseEntity<Course> course = restTemplate.exchange(
-                baseApiUrl + "/courses/{courseId}",
+                baseApiUrl + "/courses/{id}",
                 HttpMethod.GET,
                 buildRequest(token),
                 Course.class,
