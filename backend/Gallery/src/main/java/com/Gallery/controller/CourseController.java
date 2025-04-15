@@ -6,9 +6,7 @@ import com.Gallery.model.User;
 import com.Gallery.service.CourseService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +18,11 @@ public class CourseController {
 
     public CourseController(CourseService courseService) {
         this.courseService = courseService;
+    }
+
+    @GetMapping
+    public Map<String, List<Course>> getAllCourses(@AuthenticationPrincipal User user) {
+        return courseService.getAllCourses(user);
     }
 
     @GetMapping("/announcements")

@@ -164,6 +164,30 @@ public class CourseControllerIntegrationTest {
     }
 
     @Test
+    public void shouldReturnOKUponGettingAllCourses() throws Exception {
+        setValidTokenForUser(user, institutionList);
+
+        for (Institution institution : institutionList) {
+            String shortName = institution.getShortName();
+            List<Course> courses = new ArrayList<>(mockedApi.get(shortName).keySet());
+
+            ResponseEntity<List<Course>> responseCourseList = new ResponseEntity<>(courses, HttpStatus.OK);
+            when(restTemplate.exchange(
+                    eq(institution.getApiUrl() + "/courses"),
+                    eq(HttpMethod.GET),
+                    any(),
+                    eq(new ParameterizedTypeReference<List<Course>>(){})
+            )).thenReturn(responseCourseList);
+        }
+
+        mockMvc.perform(get("/api/courses")
+                        .with(csrf())
+                        .with(user(user)))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
     public void shouldReturnOKUponGettingAllAnnouncements() throws Exception {
         setValidTokenForUser(user, institutionList);
 
