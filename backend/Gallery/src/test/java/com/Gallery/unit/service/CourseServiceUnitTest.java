@@ -99,11 +99,6 @@ public class CourseServiceUnitTest {
         jsonAnnouncements = json;
     }
 
-    @BeforeEach
-    public void mockServices() {
-
-    }
-
     private void mockInstitutionService(List<Institution> validInstitutions, boolean invalidInstitutions) {
         for (Institution institution : validInstitutions) {
             lenient().when(institutionService.findApiUrlByShortName(institution.getShortName()))
@@ -137,6 +132,15 @@ public class CourseServiceUnitTest {
 
         lenient().when(institutionService.findAllInstitutions()).thenReturn(institutionList);
     }
+
+    private HttpEntity<String> createRequestWithAuthorizationHeaders(CanvasToken authorizationToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.set("Authorization", "Bearer " + authorizationToken.getToken());
+        return new HttpEntity<>(headers);
+    }
+
 
     @Test
     public void shouldReturnAPIAnnouncementsUponGetAnnouncements() throws JsonProcessingException {
@@ -197,12 +201,78 @@ public class CourseServiceUnitTest {
         }
     }
 
-    private HttpEntity<String> createRequestWithAuthorizationHeaders(CanvasToken authorizationToken) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.set("Authorization", "Bearer " + authorizationToken.getToken());
-        return new HttpEntity<>(headers);
+    @Test
+    public void shouldReturnApiCoursesUponGetCourses() {
+        // Mock services
+        Institution institution = institutionList.getFirst();
+        mockTokenService(List.of(institution), false);
+        mockInstitutionService(List.of(institution), false);
+
+        String institutionShortName = institution.getShortName();
+        List<Course> expected = new ArrayList<>(mockedApi.get(institutionShortName).keySet());
+        String baseApiUrl = institutionService.findApiUrlByShortName(institutionShortName).get();
+
+        // Mock restTemplate response
+        List<Course> courses = new ArrayList<>(mockedApi.get(institution.getShortName()).keySet());
+
+        ResponseEntity<List<Course>> responseCourseList = new ResponseEntity<>(courses, HttpStatus.OK);
+        when(restTemplate.exchange(
+                eq(institution.getApiUrl() + "/courses"),
+                eq(HttpMethod.GET),
+                any(),
+                eq(new ParameterizedTypeReference<List<Course>>(){})
+        )).thenReturn(responseCourseList);
+
+
+        CanvasToken authorizationToken = tokenService.getTokenForUserAndInstitutionShortName(emptyUser, institutionShortName);
+        HttpEntity<String> request = createRequestWithAuthorizationHeaders(authorizationToken);
+
+        List<Course> actual = courseService.getCourses(institutionShortName, emptyUser);
+
+        // Assertions
+        verify(restTemplate).exchange(
+                baseApiUrl + "/courses",
+                HttpMethod.GET,
+                request,
+                new ParameterizedTypeReference<List<Course>>(){});
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldReturnApiCourseUponGetCourse() {
+        // Mock services
+        Institution institution = institutionList.getFirst();
+        mockTokenService(List.of(institution), false);
+        mockInstitutionService(List.of(institution), false);
+
+        String institutionShortName = institution.getShortName();
+        Course expected = new ArrayList<>(mockedApi.get(institutionShortName).keySet()).getFirst();
+        String baseApiUrl = institutionService.findApiUrlByShortName(institutionShortName).get();
+
+        // Mock restTemplate response
+        ResponseEntity<Course> responseCourse = new ResponseEntity<>(expected, HttpStatus.OK);
+        when(restTemplate.exchange(
+                eq(institution.getApiUrl() + "/courses/{courseId}"),
+                eq(HttpMethod.GET),
+                any(),
+                eq(Course.class),
+                any(String.class)
+        )).thenReturn(responseCourse);
+
+        CanvasToken authorizationToken = tokenService.getTokenForUserAndInstitutionShortName(emptyUser, institutionShortName);
+        HttpEntity<String> request = createRequestWithAuthorizationHeaders(authorizationToken);
+        Course actual = courseService.getCourse(expected.getId(), institutionShortName, emptyUser);
+
+        // Assertions
+        verify(restTemplate).exchange(
+                baseApiUrl + "/courses/{courseId}",
+                HttpMethod.GET,
+                request,
+                Course.class,
+                expected.getId());
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -217,39 +287,67 @@ public class CourseServiceUnitTest {
         assertThrows(HttpClientErrorException.class, () -> courseService.getAnnouncements(institutionList.getFirst().getShortName(), null, emptyUser));
     }
 
-    private void verifyCorrectBaseApiUrl(Institution institution, List<String> courseIds, User authorizedUser) throws JsonProcessingException {
+    private void verifyCorrectBaseApiUrl(Institution institution, User authorizedUser) {
         String institutionBaseUrl = institution.getApiUrl();
-        ResponseEntity<String> response = new ResponseEntity<>("", HttpStatus.OK);
-        lenient().when(restTemplate.exchange(
-                any(),
+        ResponseEntity<List<Course>> response = new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        when(restTemplate.exchange(
+                eq(institutionBaseUrl + "/courses"),
                 eq(HttpMethod.GET),
                 any(),
-                eq(String.class),
-                any(Object[].class)
+                eq(new ParameterizedTypeReference<List<Course>>(){})
         )).thenReturn(response);
 
-        String apiUrl = institutionBaseUrl + "/announcements?context_codes[]={validCourseIds}";
+        String apiUrl = institutionBaseUrl + "/courses";
         CanvasToken token = tokenService.getTokenForUserAndInstitutionShortName(authorizedUser, institution.getShortName());
         HttpEntity<String> request = createRequestWithAuthorizationHeaders(token);
 
-        courseService.getAnnouncements(institution.getShortName(), courseIds, authorizedUser);
+        courseService.getCourses(institution.getShortName(), authorizedUser);
 
         verify(restTemplate).exchange(
                 apiUrl,
                 HttpMethod.GET,
                 request,
-                String.class,
-                courseIds.toString()
+                new ParameterizedTypeReference<List<Course>>() {}
         );
     }
 
     @Test
-    public void shouldUseCorrectBaseApiUrlForValidInstitution() throws JsonProcessingException {
+    public void shouldUseCorrectBaseApiUrlForValidInstitution() {
         mockInstitutionService(institutionList, false);
         mockTokenService(institutionList, false);
         for (Institution institution : institutionList) {
-            verifyCorrectBaseApiUrl(institution, new ArrayList<>(), emptyUser);
+            verifyCorrectBaseApiUrl(institution, emptyUser);
         }
+    }
+
+    @Test
+    public void shouldReturnAllCoursesForAllInstitutionsUponGetAllCourses() {
+        mockTokenService(institutionList, false);
+        mockInstitutionService(institutionList, false);
+
+        for (Institution institution : institutionList) {
+            List<Course> expected = new ArrayList<>(mockedApi.get(institution.getShortName()).keySet());
+
+            ResponseEntity<List<Course>> responseCourseList = new ResponseEntity<>(expected, HttpStatus.OK);
+            when(restTemplate.exchange(
+                    eq(institution.getApiUrl() + "/courses"),
+                    eq(HttpMethod.GET),
+                    any(),
+                    eq(new ParameterizedTypeReference<List<Course>>(){})
+            )).thenReturn(responseCourseList);
+        }
+
+        Map<String, List<Course>> result = courseService.getAllCourses(emptyUser);
+
+        for (Institution institution : institutionList) {
+            String shortName = institution.getShortName();
+            List<Course> expected = new ArrayList<>(mockedApi.get(shortName).keySet());
+            List<Course> actual = result.get(shortName);
+            for (Course course : expected) {
+                assertTrue(actual.contains(course));
+            }
+        }
+
     }
 
     @Test

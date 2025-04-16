@@ -84,7 +84,7 @@ public class CourseService {
     }
 
     /**
-     * Gets the announcements for the specified courses at the specified institution.
+     * Gets the user's announcements for the specified courses at the specified institution.
      * The user must have set a valid authorization token for the institutions.
      * @param institution a valid institution name that all the wanted courses belong to
      * @param courseIds a list of valid course ids for which to collect announcements
@@ -95,25 +95,56 @@ public class CourseService {
      */
     public Map<String, Map<Course, List<DiscussionTopic>>> getAnnouncements(String institution, List<String> courseIds, User user) throws JsonProcessingException {
         String token = getToken(institution, user);
-
         String baseApiUrl = getBaseApiUrl(institution);
 
         // Get courses from the canvas api
         List<Course> courses = new ArrayList<>();
         for (String courseId : courseIds) {
-            ResponseEntity<Course> course = restTemplate.exchange(
-                    baseApiUrl + "/courses/{courseId}",
-                    HttpMethod.GET,
-                    buildRequest(token),
-                    Course.class,
-                    courseId
-            );
-            courses.add(course.getBody());
+            Course course = getCourse(courseId, institution, user);
+            courses.add(course);
         }
 
         Map<String, Map<Course, List<DiscussionTopic>>> announcements = new HashMap<>();
         announcements.put(institution, getAnnouncements(baseApiUrl, courseIds, courses, token));
         return announcements;
+    }
+
+    public Course getCourse(String courseId, String institution, User user) {
+        String token = getToken(institution, user);
+        String baseApiUrl = getBaseApiUrl(institution);
+
+        ResponseEntity<Course> course = restTemplate.exchange(
+                baseApiUrl + "/courses/{courseId}",
+                HttpMethod.GET,
+                buildRequest(token),
+                Course.class,
+                courseId
+        );
+
+        return course.getBody();
+    }
+
+    /**
+     * Gets the user's courses for the specified institution.
+     * The user must have set a valid authorization token for the institutions.
+     * @param institution a valid institution name that all the wanted courses belong to
+     * @param user the user for which to collect the announcements
+     * @return A list of courses the user is enrolled in at the given institutions Canvas
+     * @throws HttpClientErrorException if the user has not set an authorization token or if the institution is invalid
+     */
+    public List<Course> getCourses(String institution, User user) {
+        String token = getToken(institution, user);
+        String baseApiUrl = getBaseApiUrl(institution);
+        String apiUrl = baseApiUrl + "/courses";
+
+        ResponseEntity<List<Course>> response = restTemplate.exchange(
+                apiUrl,
+                HttpMethod.GET,
+                buildRequest(token),
+                new ParameterizedTypeReference<>(){}
+        );
+
+        return response.getBody();
     }
 
     private String getBaseApiUrl(String institution) {
@@ -131,7 +162,7 @@ public class CourseService {
 
     /**
      * Gets all announcements for all courses the user is enrolled in on all institutions.
-     * The user must have set a valid token for both institutions.
+     * The user must have set a valid token for all institutions.
      * @param user the user for which to collect the announcements
      * @return A map linking each institution to its courses, and each course to its announcements
      * @throws JsonProcessingException if the json response from the Canvas api cannot be processed
@@ -145,16 +176,8 @@ public class CourseService {
         for (Institution institution : institutions) {
             String token = getToken(institution.getShortName(), user);
             String baseApiUrl = institution.getApiUrl();
-            String apiUrl = baseApiUrl + "/courses";
 
-            ResponseEntity<List<Course>> response = restTemplate.exchange(
-                    apiUrl,
-                    HttpMethod.GET,
-                    buildRequest(token),
-                    new ParameterizedTypeReference<>(){}
-            );
-
-            List<Course> courses = response.getBody();
+            List<Course> courses = getCourses(institution.getShortName(), user);
             List<String> courseIds = new ArrayList<>();
             for (Course course : courses) {
                 courseIds.add(course.getId());
@@ -163,6 +186,25 @@ public class CourseService {
             announcements.put(institution.getShortName(), getAnnouncements(baseApiUrl, courseIds, courses, token));
         }
         return announcements;
+    }
+
+    /**
+     * Gets all courses the user is enrolled in on all institutions.
+     * The user must have set a valid token for all institutions.
+     * @param user the user for which to collect the courses
+     * @return A map linking each institution to its courses
+     * @throws HttpClientErrorException if the user has not set both tokens
+     */
+    public Map<String, List<Course>> getAllCourses(User user) {
+        Map<String, List<Course>> courses = new HashMap<>();
+
+        // Get all courses for each institution
+        List<Institution> institutions = institutionService.findAllInstitutions();
+        for (Institution institution : institutions) {
+            String institutionShortName = institution.getShortName();
+            courses.put(institutionShortName, getCourses(institutionShortName, user));
+        }
+        return courses;
     }
 
 
