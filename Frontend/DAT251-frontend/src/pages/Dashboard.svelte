@@ -1,57 +1,37 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { api_url } from "../ts_modules/api";
-    import {redirect} from "../ts_modules/routing";
+  import { onMount } from "svelte";
+  import { redirect } from "../ts_modules/routing";
+  import config from "../config"
 
-    interface User {
-        name:String
+  interface Course { id: number; name: string; code: string }
+
+  let courses: Course[] = [];
+
+  async function getCourses(): Promise<Course[]> {
+    const res = await fetch(`${config.API_BASE_URL}/api/courses`);
+    return res.json();
+  }
+
+  onMount(async () => {
+    try {
+      courses = await getCourses();
+    } catch (e) {
+      console.error("Failed to load courses", e);
     }
-
-    const monthNames = ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ];
-
-    const date = new Date();
-    let courses : JSON;
-    let calendar_events : JSON;
-    let user : User = {name:"User"}
-
-    async function getCourses(){
-        const r_json = fetch(api_url("/courses"))
-                        .then((r) => r.json())
-                        .catch((e) => console.error(e))
-
-        return r_json
-    }
-
-    async function getEvents(){
-        const r_json = fetch(api_url("/calendar"))
-                        .then((r) => r.json())
-                        .catch((e) => console.error(e))
-
-        return r_json
-    }
-
-    async function getUser(){
-        const r_json = fetch(api_url("/user"))
-                        .then((r) => r.json())
-                        .catch((e) => console.error(e))
-
-        return r_json
-    }
-
-    onMount( async () => {
-        
-        //getCourses().then((r)=> courses = r)
-        //getEvents().then((r) => calendar_events = r)
-        
-    })
-
-
+  });
 </script>
 
 <main>
-    <h2>Welcome {user.name}</h2>
-    <h2>{date.toLocaleString("default", {weekday:'long',day:'numeric',month:'long',year:'numeric'})}</h2>
-    <button onclick={() => redirect("announcements")}>To announcements</button>
+  <div class="header">
+    <h3>{new Date().toLocaleString("default",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</h3>
+    <button on:click={() => redirect("announcements")}>Announcements</button>
+  </div>
+  <section class="courses-grid">
+    {#each courses as c}
+      <div class="course-card" on:click={() => redirect(`course/${c.id}`)}>
+        <h3>{c.name}</h3>
+        <p>{c.code}</p>
+      </div>
+    {/each}
+  </section>
 </main>
