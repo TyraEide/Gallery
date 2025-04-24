@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -161,6 +162,56 @@ public class CourseControllerIntegrationTest {
 
             tokenService.create(token, dbUser);
         }
+    }
+
+    @Test
+    public void shouldReturnOKUponGettingAllCourses() throws Exception {
+        setValidTokenForUser(user, institutionList);
+
+        for (Institution institution : institutionList) {
+            String shortName = institution.getShortName();
+            List<Course> courses = new ArrayList<>(mockedApi.get(shortName).keySet());
+
+            ResponseEntity<List<Course>> responseCourseList = new ResponseEntity<>(courses, HttpStatus.OK);
+            when(restTemplate.exchange(
+                    eq(institution.getApiUrl() + "/courses"),
+                    eq(HttpMethod.GET),
+                    any(),
+                    eq(new ParameterizedTypeReference<List<Course>>(){})
+            )).thenReturn(responseCourseList);
+        }
+
+        mockMvc.perform(get("/api/courses")
+                        .with(csrf())
+                        .with(user(user)))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldReturnOKUponGetCourseWithId() throws Exception {
+        setValidTokenForUser(user, institutionList);
+
+        Institution institution = institutionList.getFirst();
+        String shortName = institution.getShortName();
+        Course course = new ArrayList<>(mockedApi.get(shortName).keySet()).getFirst();
+
+        ResponseEntity<Course> response = new ResponseEntity<>(course, HttpStatus.OK);
+        when(restTemplate.exchange(
+                eq(institution.getApiUrl() + "/courses/{id}"),
+                eq(HttpMethod.GET),
+                any(),
+                eq(Course.class),
+                any(String.class)
+        )).thenReturn(response);
+
+        mockMvc.perform(get("/api/courses/{id}", course.getId())
+                        .with(csrf())
+                        .with(user(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(shortName))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
