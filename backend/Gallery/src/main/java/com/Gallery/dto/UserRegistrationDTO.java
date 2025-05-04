@@ -21,8 +21,8 @@ public class UserRegistrationDTO {
             throw new IllegalArgumentException("Password must be at least 8 characters long.");
         }
 
-        if(!password.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=]).{8,}$")){
-            throw new IllegalArgumentException("Password must contain letters, numbers, and symbols");
+        if(!password.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+,.\\-=]).{8,}$")){
+            throw new IllegalArgumentException("Password must contain at least a letter, a number, and a special character");
         }
 
     }
