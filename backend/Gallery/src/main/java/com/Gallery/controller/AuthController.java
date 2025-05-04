@@ -1,5 +1,6 @@
 package com.Gallery.controller;
 
+import com.Gallery.dto.LoginRequestDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
