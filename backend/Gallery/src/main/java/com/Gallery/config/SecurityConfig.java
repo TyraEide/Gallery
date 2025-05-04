@@ -2,12 +2,15 @@ package com.Gallery.config;
 
 import java.util.List;
 
+import com.Gallery.jwt.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -15,27 +18,36 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        return http.
+                cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable()) //Used to allow connection to localhost 
-                
-                .authorizeHttpRequests((request) -> {
-                    request.requestMatchers("/api/users").permitAll()
-                           .requestMatchers("/login").permitAll() 
-                           .anyRequest().authenticated();
-                            
-                })
-                
-                .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())  // Allow frames from the same origin
+
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers("/api/users").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .formLogin(Customizer.withDefaults())
-                .logout((logout) -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessUrl("/login")
-                        .permitAll())
-                .httpBasic(Customizer.withDefaults())
+
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                )
+
+                // Remove formLogin and httpBasic since we're using JWT
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .build();
     }
 
