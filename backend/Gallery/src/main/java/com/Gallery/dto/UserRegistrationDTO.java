@@ -22,7 +22,7 @@ public class UserRegistrationDTO {
         }
 
         if(!password.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=]).{8,}$")){
-            throw new IllegalArgumentException("Password must contain letters, numbers, and symbols");
+            throw new IllegalArgumentException("Password must contain at least a letter, a number, and a special character");
         }
 
     }
