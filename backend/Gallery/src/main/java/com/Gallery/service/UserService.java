@@ -55,6 +55,11 @@ public class UserService {
                 "No user with id " + id + " found."));
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND,
+                "No user with email " + email + " found."));
+    }
+
     public boolean existsById(UUID userId) {
         return userRepository.existsById(userId);
     }
