@@ -1,20 +1,15 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { redirect } from "../ts_modules/routing";
+  import {get_logged_in_user, type User} from "../ts_modules/api";
   import config from "../config"
   import Announcement from "./Announcement.svelte";
   import type {UUID} from "node:crypto";
 
   interface Course { id: number; name: string; code: string }
-  interface User {id: UUID, username: string; email: string;}
 
   let courses: Course[] = [];
   let user: User = null;
-
-  function getUser(): User {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null
-  }
 
   async function getCourses(): Promise<Course[]> {
     const res = await fetch(`${config.API_BASE_URL}/api/courses`);
@@ -22,7 +17,7 @@
   }
 
   onMount(async () => {
-    user = getUser();
+    user = get_logged_in_user();
     try {
       courses = await getCourses();
     } catch (e) {

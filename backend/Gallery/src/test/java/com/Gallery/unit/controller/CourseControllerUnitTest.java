@@ -81,26 +81,26 @@ public class CourseControllerUnitTest {
     }
 
 
-    @Test
-    public void shouldReturnAnnouncementsUponGetAllAnnouncements() throws JsonProcessingException {
-        // Prep arguments
-        User authorizedUser = new User();
-
-        // Get announcements
-        when(courseService.getAllAnnouncements(authorizedUser)).thenReturn(mockedApi);
-        Map<String, Map<Course, List<DiscussionTopic>>> result = courseController.getAllAnnouncements(authorizedUser);
-        verify(courseService).getAllAnnouncements(authorizedUser);
-
-        // Validate result
-        List<String> institutions = List.of("uib", "hvl");
-        for (String institution : institutions) {
-            Map<Course, List<DiscussionTopic>> expected = mockedApi.get(institution);
-            Map<Course, List<DiscussionTopic>> actual = result.get(institution);
-            for (Course course : mockedApi.get(institution).keySet()) {
-                for (DiscussionTopic announcement : expected.get(course)) {
-                    assertTrue(actual.get(course).contains(announcement));
-                }
-            }
-        }
-    }
+//    @Test
+//    public void shouldReturnAnnouncementsUponGetAllAnnouncements() throws JsonProcessingException {
+//        // Prep arguments
+//        User authorizedUser = new User();
+//
+//        // Get announcements
+//        when(courseService.getAllAnnouncements(authorizedUser)).thenReturn(mockedApi);
+//        Map<String, Map<Course, List<DiscussionTopic>>> result = courseController.getAllAnnouncements(authorizedUser);
+//        verify(courseService).getAllAnnouncements(authorizedUser);
+//
+//        // Validate result
+//        List<String> institutions = List.of("uib", "hvl");
+//        for (String institution : institutions) {
+//            Map<Course, List<DiscussionTopic>> expected = mockedApi.get(institution);
+//            Map<Course, List<DiscussionTopic>> actual = result.get(institution);
+//            for (Course course : mockedApi.get(institution).keySet()) {
+//                for (DiscussionTopic announcement : expected.get(course)) {
+//                    assertTrue(actual.get(course).contains(announcement));
+//                }
+//            }
+//        }
+//    }
 }

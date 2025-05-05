@@ -56,10 +56,10 @@
         //check for contents
         if(response_json.token != undefined){
           
-            set_jwt_token(response_json.token)
-            set_logged_in_user(response_json.user)
-            message = "Login Successful"
-            setTimeout(() => redirect("dashboard"), 600)
+            set_jwt_token(response_json.token);
+            set_logged_in_user(JSON.stringify(response_json.user));
+            message = "Login Successful";
+            setTimeout(() => redirect("dashboard"), 600);
         }
         else{
           message = response_json.token

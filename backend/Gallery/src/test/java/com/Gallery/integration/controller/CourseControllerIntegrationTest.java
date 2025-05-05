@@ -160,7 +160,7 @@ public class CourseControllerIntegrationTest {
             token.setInstitution(dbInstitution);
             token.setToken("validToken");
 
-            tokenService.create(token, dbUser);
+            tokenService.create(token);
         }
     }
 
