@@ -31,10 +31,19 @@ public class AuthController {
 
         if (encoder.matches(loginRequest.getPassword(), user.getPassword())) {
             String token = jwtUtil.generateToken(user.getEmail());
-            return ResponseEntity.ok(Map.of("token", token));
+
+            // Build the response with both token and user
+            Map<String, Object> userData = Map.of("email", user.getEmail()); // Add more fields if needed
+            Map<String, Object> response = Map.of(
+                    "token", token,
+                    "user", userData
+            );
+
+            return ResponseEntity.ok(response);
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Invalid email or password"));
+                .body(Map.of("message", "Invalid email or password")); // "message" matches frontend error handler
     }
 }
+

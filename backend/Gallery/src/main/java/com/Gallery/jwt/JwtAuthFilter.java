@@ -52,9 +52,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     e.printStackTrace();
                 }
             } else {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+                return;
             }
         }
 
+        // ✅ Allow anonymous requests to proceed here
         filterChain.doFilter(request, response);
     }
 }

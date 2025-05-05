@@ -5,6 +5,7 @@ import java.util.List;
 import com.Gallery.jwt.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,8 +33,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) //Used to allow connection to localhost 
 
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/users").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/users").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/courses").authenticated()
                         .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // ✅ allow CORS preflight
                         .anyRequest().authenticated()
                 )
 
@@ -54,15 +57,17 @@ public class SecurityConfig {
     //This is a configuration to make allow rewuests to localhost
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        
-        // Adjust frontend URL if needed
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+
+        config.setAllowedOriginPatterns(List.of("http://localhost:5173")); // ✅ preferred over setAllowedOrigins
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowCredentials(true);
+        config.setExposedHeaders(List.of("Authorization")); // ✅ if you need to read token from response
+        config.setAllowCredentials(true); // ✅ important if frontend sends credentials
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
 }
