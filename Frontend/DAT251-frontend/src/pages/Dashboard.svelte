@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { redirect } from "../ts_modules/routing";
   import config from "../config"
+  import Announcement from "./Announcement.svelte";
 
   interface Course { id: number; name: string; code: string }
 
@@ -24,8 +25,10 @@
 <main>
   <div class="header">
     <h3>{new Date().toLocaleString("default",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</h3>
-    <button on:click={() => redirect("announcements")}>Announcements</button>
   </div>
+  <section class="announcement-container">
+    <Announcement />
+  </section>
   <section class="courses-grid">
     {#each courses as c}
       <div class="course-card" on:click={() => redirect(`course/${c.id}`)}>
