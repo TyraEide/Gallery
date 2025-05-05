@@ -13,7 +13,7 @@
     async function register(event: Event) {
         event.preventDefault();
 
-        if (!username || !email || !password || !confirmPassword) {
+        if (!username.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
             message = "A field is missing. Please try again.";
             return;
         }
@@ -40,7 +40,6 @@
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRF-Token": csrfToken,
                 },
                 body: JSON.stringify({ username, email, password }),
             });

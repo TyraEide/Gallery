@@ -25,7 +25,7 @@
     try{
 
       // request
-      const response = await fetch(api_url("/login"), 
+      const response = await fetch(api_url("/auth/login"), 
         {method: "POST", 
         signal : AbortSignal.timeout(8000),
         headers: {
