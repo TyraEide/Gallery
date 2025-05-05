@@ -17,9 +17,8 @@ public class InstitutionController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void createInstitution(@RequestBody Institution institution) {
-        institutionService.create(institution);
+    public Institution createInstitution(@RequestBody Institution institution) {
+        return institutionService.create(institution);
     }
 
     @GetMapping("/{shortName}")

@@ -57,5 +57,5 @@
             </tbody>
         </table>
     {/if}
-    <button onclick={() => redirect("settings/add_token")}>Add new institution</button>
+    <button onclick={() => redirect("settings/add_token")}>Add new canvas token</button>
 </main>

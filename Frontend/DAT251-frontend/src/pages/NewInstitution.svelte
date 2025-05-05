@@ -39,6 +39,7 @@
             } else {
                 message = data.message || "Successfully added institution!";
 
+
                 setTimeout(() =>
                 {
                     redirect("adminSettings");

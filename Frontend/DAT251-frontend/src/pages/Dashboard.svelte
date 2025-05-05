@@ -41,6 +41,7 @@
     <button on:click={() => redirect("announcements")}>Announcements</button>
     <button on:click={() => goToLink('https://hvl.instructure.com')}>HVL Canvas</button>
     <button on:click={() => goToLink('https://mitt.uib.no/login/canvas')}>UIB Canvas</button>
+    <button on:click={() => redirect("settings")}>Settings</button>
   </div>
   <section class="announcement-container">
     <Announcement />
