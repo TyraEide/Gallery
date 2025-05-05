@@ -2,6 +2,9 @@ package com.Gallery.controller;
 
 import com.Gallery.model.Institution;
 import com.Gallery.service.InstitutionService;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -21,7 +24,7 @@ public class InstitutionController {
 
     @GetMapping("/{shortName}")
     public Institution getInstitutionByShortName(@PathVariable String shortName) {
-        return institutionService.findByShortName(shortName).orElseThrow(() -> HttpClientErrorException(HttpStatus.NOT_FOUND,
+        return institutionService.findByShortName(shortName).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND,
                 "No institution with short name " + shortName + " found."));
     }
 

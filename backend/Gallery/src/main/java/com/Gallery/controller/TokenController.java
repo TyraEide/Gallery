@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-        @RequestMapping("api/tokens")
+@RequestMapping("api/tokens")
 public class TokenController {
 
     private final TokenService tokenService;
@@ -25,7 +25,7 @@ public class TokenController {
     }
 
     @GetMapping("/user")
-    public void getAllTokensForUser(@RequestBody User user, @AuthenticationPrinciple User auth) {
+    public void getAllTokensForUser(@RequestBody User user, @AuthenticationPrincipal User auth) {
         tokenService.getAllTokensForUser(user, auth);
     }
 }
