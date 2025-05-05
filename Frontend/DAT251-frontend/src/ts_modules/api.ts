@@ -5,7 +5,7 @@ export function api_url(path:string){
 }
 
 export function set_jwt_token(token:string){
-    localStorage.setItem("token",token)
+    localStorage.setItem("token", token)
 }
 
 export function jwt_token_header(){
@@ -13,4 +13,8 @@ export function jwt_token_header(){
     const headers   = new Headers({})
     headers.set("Authorization", "Bearer " + token)
     return headers
+}
+
+export function set_logged_in_user(user:any) {
+    localStorage.setItem("user", user)
 }
