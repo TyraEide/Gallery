@@ -7,6 +7,7 @@
   import Register from "./pages/Register.svelte";
   import RegistrationSuccessful from "./pages/RegistrationSuccessful.svelte";
   import Announcement from "./pages/Announcement.svelte";
+  import Course from "./pages/Course.svelte";
 
   // Routing paths
   let routes = {
@@ -16,10 +17,11 @@
     "/registrationSuccessful": RegistrationSuccessful,
     "/announcement": Announcement,
     "/dashboard": Dashboard,
+    "/course/:id": Course, // Dynamic route for courses
     "*": PageMissing
-  }
+  };
 </script>
 
 <main>
-  <Router {routes}/>
+  <Router {routes} />
 </main>
