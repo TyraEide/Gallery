@@ -39,6 +39,10 @@
         } catch (e) {
             console.error("Failed to load tokens", e);
         }
+
+        if(user == null){
+            redirect("login")
+        }
     })
 </script>
 

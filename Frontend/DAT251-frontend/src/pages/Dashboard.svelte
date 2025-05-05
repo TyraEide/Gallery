@@ -10,6 +10,7 @@
 
   let courses: Course[] = [];
   let user: User = null;
+  let displayName: String = "";
 
   async function getCourses(): Promise<Course[]> {
     const res = await fetch(`${config.API_BASE_URL}/api/courses`);
@@ -23,11 +24,18 @@
     } catch (e) {
       console.error("Failed to load courses", e);
     }
+
+    if(user == null){
+      redirect("login")
+    }
+
+    displayName = user.username;
   });
 </script>
 
 <main>
   <div class="header">
+    <h2>Welcome {displayName}</h2>
     <h3>{new Date().toLocaleString("default",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</h3>
     <button on:click={() => redirect("settings")}>Settings</button>
   </div>
