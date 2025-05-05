@@ -23,4 +23,9 @@ public class TokenController {
     public void createToken(@RequestBody CanvasToken canvasToken, @AuthenticationPrincipal User auth) {
         tokenService.create(canvasToken, auth);
     }
+
+    @GetMapping("/user")
+    public void getAllTokensForUser(@RequestBody User user, @AuthenticationPrinciple User auth) {
+        tokenService.getAllTokensForUser(user, auth);
+    }
 }
