@@ -31,8 +31,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) //Used to allow connection to localhost 
 
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/**").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
 
                 .headers(headers -> headers
@@ -49,7 +48,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    //This is a configuration to make allow rewuests to localhost
+    //This is a configuration to make allow requests to localhost
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

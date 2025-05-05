@@ -2,30 +2,38 @@
     import config from "../config";
     import {onMount} from "svelte";
     import {redirect} from "../ts_modules/routing";
-    import type {UUID} from "node:crypto";
+    import {type User, get_logged_in_user, jwt_token_header} from "../ts_modules/api";
 
     interface Institution {fullName: string, shortName: string, apiUrl: string;}
     interface CanvasToken {user: User, institution: Institution, token: string}
-    interface User {id: UUID}
 
     let user: User = null;
     let tokens: CanvasToken[] = [];
 
-
     async function getTokensForUser(): Promise<CanvasToken[]> {
-        const res = await fetch(`${config.API_BASE_URL}/api/tokens/user`,
-            {
-                method: "GET",
-                signal: AbortSignal.timeout(10000),
-                headers: {
-                    'content-type': 'application/json'
-                }, body: JSON.stringify(user)
-            });
-        return res.json();
+        let id = user.id;
+        try {
+            const res = await fetch(`${config.API_BASE_URL}/api/tokens/user/${id}`,
+                {
+                    method: "GET",
+                    signal: AbortSignal.timeout(10000),
+                    headers: jwt_token_header()
+                });
+
+            if (res.ok) {
+                return res.json();
+            } else {
+                return [];
+            }
+
+        } catch (e) {
+            console.log("Failed to fetch tokens for user: ", e);
+        }
     }
 
 
     onMount(async () => {
+        user = get_logged_in_user();
         try {
             tokens = await getTokensForUser();
         } catch (e) {

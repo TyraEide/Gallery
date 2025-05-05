@@ -37,8 +37,9 @@ public class CourseService {
 
     private Map<Course, List<DiscussionTopic>> getAnnouncements(String baseApiUrl, List<String> courseIds, List<Course> courses, String token) throws JsonProcessingException {
         // Get announcements from the canvas api
-        String apiUrl = baseApiUrl + "/announcements?context_codes[]={validCourseIds}";
-        List<String> contextCodes = convertCourseIdToContextCode(courseIds);
+        String apiUrl = baseApiUrl + "/announcements?{validContextCodes}";
+        String contextCodes = convertCourseIdToContextCode(courseIds);
+        System.out.println(contextCodes);
 
         // We avoid getting the response as DiscussionTopic to get the context_code information
         ResponseEntity<String> response = restTemplate.exchange(
@@ -46,7 +47,7 @@ public class CourseService {
                 HttpMethod.GET,
                 buildRequest(token),
                 String.class,
-                contextCodes.toString());
+                contextCodes);
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response.getBody());
@@ -75,12 +76,12 @@ public class CourseService {
         return announcementsPerCourse;
     }
 
-    private List<String> convertCourseIdToContextCode(List<String> courseIds) {
-        List<String> contextCodes = new ArrayList<>();
+    private String convertCourseIdToContextCode(List<String> courseIds) {
+        StringBuilder contextCodes = new StringBuilder();
         for (String courseId : courseIds) {
-            contextCodes.add("course_"+courseId);
+            contextCodes.append("context_codes[]=course_").append(courseId).append("&");
         }
-        return contextCodes;
+        return contextCodes.toString();
     }
 
     /**
