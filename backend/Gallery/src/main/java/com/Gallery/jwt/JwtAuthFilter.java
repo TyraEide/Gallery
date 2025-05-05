@@ -52,7 +52,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     e.printStackTrace();
                 }
             } else {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+                return;
             }
+        } else if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
+            return;
         }
 
         filterChain.doFilter(request, response);
