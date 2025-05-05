@@ -13,6 +13,8 @@
   import NewInstitution from "./pages/NewInstitution.svelte";
   import NewCanvasToken from "./pages/NewCanvasToken.svelte";
 
+  import CustomSidebar from "./pages/Sidebar.svelte";
+
   // Routing paths
   let routes = {
     "/": Home,
@@ -31,5 +33,6 @@
 </script>
 
 <main>
+  <CustomSidebar/>
   <Router {routes} />
-</main>
+</main> 

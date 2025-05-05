@@ -6,7 +6,7 @@
     let user: User = null;
 
     onMount(async () => {
-        localStorage.clear();
+        //localStorage.clear();
         user = get_logged_in_user();
     });
 </script>
