@@ -34,6 +34,7 @@
 <main>
   <div class="header">
     <h3>{new Date().toLocaleString("default",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</h3>
+    <button on:click={() => redirect("announcements")}>Announcements</button>
   </div>
   <section class="announcement-container">
     <Announcement />
