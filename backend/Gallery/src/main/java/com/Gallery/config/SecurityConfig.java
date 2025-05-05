@@ -32,8 +32,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) //Used to allow connection to localhost 
 
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/users").permitAll()
-                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/*").permitAll()
                         .anyRequest().authenticated()
                 )
 
@@ -60,7 +59,7 @@ public class SecurityConfig {
         // Adjust frontend URL if needed
         config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowCredentials(true);
         source.registerCorsConfiguration("/**", config);
         return source;

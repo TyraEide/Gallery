@@ -1,14 +1,14 @@
 <script lang="ts">
     import config from "../config";
     import {redirect} from "../ts_modules/routing";
-
-    interface Institution {fullName: string, shortName: string, apiUrl: string;}
+    import {jwt_token_header} from "../ts_modules/api";
 
     let loading: boolean = false;
     let shortName: string = "";
     let fullName: string = "";
     let apiUrl: string = "";
     let message: string = "";
+    let csrfToken: string = "";
 
     async function addInstitution(event: Event) {
         event.preventDefault()
@@ -19,31 +19,29 @@
         }
 
         try {
+
             loading = true;
             const res = await fetch(`${config.API_BASE_URL}/api/institutions`,
                 {
                     method: "POST",
                     signal: AbortSignal.timeout(10000),
                     headers: {
-                        'content-type': 'application/json'
+                        'Content-Type': 'application/json'
                     }, body: JSON.stringify({fullName, shortName, apiUrl})
                 }
             );
 
             const data = await res.json();
 
-            if (!res.ok) {
-                message =
-                    data.message || "This institution already exists.";
-                loading = false;
-            } else {
+            if (res.status == 201) {
                 message = data.message || "Successfully added institution!";
 
-
-                setTimeout(() =>
-                {
-                    redirect("adminSettings");
+                setTimeout(() => {
+                    redirect("admin/settings");
                 }, 1500);
+            } else {
+                message = data.message || "Status " + res.status;
+                loading = false;
             }
         } catch(err) {
             message = "Issue reaching server | " + err
