@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { api_url } from "../ts_modules/api";
     import {redirect} from "../ts_modules/routing";
+    import Announcement from "./Announcement.svelte";
 
     interface User {
         name:String
@@ -33,7 +34,7 @@
     }
 
     async function getUser(){
-        const r_json = fetch(api_url("/user"))
+        const r_json = fetch(api_url("/users"))
                         .then((r) => r.json())
                         .catch((e) => console.error(e))
 
@@ -41,7 +42,6 @@
     }
 
     onMount( async () => {
-        
         //getCourses().then((r)=> courses = r)
         //getEvents().then((r) => calendar_events = r)
         
@@ -53,5 +53,5 @@
 <main>
     <h2>Welcome {user.name}</h2>
     <h2>{date.toLocaleString("default", {weekday:'long',day:'numeric',month:'long',year:'numeric'})}</h2>
-    <button onclick={() => redirect("announcements")}>To announcements</button>
+    <Announcement />
 </main>
