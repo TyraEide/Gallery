@@ -31,7 +31,7 @@ public class AuthController {
 
         if (encoder.matches(loginRequest.getPassword(), user.getPassword())) {
             String token = jwtUtil.generateToken(user.getEmail());
-            return ResponseEntity.ok(Map.of("token", token));
+            return ResponseEntity.ok(Map.of("token", token, "user", user));
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

@@ -1,6 +1,6 @@
 <script lang="ts">
 
-  import {api_url,set_jwt_token,jwt_token_header} from "../ts_modules/api"
+  import {api_url,set_jwt_token,jwt_token_header,set_logged_in_user} from "../ts_modules/api"
   import {redirect } from "../ts_modules/routing"
 
   console.log("page loaded")
@@ -57,6 +57,7 @@
         if(response_json.token != undefined){
           
             set_jwt_token(response_json.token)
+            set_logged_in_user(response_json.user)
             message = "Login Successful"
             setTimeout(() => redirect("dashboard"), 600)
         }
