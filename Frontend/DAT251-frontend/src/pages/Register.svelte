@@ -61,7 +61,7 @@
                 loading = false;
             }
         } catch (error) {
-            message = "A field is missing. Please try again.";
+            message = "Unkown error | " + error;
             console.error(error);
         } finally {
             loading = false;
