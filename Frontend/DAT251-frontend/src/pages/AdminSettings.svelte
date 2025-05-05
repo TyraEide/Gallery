@@ -2,6 +2,7 @@
     import config from "../config";
     import {onMount} from "svelte";
     import {redirect} from "../ts_modules/routing";
+    import {jwt_token_header} from "../ts_modules/api";
 
     interface Institution {fullName: string, shortName: string, apiUrl: string;}
 
