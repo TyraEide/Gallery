@@ -78,10 +78,10 @@ public class TokenService {
 
     public List<CanvasToken> getAllTokensForUser(User user, User auth) {
         if (!user.getId().equals(auth.getId())) {
-            throw new HttpsClientErrorException(HttpsStatus.UNAUTHORIZED, "User is not authorized to perform this request.");
+            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "User is not authorized to perform this request.");
         }
         return tokenRepository.findCanvasTokenByUser(user).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND,
-                "No user with id " + id + " found."));
+                "No user with id " + user.getId() + " found."));
     }
 
 }
