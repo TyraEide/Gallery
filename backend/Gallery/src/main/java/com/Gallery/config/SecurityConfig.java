@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -32,7 +31,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) //Used to allow connection to localhost 
 
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/*").permitAll()
+                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
@@ -64,4 +63,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
 }
