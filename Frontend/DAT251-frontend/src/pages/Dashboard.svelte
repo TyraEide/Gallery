@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { redirect } from "../ts_modules/routing";
   import config from "../config"
+  import Announcement from "./Announcement.svelte";
 
   interface Course { id: number; name: string; code: string }
 
@@ -32,6 +33,9 @@
     <button on:click={() => goToLink('https://hvl.instructure.com')}>HVL Canvas</button>
     <button on:click={() => goToLink('https://mitt.uib.no/login/canvas')}>UIB Canvas</button>
   </div>
+  <section class="announcement-container">
+    <Announcement />
+  </section>
   <section class="courses-grid">
     {#each courses as c}
       <div class="course-card" on:click={() => redirect(`course/${c.id}`)}>
