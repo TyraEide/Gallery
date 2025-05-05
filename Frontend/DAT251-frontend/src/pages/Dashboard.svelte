@@ -6,7 +6,7 @@
   import type {UUID} from "node:crypto";
 
   interface Course { id: number; name: string; code: string }
-  interface User {username: string; email: string;}
+  interface User {id: UUID, username: string; email: string;}
 
   let courses: Course[] = [];
   let user: User = null;

@@ -8,6 +8,10 @@
   import RegistrationSuccessful from "./pages/RegistrationSuccessful.svelte";
   import Announcement from "./pages/Announcement.svelte";
   import Course from "./pages/Course.svelte";
+  import Settings from "./pages/Settings.svelte";
+  import AdminSettings from "./pages/AdminSettings.svelte";
+  import NewInstitution from "./pages/NewInstitution.svelte";
+  import NewCanvasToken from "./pages/NewCanvasToken.svelte";
 
   // Routing paths
   let routes = {
@@ -18,6 +22,10 @@
     "/announcement": Announcement,
     "/dashboard": Dashboard,
     "/course/:id": Course, // Dynamic route for courses
+    "/settings": Settings,
+    "/settings/add_token": NewCanvasToken,
+    "/admin/settings": AdminSettings,
+    "/admin/settings/add_institution": NewInstitution,
     "*": PageMissing
   };
 </script>
