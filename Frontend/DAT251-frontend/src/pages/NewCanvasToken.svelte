@@ -65,7 +65,7 @@
 
                 setTimeout(() =>
                 {
-                    redirect("dashboard");
+                    redirect("settings");
                 }, 1500);
             }
         } catch(err) {
