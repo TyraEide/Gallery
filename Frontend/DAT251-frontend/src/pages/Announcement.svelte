@@ -36,7 +36,7 @@
       errorMessage = null;
     } catch (error) {
       console.error("Error fetching announcements:", error);
-      errorMessage = "You have not configured your Canvas tokens yet, please do so in the settings menu."
+      errorMessage = "Could not fetch announcements: " + error
     } finally {
       isLoading = false;
     }
