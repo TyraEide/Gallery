@@ -53,16 +53,15 @@
         <table>
             <thead>
             <tr>
-                <th>Full Name</th>
-                <th>Short Name</th>
-                <th>Api Url</th>
+                <th>Institution</th>
+                <th>Token</th>
             </tr>
             </thead>
             <tbody>
             {#each tokens as t}
                 <tr>
                     <td>{t.institution.fullName}</td>
-                    <td>{t.token}</td>
+                    <td>●●●●●●●●●●●●●●●●</td>
                 </tr>
             {/each}
             </tbody>
