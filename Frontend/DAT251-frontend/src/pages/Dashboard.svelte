@@ -1,15 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { redirect } from "../ts_modules/routing";
-  import {get_logged_in_user, type User} from "../ts_modules/api";
   import config from "../config"
   import Announcement from "./Announcement.svelte";
   import type {UUID} from "node:crypto";
+  import {user} from "../ts_modules/auth";
 
   interface Course { id: number; name: string; code: string }
 
   let courses: Course[] = [];
-  let user: User = null;
   let displayName: String = "";
 
   async function getCourses(): Promise<Course[]> {
@@ -22,18 +21,17 @@
   }
 
   onMount(async () => {
-    user = get_logged_in_user();
     try {
       courses = await getCourses();
     } catch (e) {
       console.error("Failed to load courses", e);
     }
 
-    if(user == null){
+    if(!$user){
       redirect("login")
     }
 
-    displayName = user.username;
+    displayName = $user.username;
   });
 </script>
 

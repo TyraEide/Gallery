@@ -1,7 +1,8 @@
 <script lang="ts">
 
-  import {api_url,set_jwt_token,jwt_token_header,set_logged_in_user} from "../ts_modules/api"
+  import {api_url,set_jwt_token,jwt_token_header} from "../ts_modules/api"
   import {redirect } from "../ts_modules/routing"
+  import {login, logout} from "../ts_modules/auth";
 
   console.log("page loaded")
 
@@ -34,7 +35,7 @@
                   email: email,
                   password: password
               })
-      })
+      });
 
       if(!response.ok){
         switch(response.status){
@@ -51,15 +52,15 @@
       }
       else{
 
-        const response_json = await response.json()
+        const response_json = await response.json();
 
         //check for contents
         if(response_json.token != undefined){
           
             set_jwt_token(response_json.token);
-            set_logged_in_user(JSON.stringify(response_json.user));
+            login(response_json.user);
             message = "Login Successful";
-            setTimeout(() => redirect("dashboard"), 600);
+            setTimeout(() => redirect("dashboard"));
         }
         else{
           message = response_json.token

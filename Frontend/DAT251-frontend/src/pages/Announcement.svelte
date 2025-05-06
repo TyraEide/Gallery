@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import config from "../config";
-  import {get_logged_in_user, type User} from "../ts_modules/api";
+  import {user, type User} from "../ts_modules/auth";
 
   type DiscussionTopic = {
     title: string;
@@ -15,12 +15,10 @@
   let selectedTopic: DiscussionTopic | null = null;
   let errorMessage: string | null = null;
   let isLoading: boolean = true
-  let user: User = null;
-
 
   async function fetchAnnouncements() {
     try {
-      let id = user.id;
+      let id = $user.id;
       const response = await fetch(
         `${config.API_BASE_URL}/api/courses/announcements/users/${id}`,
       );
@@ -53,7 +51,6 @@
   }
 
   onMount(async () => {
-    user = get_logged_in_user();
     await fetchAnnouncements();
   })
 </script>
