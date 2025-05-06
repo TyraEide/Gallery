@@ -1,5 +1,7 @@
 <script lang="ts">
-    import {build_page_url} from "../ts_modules/routing";
+    import {build_page_url, redirect} from "../ts_modules/routing";
+    import {logout, user} from "../ts_modules/auth";
+
 </script>
 
 <style>
@@ -30,7 +32,7 @@
 
     .sidebar {
         position: fixed;
-        width: 150px;
+        width: 160px;
         height: 100%;
         color: white;
         top: 0;
@@ -48,8 +50,13 @@
 <div class="sidebar">
     <img src="../public/iconGallery.png"/>
     <a href={build_page_url("")}>Home</a>
-    <a href={build_page_url("Dashboard")} >Dashboard</a>
-    <a href={build_page_url("Login")}>Login</a>
-    <a href={build_page_url("Settings")}>⚙ Settings</a>
-    <a href={build_page_url("")} onclick={localStorage.clear()}>↩ Logout</a>
+    {#if $user}
+        <a href={build_page_url("Dashboard")} >Dashboard</a>
+        <a href={build_page_url("Settings")}>⚙ Settings</a>
+        <a href={build_page_url("Admin/settings")}>⚙ Admin Settings</a>
+        <a href={build_page_url("")} onclick={logout}>↩ Logout</a>
+    {:else}
+        <a href={build_page_url("Login")}>Login</a>
+        <a href={build_page_url("Register")}>Register</a>
+    {/if}
   </div>

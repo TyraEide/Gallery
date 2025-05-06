@@ -2,14 +2,14 @@
     import config from "../config";
     import {redirect} from "../ts_modules/routing";
     import {onMount} from "svelte";
-    import {type User, get_logged_in_user, jwt_token_header} from "../ts_modules/api";
+    import {jwt_token_header} from "../ts_modules/api";
+    import {type User, user} from "../ts_modules/auth";
 
     interface Institution {fullName: string, shortName: string, apiUrl: string;}
 
     let loading: boolean = false;
     let institution: Institution = null;
     let institutions: Institution[] = [];
-    let user: User = null;
     let token: string = "";
     let message: string = "";
 
@@ -48,7 +48,7 @@
                     method: "POST",
                     signal: AbortSignal.timeout(10000),
                     headers: jwt_token_header(),
-                    body: JSON.stringify(wrapToken(user, institution, token))
+                    body: JSON.stringify(wrapToken($user, institution, token))
                 }
             );
 
@@ -76,7 +76,6 @@
     }
 
     onMount(async () => {
-        user = get_logged_in_user();
         try {
             institutions = await getInstitutions();
         } catch (e) {
@@ -102,7 +101,7 @@
         <label for="token">Token</label>
         <input
                 id="token"
-                type="text"
+                type="password"
                 required
                 bind:value={token}
         />

@@ -2,16 +2,16 @@
     import config from "../config";
     import {onMount} from "svelte";
     import {redirect} from "../ts_modules/routing";
-    import {type User, get_logged_in_user, jwt_token_header} from "../ts_modules/api";
+    import {jwt_token_header} from "../ts_modules/api";
+    import {user, type User} from "../ts_modules/auth";
 
     interface Institution {fullName: string, shortName: string, apiUrl: string;}
     interface CanvasToken {user: User, institution: Institution, token: string}
 
-    let user: User = null;
     let tokens: CanvasToken[] = [];
 
     async function getTokensForUser(): Promise<CanvasToken[]> {
-        let id = user.id;
+        let id = $user.id;
         try {
             const res = await fetch(`${config.API_BASE_URL}/api/tokens/user/${id}`,
                 {
@@ -33,14 +33,13 @@
 
 
     onMount(async () => {
-        user = get_logged_in_user();
         try {
             tokens = await getTokensForUser();
         } catch (e) {
             console.error("Failed to load tokens", e);
         }
 
-        if(user == null){
+        if(!$user){
             redirect("login")
         }
     })
