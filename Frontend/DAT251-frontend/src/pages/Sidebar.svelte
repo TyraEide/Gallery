@@ -49,7 +49,6 @@
 
 <div class="sidebar">
     <img src="../public/iconGallery.png"/>
-    <a href={build_page_url("")}>Home</a>
     {#if $user}
         <a href={build_page_url("Dashboard")} >Dashboard</a>
         <a href={build_page_url("Settings")}>⚙ Settings</a>

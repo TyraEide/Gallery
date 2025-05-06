@@ -7,6 +7,8 @@
         //localStorage.clear();
         if (!$user) {
             redirect("login");
+        } else {
+            redirect("dashboard");
         }
     });
 </script>
