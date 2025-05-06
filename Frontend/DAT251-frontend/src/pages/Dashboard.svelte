@@ -3,16 +3,17 @@
   import { redirect } from "../ts_modules/routing";
   import config from "../config"
   import Announcement from "./Announcement.svelte";
-  import type {UUID} from "node:crypto";
   import {user} from "../ts_modules/auth";
 
   interface Course { id: number; name: string; code: string }
+  interface CourseMap {[key: string]: Course[] }
 
-  let courses: Course[] = [];
+  let courses: CourseMap = {};
   let displayName: String = "";
 
-  async function getCourses(): Promise<Course[]> {
-    const res = await fetch(`${config.API_BASE_URL}/api/courses`);
+  async function getCourses(): Promise<CourseMap> {
+    let id = $user.id;
+    const res = await fetch(`${config.API_BASE_URL}/api/courses/users/${id}`);
     return res.json();
   }
 
@@ -40,11 +41,16 @@
   <section class="announcement-container">
     <Announcement />
   </section>
-  <section class="courses-grid">
-    {#each courses as c}
-      <div class="course-card" on:click={() => redirect(`course/${c.id}`)}>
-        <h3>{c.name}</h3>
-        <p>{c.code}</p>
+  <section class="courses-container">
+    {#each Object.entries(courses) as [institution, courseList]}
+      <h3>{institution}</h3>
+      <div class="courses-grid">
+        {#each courseList as c}
+          <div class="course-card" on:click={() => redirect(`course/${c.id}`)}>
+            <h3>{c.name}</h3>
+            <p>{c.code}</p>
+          </div>
+          {/each}
       </div>
     {/each}
   </section>
