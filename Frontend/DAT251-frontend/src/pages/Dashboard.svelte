@@ -40,11 +40,8 @@
   <div class="header">
     <h2>Welcome {displayName}</h2>
     <h3>{new Date().toLocaleString("default",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</h3>
-<<<<<<< HEAD
     <button on:click={() => goToLink('https://hvl.instructure.com')}>HVL Canvas</button>
     <button on:click={() => goToLink('https://mitt.uib.no/login/canvas')}>UIB Canvas</button>
-=======
->>>>>>> 9ebc8838c6526c426524dc645f7f0462e00f708a
     <button on:click={() => redirect("settings")}>Settings</button>
   </div>
   <section class="announcement-container">
