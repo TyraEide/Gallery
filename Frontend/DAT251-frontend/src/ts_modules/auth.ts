@@ -15,3 +15,10 @@ export function logout() {
     user.set(null);
     redirect("");
 }
+
+export function initializeUser() {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+        user.set(JSON.parse(storedUser));
+    }
+}

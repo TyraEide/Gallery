@@ -14,6 +14,10 @@
   import NewCanvasToken from "./pages/NewCanvasToken.svelte";
 
   import CustomSidebar from "./pages/Sidebar.svelte";
+  import {onMount} from "svelte";
+  import {user} from "./ts_modules/auth";
+  import {redirect} from "./ts_modules/routing";
+  import {initializeUser} from "./ts_modules/auth.js";
 
   // Routing paths
   let routes = {
@@ -30,6 +34,12 @@
     "/admin/settings/add_institution": NewInstitution,
     "*": PageMissing
   };
+
+
+
+  onMount(async () => {
+    initializeUser();
+  })
 </script>
 
 <main>
