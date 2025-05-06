@@ -42,7 +42,7 @@
         if(!$user){
             redirect("login")
         }
-    })
+    });
 </script>
 
 <main>
