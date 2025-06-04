@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import {onMount} from "svelte";
   import config from "../config";
-  import {user, type User} from "../ts_modules/auth";
+  import {user} from "../ts_modules/auth";
 
   type DiscussionTopic = {
     title: string;
@@ -11,7 +11,14 @@
     is_announcement: boolean;
   };
 
-  let DiscussionTopics: DiscussionTopic[] = [];
+  interface Course { id: number; name: string; code: string }
+  interface AnnouncementMap {[key: string]: {
+      course: Course;
+      announcements: DiscussionTopic[];
+    }
+  }
+
+  let announcements: AnnouncementMap = {};
   let selectedTopic: DiscussionTopic | null = null;
   let errorMessage: string | null = null;
   let isLoading: boolean = true
@@ -20,19 +27,10 @@
     try {
       let id = $user.id;
       const response = await fetch(
-        `${config.API_BASE_URL}/api/courses/announcements/users/${id}`,
+        `${config.API_BASE_URL}/api/courses/announcements/users/${id}`
       );
       if (!response.ok) throw new Error("Failed to fetch announcements");
-      const data = await response.json();
-      DiscussionTopics = data
-        .filter((item: any) => item.is_announcement)
-        .map((item: any) => ({
-          title: item.title,
-          message: item.message,
-          author: { name: item.author.name },
-          posted_at: item.posted_at,
-          is_announcement: item.is_announcement,
-        }));
+      announcements = await response.json();
       errorMessage = null;
     } catch (error) {
       console.error("Error fetching announcements:", error);
@@ -79,23 +77,26 @@
   <button on:click={goBack}>Back</button>
 {:else}
   <ul>
-    {#each DiscussionTopics as DT}
+    {#each Object.entries(announcements) as [institution, courseMap]}
+      <h3>{institution}</h3>
+      {#each courseMap.announcements as a}
       <li class="announcement">
         <button
           type="button"
-          on:click={() => selectTopic(DT)}
+          on:click={() => selectTopic(a)}
           tabindex="0"
           class="announcement-button"
         >
-          <h3>{DT.title}</h3>
-          <p>{DT.message}</p>
+          <h3>{a.title}</h3>
+          <p>{a.message}</p>
           <small
-            >Posted by {DT.author.name} on {new Date(
-              DT.posted_at,
+            >Posted by {a.author.name} on {new Date(
+              a.posted_at,
             ).toLocaleString()}</small
           >
         </button>
       </li>
+        {/each}
     {/each}
   </ul>
 {/if}
