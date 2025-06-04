@@ -1,0 +1,177 @@
+stages:
+  - test
+  - make_docker_image
+  - integration
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -Dmaven.artifact.threads=1 "
+  NPM_CONFIG_CACHE: "${CI_PROJECT_DIR}/.npm"
+  BACKEND_DIR: "backend/Gallery"
+  FRONTEND_DIR: "Frontend/DAT251-frontend"
+  # Global cache settings
+  CACHE_KEY: "${CI_JOB_STAGE}"
+  CACHE_CLEANUP_AGE: "7 days"
+  JAVA_DOCKER_IMAGE: "maven:3.9.6-eclipse-temurin-21"
+  CI_BACKEND_HOSTNAME_ALIAS: "backend"
+  CI_BACKEND_URL_ENDPOINT: "http://backend:8080"
+
+java:test:unit:
+  image: ${JAVA_DOCKER_IMAGE}
+  stage: test
+  before_script:
+    - echo "Running Java unit tests"
+    - cd ${BACKEND_DIR}
+    - java -version
+  script:
+    - mvn verify
+    - echo "Java test's completed"
+  after_script:
+    - cd ${BACKEND_DIR}
+    - find . -name "TEST-*.xml" -type f -exec cp {} $CI_PROJECT_DIR/ \;
+  artifacts:
+    when: always
+    reports:
+      junit: $CI_PROJECT_DIR/TEST-*.xml
+    paths:
+      - ${BACKEND_DIR}/target/surefire-reports/
+      - ${BACKEND_DIR}/target/pit-reports/
+    expire_in: 1 week
+  tags:
+    - docker
+  cache:
+    key: "${CACHE_KEY}-java"
+    paths:
+      - .m2/
+    policy: pull-push
+    when: on_success
+
+js:test:unit:
+  image: node:20
+  stage: test
+  before_script:
+    - echo "Running frontend unit tests"
+    - cd ${FRONTEND_DIR}
+    - npm ci  # Doing a clean install, see: https://stackoverflow.com/questions/52499617/what-is-the-difference-between-npm-install-and-npm-ci
+  script:
+    - npm test
+    - echo "Frontend unit tests completed"
+  artifacts:
+    when: always
+    reports:
+      junit: ${FRONTEND_DIR}/test-results/junit.xml
+    paths:
+      - ${FRONTEND_DIR}/coverage/
+    expire_in: 1 week
+  tags:
+    - docker
+  cache:
+    key: "${CACHE_KEY}-js-node-modules"
+    paths:
+      - .npm/
+      - ${FRONTEND_DIR}/node_modules/
+    policy: pull-push
+
+# Updated job to use Kaniko for Docker builds
+java:package:docker:
+  image:     
+    name: gcr.io/kaniko-project/executor:v1.23.2-debug
+    entrypoint: [""]
+  stage: make_docker_image
+  needs: ["java:test:unit"]
+  variables:
+    BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
+  before_script:
+    - echo "Building Docker image for backend with Kaniko"
+    - mkdir -p /kaniko/.docker
+    # Create Docker config with GitLab registry credentials
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  script:
+    - cd ${BACKEND_DIR}
+    - /kaniko/executor
+      --context="${CI_PROJECT_DIR}/${BACKEND_DIR}"
+      --dockerfile="${CI_PROJECT_DIR}/${BACKEND_DIR}/Dockerfile"
+      --destination="${BACKEND_IMAGE}"
+      --cache=true
+      --cache-repo=${CI_REGISTRY_IMAGE}/cache
+      --cache-ttl=168h
+    - echo "Docker image built and pushed to ${BACKEND_IMAGE}"
+  tags:
+    - docker
+  cache:
+    key: "${CACHE_KEY}-java"
+    paths:
+      - .m2/
+    policy: pull
+
+js:build:assets:
+  image: node:20
+  stage: test
+  before_script:
+    - echo "Building frontend assets"
+    - cd ${FRONTEND_DIR}
+  script:
+    - npm ci
+    - npm run build
+    - echo "Frontend assets built successfully"
+  artifacts:
+    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - ${FRONTEND_DIR}/dist/
+    expire_in: 2 weeks
+  tags:
+    - docker
+  cache:
+    key: "${CACHE_KEY}-js-node-modules"
+    paths:
+      - .npm/
+      - ${FRONTEND_DIR}/node_modules/
+    policy: pull-push
+
+js:test:e2e:
+  image: cypress/browsers:22.14.0
+  stage: integration
+  needs: ["js:build:assets","java:package:docker"]
+  services:
+    - name: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHORT_SHA}
+      alias: backend
+  variables:
+    NODE_OPTIONS: "--max-old-space-size=4096"
+  before_script:
+    - echo "Installing Cypress and dependencies"
+    - cd ${FRONTEND_DIR}
+    - npm install         # No need for a clean install because we already did that with the build step and the caches have the right dependencies.
+    - npx cypress verify
+    - cat .env.production > .env  # Overwriting the .env such the config of cypress, cypress.config.mjs, uses the values in the .env.production #TODO make it so that Cypress uses .env.production and not .env
+    # Build the app with the environment variables
+    - npm run build
+    # Use vite preview instead of dev server
+    - npm run preview -- --port 5173 --host &
+    - echo "Waiting for preview server to start"
+    - sleep 5
+  script:
+    - echo "Running Cypress tests against preview server with backend service"
+    - npx cypress run
+    - echo "End-to-end tests completed"
+  after_script:
+    - echo "Collecting test artifacts"
+    - mkdir -p $CI_PROJECT_DIR/cypress-results
+    - mkdir -p ${FRONTEND_DIR}/cypress/screenshots || true
+    - mkdir -p ${FRONTEND_DIR}/cypress/videos || true
+    - cp -r ${FRONTEND_DIR}/cypress/screenshots $CI_PROJECT_DIR/cypress-results/ || true
+    - cp -r ${FRONTEND_DIR}/cypress/videos $CI_PROJECT_DIR/cypress-results/ || true
+    # Kill the background preview server
+    - pkill -f "npm run preview" || true
+  artifacts:
+    name: "e2e-test-results-$CI_COMMIT_SHORT_SHA"
+    when: always
+    paths:
+      - cypress-results/
+    expire_in: 2 weeks
+  tags:
+    - docker
+  cache:
+    key: "${CACHE_KEY}-js-node-modules"
+    paths:
+      - .npm/
+      - ${FRONTEND_DIR}/node_modules/
+    policy: pull
