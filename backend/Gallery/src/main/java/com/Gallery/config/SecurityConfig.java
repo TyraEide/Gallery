@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -32,9 +31,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) //Used to allow connection to localhost 
 
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/users").permitAll()
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
 
                 .headers(headers -> headers
@@ -51,7 +48,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    //This is a configuration to make allow rewuests to localhost
+    //This is a configuration to make allow requests to localhost
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -60,9 +57,10 @@ public class SecurityConfig {
         // Adjust frontend URL if needed
         config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowCredentials(true);
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
 }

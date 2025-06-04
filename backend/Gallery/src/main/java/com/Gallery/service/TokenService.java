@@ -65,15 +65,23 @@ public class TokenService {
         tokenRepository.deleteAll();
     }
 
-    public CanvasToken create(CanvasToken canvasToken, User auth) {
-        if (!canvasToken.getUser().equals(auth)) {
-            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "User is not authorized to perform this request.");
-        }
+    public CanvasToken create(CanvasToken canvasToken) {
+//        if (!canvasToken.getUser().getId().equals(auth.getId())) {
+//            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "User is not authorized to perform this request.");
+//        }
         return tokenRepository.save(canvasToken);
     }
 
     public List<CanvasToken> createAll(List<CanvasToken> canvasTokens) {
         return tokenRepository.saveAll(canvasTokens);
+    }
+
+    public List<CanvasToken> getAllTokensForUser(User user) {
+//        if (!user.getId().equals(auth.getId())) {
+//            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "User is not authorized to perform this request.");
+//        }
+        return tokenRepository.findCanvasTokenByUser(user).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND,
+                "No user with id " + user.getId() + " found."));
     }
 
 }

@@ -8,6 +8,16 @@
   import RegistrationSuccessful from "./pages/RegistrationSuccessful.svelte";
   import Announcement from "./pages/Announcement.svelte";
   import Course from "./pages/Course.svelte";
+  import Settings from "./pages/Settings.svelte";
+  import AdminSettings from "./pages/AdminSettings.svelte";
+  import NewInstitution from "./pages/NewInstitution.svelte";
+  import NewCanvasToken from "./pages/NewCanvasToken.svelte";
+
+  import CustomSidebar from "./pages/Sidebar.svelte";
+  import {onMount} from "svelte";
+  import {user} from "./ts_modules/auth";
+  import {redirect} from "./ts_modules/routing";
+  import {initializeUser} from "./ts_modules/auth.js";
 
   // Routing paths
   let routes = {
@@ -18,10 +28,21 @@
     "/announcement": Announcement,
     "/dashboard": Dashboard,
     "/course/:id": Course, // Dynamic route for courses
+    "/settings": Settings,
+    "/settings/add_token": NewCanvasToken,
+    "/admin/settings": AdminSettings,
+    "/admin/settings/add_institution": NewInstitution,
     "*": PageMissing
   };
+
+
+
+  onMount(async () => {
+    initializeUser();
+  })
 </script>
 
 <main>
+  <CustomSidebar/>
   <Router {routes} />
-</main>
+</main> 
