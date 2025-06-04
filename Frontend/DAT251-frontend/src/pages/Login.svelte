@@ -2,6 +2,7 @@
 
   import {api_url,set_jwt_token,jwt_token_header} from "../ts_modules/api"
   import {redirect } from "../ts_modules/routing"
+  import {login, logout} from "../ts_modules/auth";
 
   console.log("page loaded")
 
@@ -25,16 +26,16 @@
     try{
 
       // request
-      const response = await fetch(api_url("/login"), 
+      const response = await fetch(api_url("/auth/login"), 
         {method: "POST", 
-        signal : AbortSignal.timeout(8000),
+        signal : AbortSignal.timeout(10000),
         headers: {
           'content-type': 'application/json'
           }, body: JSON.stringify({
                   email: email,
                   password: password
               })
-      })
+      });
 
       if(!response.ok){
         switch(response.status){
@@ -51,18 +52,15 @@
       }
       else{
 
-        const response_json = await response.json()
+        const response_json = await response.json();
 
         //check for contents
-        if(response_json.token != undefined && response_json.user != undefined){
-          if(response_json.user.email == cached_email){
-            set_jwt_token(response_json.token)
-            message = "Login Successful"
-            setTimeout(() => redirect("dashboard"), 600)
-          }
-          else{
-            message = "Internal response error"
-          }
+        if(response_json.token != undefined){
+          
+            set_jwt_token(response_json.token);
+            login(response_json.user);
+            message = "Login Successful";
+            setTimeout(() => redirect("dashboard"));
         }
         else{
           message = response_json.token
